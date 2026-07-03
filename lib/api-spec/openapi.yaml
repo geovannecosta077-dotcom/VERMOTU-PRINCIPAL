@@ -3,34 +3,1690 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: MotoHub API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: items
+  - name: users
+  - name: favorites
+  - name: conversations
+  - name: messages
+  - name: appointments
+  - name: orders
+  - name: reviews
+  - name: coupons
+  - name: admin
+  - name: subscriptions
+  - name: blog
+  - name: banners
+  - name: Storage
+    description: Object storage upload and serving endpoints.
 paths:
+  /storage/uploads/request-url:
+    post:
+      tags: [Storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadUrlRequest'
+      responses:
+        '200':
+          description: Presigned upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Failed to generate upload URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [Storage]
+      operationId: getPublicObject
+      summary: Serve a public asset
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Object content
+          content:
+            '*/*':
+              schema: { type: string, format: binary }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+  /storage/objects/{objectPath}:
+    get:
+      tags: [Storage]
+      operationId: getStorageObject
+      summary: Serve an object entity
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Object content
+          content:
+            '*/*':
+              schema: { type: string, format: binary }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  /items:
+    get:
+      operationId: listItems
+      tags: [items]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema: { type: string, enum: [moto, peca, servico] }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+        - name: brand
+          in: query
+          required: false
+          schema: { type: string }
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+        - name: city
+          in: query
+          required: false
+          schema: { type: string }
+        - name: sellerId
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: array
+                items: { $ref: "#/components/schemas/Item" }
+    post:
+      operationId: createItem
+      tags: [items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateItem" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Item" }
+
+  /items/{id}:
+    get:
+      operationId: getItem
+      tags: [items]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Item" }
+    patch:
+      operationId: updateItem
+      tags: [items]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateItem" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Item" }
+    delete:
+      operationId: deleteItem
+      tags: [items]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+    post:
+      operationId: upsertUser
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpsertUser" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+    patch:
+      operationId: updateUser
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUser" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /users/signin:
+    post:
+      operationId: signIn
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SignInRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /users/{id}/cpf:
+    patch:
+      operationId: setUserCpf
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetCpfRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400":
+          description: Invalid CPF
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "409":
+          description: CPF already registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /users/{id}/plan:
+    patch:
+      operationId: updateUserPlan
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdatePlan" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /favorites:
+    get:
+      operationId: listFavorites
+      tags: [favorites]
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: integer }
+    post:
+      operationId: toggleFavorite
+      tags: [favorites]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ToggleFavoriteInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ToggleFavoriteResult" }
+
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Conversation" }
+    post:
+      operationId: createConversation
+      tags: [conversations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateConversationInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversation" }
+
+  /conversations/{id}/messages:
+    get:
+      operationId: listMessages
+      tags: [messages]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Message" }
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Message" }
+
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Appointment" }
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateAppointmentInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Appointment" }
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      parameters:
+        - name: buyerId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: sellerId
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+    post:
+      operationId: createOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateOrderInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateOrderStatusInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      parameters:
+        - name: itemId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Review" }
+    post:
+      operationId: createReview
+      tags: [reviews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateReviewInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Review" }
+
+  /coupons:
+    get:
+      operationId: listCoupons
+      tags: [coupons]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Coupon" }
+    post:
+      operationId: createCoupon
+      tags: [coupons]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCouponInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Coupon" }
+
+  /coupons/{id}:
+    delete:
+      operationId: deleteCoupon
+      tags: [coupons]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /coupons/validate:
+    post:
+      operationId: validateCoupon
+      tags: [coupons]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ValidateCouponInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidateCouponResult" }
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminStats" }
+
+  /admin/logs:
+    get:
+      operationId: listAdminLogs
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminLog" }
+    post:
+      operationId: createAdminLog
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateAdminLogInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminLog" }
+
+  /admin/reports:
+    get:
+      operationId: listAdminReports
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Report" }
+
+  /admin/reports/{id}:
+    patch:
+      operationId: updateAdminReport
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateReportInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+    delete:
+      operationId: deleteAdminReport
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No content
+
+  /reports:
+    post:
+      operationId: createReport
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateReportInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+
+  /subscriptions:
+    post:
+      operationId: createSubscription
+      tags: [subscriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateSubscription" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subscription" }
+    get:
+      operationId: listSubscriptions
+      tags: [subscriptions]
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Subscription" }
+
+  /subscriptions/{id}:
+    patch:
+      operationId: updateSubscription
+      tags: [subscriptions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateSubscription" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subscription" }
+
+  /admin/subscriptions:
+    get:
+      operationId: listAdminSubscriptions
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminSubscription" }
+
+  /admin/subscriptions/{id}:
+    patch:
+      operationId: adminUpdateSubscription
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateSubscription" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subscription" }
+
+  /blog/posts:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+        - name: published
+          in: query
+          required: false
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BlogPost" }
+
+  /blog/posts/{slug}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlogPost" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /admin/blog/posts:
+    get:
+      operationId: adminListBlogPosts
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BlogPost" }
+    post:
+      operationId: adminCreateBlogPost
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateBlogPost" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlogPost" }
+
+  /admin/blog/posts/{id}:
+    patch:
+      operationId: adminUpdateBlogPost
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateBlogPost" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlogPost" }
+    delete:
+      operationId: adminDeleteBlogPost
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No content
+
+  /admin/email/send:
+    post:
+      operationId: adminSendEmail
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminEmailInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminEmailResult" }
+
+  /admin/email/campaigns:
+    get:
+      operationId: adminListEmailCampaigns
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EmailCampaign" }
+
+  /banners:
+    get:
+      operationId: listBanners
+      tags: [banners]
+      summary: List active banners for the homepage carousel
+      parameters:
+        - name: all
+          in: query
+          required: false
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Banner" }
+
+  /admin/banners:
+    get:
+      operationId: adminListBanners
+      tags: [banners]
+      summary: List all banners (admin)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Banner" }
+    post:
+      operationId: adminCreateBanner
+      tags: [banners]
+      summary: Create a new banner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateBanner" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Banner" }
+
+  /admin/banners/{id}:
+    put:
+      operationId: adminUpdateBanner
+      tags: [banners]
+      summary: Update a banner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateBanner" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Banner" }
+    delete:
+      operationId: adminDeleteBanner
+      tags: [banners]
+      summary: Delete a banner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean }
+
 components:
   schemas:
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string, minLength: 1 }
+        size: { type: integer, minimum: 1 }
+        contentType: { type: string, minLength: 1 }
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string, format: uri }
+        objectPath: { type: string }
+        metadata:
+          $ref: '#/components/schemas/UploadUrlRequest'
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
 
+    Item:
+      type: object
+      required: [id, type, category, title, price, image, description, location, sellerId, status, createdAt, premium, stock, ratingAvg, ratingCount, condition]
+      properties:
+        id: { type: integer }
+        type: { type: string, enum: [moto, peca, servico] }
+        category: { type: string }
+        title: { type: string }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        condition: { type: string, enum: [novo, usado] }
+        price: { type: number }
+        year: { type: ["integer", "null"] }
+        mileage: { type: ["integer", "null"] }
+        engineSize: { type: ["integer", "null"] }
+        image: { type: string }
+        description: { type: string }
+        location: { type: string }
+        sellerId: { type: integer }
+        status: { type: string, enum: [active, sold, pending] }
+        createdAt: { type: string }
+        premium: { type: boolean }
+        stock: { type: integer }
+        ratingAvg: { type: number }
+        ratingCount: { type: integer }
+        phone: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        workingHours: { type: ["string", "null"] }
+        color: { type: ["string", "null"] }
+        fuelType: { type: ["string", "null"] }
+        optionals: { type: ["string", "null"] }
+        tradeInfo: { type: ["string", "null"] }
+        extras: { type: ["string", "null"] }
+
+    CreateItem:
+      type: object
+      required: [type, title, price, description, location, sellerId, image]
+      properties:
+        type: { type: string, enum: [moto, peca, servico] }
+        category: { type: ["string", "null"] }
+        title: { type: string, minLength: 3 }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        condition: { type: ["string", "null"] }
+        price: { type: number, minimum: 0 }
+        year: { type: ["integer", "null"] }
+        mileage: { type: ["integer", "null"] }
+        engineSize: { type: ["integer", "null"] }
+        image: { type: string, minLength: 1 }
+        description: { type: string, minLength: 10 }
+        location: { type: string, minLength: 2 }
+        sellerId: { type: integer }
+        premium: { type: ["boolean", "null"] }
+        stock: { type: ["integer", "null"] }
+        phone: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        workingHours: { type: ["string", "null"] }
+        color: { type: ["string", "null"] }
+        fuelType: { type: ["string", "null"] }
+        optionals: { type: ["string", "null"] }
+        tradeInfo: { type: ["string", "null"] }
+        extras: { type: ["string", "null"] }
+
+    UpdateItem:
+      type: object
+      properties:
+        title: { type: string }
+        price: { type: number }
+        description: { type: string }
+        status: { type: string, enum: [active, sold, pending] }
+        premium: { type: boolean }
+        stock: { type: integer }
+        category: { type: string }
+
+    User:
+      type: object
+      required: [id, name, email, plan, isAdmin, banned, storeName, bio, city, phoneVerified, accountVerified, accountType, acceptedTerms, createdAt]
+      properties:
+        id: { type: integer }
+        publicId: { type: ["string", "null"] }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        cpf: { type: ["string", "null"] }
+        cnpj: { type: ["string", "null"] }
+        accountType: { type: string, enum: [pessoa, empresa] }
+        avatarUrl: { type: ["string", "null"] }
+        acceptedTerms: { type: boolean }
+        phoneVerified: { type: boolean }
+        accountVerified: { type: boolean }
+        plan: { type: string, enum: [free, pro, premium] }
+        isAdmin: { type: boolean }
+        banned: { type: boolean }
+        storeName: { type: string }
+        bio: { type: string }
+        city: { type: string }
+        createdAt: { type: string }
+
+    UpsertUser:
+      type: object
+      required: [name, email, password, phone]
+      properties:
+        name: { type: string, minLength: 2 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 6 }
+        phone: { type: string, minLength: 10 }
+        accountType: { type: ["string", "null"] }
+        acceptedTerms: { type: ["boolean", "null"] }
+
+    SignInRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1 }
+
+    SetCpfRequest:
+      type: object
+      required: [cpf]
+      properties:
+        cpf: { type: string, minLength: 11 }
+
+    UpdateUser:
+      type: object
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        storeName: { type: string }
+        bio: { type: string }
+        city: { type: string }
+        banned: { type: boolean }
+        accountVerified: { type: boolean }
+        isAdmin: { type: boolean }
+        plan: { type: string, enum: [free, pro, premium] }
+        avatarUrl: { type: string }
+        accountType: { type: string }
+        cnpj: { type: string }
+
+    UpdatePlan:
+      type: object
+      required: [plan]
+      properties:
+        plan: { type: string, enum: [free, pro, premium] }
+
+    Conversation:
+      type: object
+      required: [id, buyerId, sellerId, itemId, updatedAt]
+      properties:
+        id: { type: integer }
+        buyerId: { type: integer }
+        sellerId: { type: integer }
+        itemId: { type: integer }
+        updatedAt: { type: string }
+
+    Message:
+      type: object
+      required: [id, conversationId, senderId, text, timestamp]
+      properties:
+        id: { type: integer }
+        conversationId: { type: integer }
+        senderId: { type: integer }
+        text: { type: string }
+        timestamp: { type: string }
+
+    Appointment:
+      type: object
+      required: [id, serviceId, userId, date, status]
+      properties:
+        id: { type: integer }
+        serviceId: { type: integer }
+        userId: { type: integer }
+        date: { type: string }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+
+    ToggleFavoriteInput:
+      type: object
+      required: [userId, itemId]
+      properties:
+        userId: { type: integer }
+        itemId: { type: integer }
+
+    ToggleFavoriteResult:
+      type: object
+      required: [favorited]
+      properties:
+        favorited: { type: boolean }
+
+    CreateConversationInput:
+      type: object
+      required: [buyerId, sellerId, itemId]
+      properties:
+        buyerId: { type: integer }
+        sellerId: { type: integer }
+        itemId: { type: integer }
+
+    SendMessageInput:
+      type: object
+      required: [senderId, text]
+      properties:
+        senderId: { type: integer }
+        text: { type: string }
+
+    CreateAppointmentInput:
+      type: object
+      required: [serviceId, userId, date]
+      properties:
+        serviceId: { type: integer }
+        userId: { type: integer }
+        date: { type: string }
+
+    OrderItem:
+      type: object
+      required: [id, orderId, itemId, title, image, price, qty]
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        itemId: { type: integer }
+        title: { type: string }
+        image: { type: string }
+        price: { type: number }
+        qty: { type: integer }
+
+    Order:
+      type: object
+      required: [id, buyerId, sellerId, status, subtotal, discount, total, paymentMethod, shippingAddress, createdAt, items]
+      properties:
+        id: { type: integer }
+        buyerId: { type: integer }
+        sellerId: { type: integer }
+        status: { type: string, enum: [pending, paid, shipped, delivered, cancelled] }
+        subtotal: { type: number }
+        discount: { type: number }
+        total: { type: number }
+        couponCode: { type: ["string", "null"] }
+        paymentMethod: { type: string, enum: [pix, card, boleto] }
+        shippingAddress: { type: string }
+        createdAt: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+
+    CartLine:
+      type: object
+      required: [itemId, qty]
+      properties:
+        itemId: { type: integer }
+        qty: { type: integer }
+
+    CreateOrderInput:
+      type: object
+      required: [buyerId, paymentMethod, shippingAddress, lines]
+      properties:
+        buyerId: { type: integer }
+        paymentMethod: { type: string, enum: [pix, card, boleto] }
+        shippingAddress: { type: string }
+        couponCode: { type: ["string", "null"] }
+        lines:
+          type: array
+          items: { $ref: "#/components/schemas/CartLine" }
+
+    UpdateOrderStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [pending, paid, shipped, delivered, cancelled] }
+
+    Review:
+      type: object
+      required: [id, itemId, userId, rating, comment, createdAt, userName]
+      properties:
+        id: { type: integer }
+        itemId: { type: integer }
+        userId: { type: integer }
+        rating: { type: integer }
+        comment: { type: string }
+        createdAt: { type: string }
+        userName: { type: string }
+
+    CreateReviewInput:
+      type: object
+      required: [itemId, userId, rating]
+      properties:
+        itemId: { type: integer }
+        userId: { type: integer }
+        rating: { type: integer }
+        comment: { type: ["string", "null"] }
+
+    Coupon:
+      type: object
+      required: [id, code, type, value, minOrder, active, createdAt]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        type: { type: string, enum: [percent, fixed] }
+        value: { type: number }
+        minOrder: { type: number }
+        active: { type: boolean }
+        createdAt: { type: string }
+
+    CreateCouponInput:
+      type: object
+      required: [code, type, value]
+      properties:
+        code: { type: string }
+        type: { type: string, enum: [percent, fixed] }
+        value: { type: number }
+        minOrder: { type: ["number", "null"] }
+        active: { type: ["boolean", "null"] }
+
+    ValidateCouponInput:
+      type: object
+      required: [code, subtotal]
+      properties:
+        code: { type: string }
+        subtotal: { type: number }
+
+    ValidateCouponResult:
+      type: object
+      required: [valid, discount]
+      properties:
+        valid: { type: boolean }
+        discount: { type: number }
+        message: { type: ["string", "null"] }
+        coupon: { $ref: "#/components/schemas/Coupon" }
+
+    AdminLog:
+      type: object
+      required: [id, adminId, adminName, action, target, details, createdAt]
+      properties:
+        id: { type: integer }
+        adminId: { type: integer }
+        adminName: { type: string }
+        action: { type: string }
+        target: { type: string }
+        details: { type: string }
+        createdAt: { type: string }
+
+    CreateAdminLogInput:
+      type: object
+      required: [adminId, action]
+      properties:
+        adminId: { type: integer }
+        adminName: { type: string }
+        action: { type: string }
+        target: { type: string }
+        details: { type: string }
+
+    Report:
+      type: object
+      required: [id, reporterId, targetType, targetId, reason, details, status, createdAt]
+      properties:
+        id: { type: integer }
+        reporterId: { type: integer }
+        targetType: { type: string }
+        targetId: { type: integer }
+        reason: { type: string }
+        details: { type: string }
+        status: { type: string, enum: [pending, resolved, dismissed] }
+        createdAt: { type: string }
+
+    CreateReportInput:
+      type: object
+      required: [reporterId, targetId, reason]
+      properties:
+        reporterId: { type: integer }
+        targetType: { type: string }
+        targetId: { type: integer }
+        reason: { type: string }
+        details: { type: string }
+
+    UpdateReportInput:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [pending, resolved, dismissed] }
+
+    AdminStats:
+      type: object
+      required: [totalItems, totalUsers, totalMessages, totalOrders, totalAppointments, bannedUsers, verifiedUsers, activeItems, pendingItems, simulatedRevenue, gmv, commission, subscriptionRevenue, itemsByCategory, newUsersByDay, ordersByStatus, planCount]
+      properties:
+        totalItems: { type: integer }
+        totalUsers: { type: integer }
+        totalMessages: { type: integer }
+        totalOrders: { type: integer }
+        totalAppointments: { type: integer }
+        bannedUsers: { type: integer }
+        verifiedUsers: { type: integer }
+        activeItems: { type: integer }
+        pendingItems: { type: integer }
+        simulatedRevenue: { type: number }
+        gmv: { type: number }
+        commission: { type: number }
+        subscriptionRevenue: { type: number }
+        itemsByCategory:
+          type: array
+          items:
+            type: object
+            required: [category, count]
+            properties:
+              category: { type: string }
+              count: { type: integer }
+        newUsersByDay:
+          type: array
+          items:
+            type: object
+            required: [day, count]
+            properties:
+              day: { type: string }
+              count: { type: integer }
+        ordersByStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status: { type: string }
+              count: { type: integer }
+        planCount:
+          type: array
+          items:
+            type: object
+            required: [plan, count]
+            properties:
+              plan: { type: string }
+              count: { type: integer }
+
+    Subscription:
+      type: object
+      required: [id, userId, plan, amount, status, pixCode, pixKey, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        plan: { type: string }
+        amount: { type: number }
+        status: { type: string }
+        pixCode: { type: string }
+        pixKey: { type: string }
+        proofUrl: { type: ["string", "null"] }
+        proofName: { type: ["string", "null"] }
+        adminNote: { type: ["string", "null"] }
+        approvedBy: { type: ["integer", "null"] }
+        expiresAt: { type: ["string", "null"] }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+
+    AdminSubscription:
+      type: object
+      required: [id, userId, plan, amount, status, pixCode, pixKey, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        plan: { type: string }
+        amount: { type: number }
+        status: { type: string }
+        pixCode: { type: string }
+        pixKey: { type: string }
+        proofUrl: { type: ["string", "null"] }
+        proofName: { type: ["string", "null"] }
+        adminNote: { type: ["string", "null"] }
+        approvedBy: { type: ["integer", "null"] }
+        expiresAt: { type: ["string", "null"] }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+        userName: { type: ["string", "null"] }
+        userEmail: { type: ["string", "null"] }
+
+    CreateSubscription:
+      type: object
+      required: [userId, plan]
+      properties:
+        userId: { type: integer }
+        plan: { type: string, enum: [pro, premium] }
+        proofUrl: { type: ["string", "null"] }
+        proofName: { type: ["string", "null"] }
+
+    UpdateSubscription:
+      type: object
+      properties:
+        proofUrl: { type: string }
+        proofName: { type: string }
+        status: { type: string }
+
+    AdminUpdateSubscription:
+      type: object
+      properties:
+        status: { type: string }
+        adminNote: { type: ["string", "null"] }
+        approvedBy: { type: ["integer", "null"] }
+
+    BlogPost:
+      type: object
+      required: [id, title, slug, content, excerpt, category, authorId, authorName, published, seoTitle, seoDescription, views, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        content: { type: string }
+        excerpt: { type: string }
+        category: { type: string }
+        authorId: { type: integer }
+        authorName: { type: string }
+        published: { type: boolean }
+        publishedAt: { type: ["string", "null"] }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        coverImageUrl: { type: ["string", "null"] }
+        views: { type: integer }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+
+    CreateBlogPost:
+      type: object
+      required: [title, slug, content, authorId]
+      properties:
+        title: { type: string, minLength: 3 }
+        slug: { type: string, minLength: 3 }
+        content: { type: string }
+        excerpt: { type: ["string", "null"] }
+        category: { type: ["string", "null"] }
+        authorId: { type: integer }
+        authorName: { type: ["string", "null"] }
+        published: { type: ["boolean", "null"] }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        coverImageUrl: { type: ["string", "null"] }
+
+    UpdateBlogPost:
+      type: object
+      properties:
+        title: { type: string }
+        slug: { type: string }
+        content: { type: string }
+        excerpt: { type: string }
+        category: { type: string }
+        published: { type: boolean }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        coverImageUrl: { type: ["string", "null"] }
+
+    AdminEmailInput:
+      type: object
+      required: [subject, body, sentBy]
+      properties:
+        subject: { type: string, minLength: 3 }
+        body: { type: string, minLength: 10 }
+        targetFilter: { type: ["string", "null"] }
+        sentBy: { type: integer }
+        sentByName: { type: ["string", "null"] }
+
+    Banner:
+      type: object
+      required: [id, title, subtitle, ctaText, ctaUrl, imageUrl, bgColor, order, active, durationSecs, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        subtitle: { type: string }
+        ctaText: { type: string }
+        ctaUrl: { type: string }
+        imageUrl: { type: string }
+        bgColor: { type: string }
+        order: { type: integer }
+        active: { type: boolean }
+        startsAt: { type: ["string", "null"] }
+        endsAt: { type: ["string", "null"] }
+        durationSecs: { type: integer }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+
+    CreateBanner:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1 }
+        subtitle: { type: ["string", "null"] }
+        ctaText: { type: ["string", "null"] }
+        ctaUrl: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        bgColor: { type: ["string", "null"] }
+        order: { type: ["integer", "null"] }
+        active: { type: ["boolean", "null"] }
+        startsAt: { type: ["string", "null"] }
+        endsAt: { type: ["string", "null"] }
+        durationSecs: { type: ["integer", "null"] }
+
+    UpdateBanner:
+      type: object
+      properties:
+        title: { type: string }
+        subtitle: { type: string }
+        ctaText: { type: string }
+        ctaUrl: { type: string }
+        imageUrl: { type: string }
+        bgColor: { type: string }
+        order: { type: integer }
+        active: { type: boolean }
+        startsAt: { type: ["string", "null"] }
+        endsAt: { type: ["string", "null"] }
+        durationSecs: { type: integer }
+
+    AdminEmailResult:
+      type: object
+      required: [recipientCount, campaignId]
+      properties:
+        recipientCount: { type: integer }
+        campaignId: { type: integer }
+
+    EmailCampaign:
+      type: object
+      required: [id, subject, body, targetFilter, recipientCount, sentBy, sentByName, createdAt]
+      properties:
+        id: { type: integer }
+        subject: { type: string }
+        body: { type: string }
+        targetFilter: { type: string }
+        recipientCount: { type: integer }
+        sentBy: { type: integer }
+        sentByName: { type: string }
+        createdAt: { type: string }

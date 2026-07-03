@@ -1,20 +1,217 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+import { pgTable, serial, integer, text, doublePrecision, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
 
-export {}
+export const usersTable = pgTable("users", {
+  id: serial("id").primaryKey(),
+  publicId: text("public_id").unique(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull().default(""),
+  phone: text("phone").unique(),
+  cpf: text("cpf").unique(),
+  cnpj: text("cnpj").unique(),
+  accountType: text("account_type").notNull().default("pessoa"),
+  avatarUrl: text("avatar_url"),
+  acceptedTerms: boolean("accepted_terms").notNull().default(false),
+  acceptedTermsAt: timestamp("accepted_terms_at", { withTimezone: true }),
+  phoneVerified: boolean("phone_verified").notNull().default(false),
+  accountVerified: boolean("account_verified").notNull().default(false),
+  plan: text("plan").notNull().default("free"),
+  isAdmin: boolean("is_admin").notNull().default(false),
+  role: text("role").notNull().default("user"),
+  banned: boolean("banned").notNull().default(false),
+  storeName: text("store_name").notNull().default(""),
+  bio: text("bio").notNull().default(""),
+  city: text("city").notNull().default(""),
+  loginAttempts: integer("login_attempts").notNull().default(0),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const itemsTable = pgTable("items", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(),
+  category: text("category").notNull().default("geral"),
+  title: text("title").notNull(),
+  brand: text("brand"),
+  model: text("model"),
+  condition: text("condition").notNull().default("usado"),
+  price: doublePrecision("price").notNull(),
+  year: integer("year"),
+  mileage: integer("mileage"),
+  engineSize: integer("engine_size"),
+  color: text("color"),
+  fuelType: text("fuel_type"),
+  optionals: text("optionals"),
+  tradeInfo: text("trade_info"),
+  phone: text("phone"),
+  address: text("address"),
+  workingHours: text("working_hours"),
+  extras: text("extras"),
+  image: text("image").notNull(),
+  description: text("description").notNull(),
+  location: text("location").notNull(),
+  sellerId: integer("seller_id").notNull(),
+  status: text("status").notNull().default("active"),
+  premium: boolean("premium").notNull().default(false),
+  stock: integer("stock").notNull().default(1),
+  ratingAvg: doublePrecision("rating_avg").notNull().default(0),
+  ratingCount: integer("rating_count").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const favoritesTable = pgTable("favorites", {
+  userId: integer("user_id").notNull(),
+  itemId: integer("item_id").notNull(),
+}, (t) => ({ pk: primaryKey({ columns: [t.userId, t.itemId] }) }));
+
+export const conversationsTable = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull(),
+  sellerId: integer("seller_id").notNull(),
+  itemId: integer("item_id").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const messagesTable = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  senderId: integer("sender_id").notNull(),
+  text: text("text").notNull(),
+  timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const appointmentsTable = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  serviceId: integer("service_id").notNull(),
+  userId: integer("user_id").notNull(),
+  date: text("date").notNull(),
+  status: text("status").notNull().default("scheduled"),
+});
+
+export const ordersTable = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull(),
+  sellerId: integer("seller_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  subtotal: doublePrecision("subtotal").notNull(),
+  discount: doublePrecision("discount").notNull().default(0),
+  total: doublePrecision("total").notNull(),
+  couponCode: text("coupon_code"),
+  paymentMethod: text("payment_method").notNull(),
+  shippingAddress: text("shipping_address").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const orderItemsTable = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  itemId: integer("item_id").notNull(),
+  title: text("title").notNull(),
+  image: text("image").notNull(),
+  price: doublePrecision("price").notNull(),
+  qty: integer("qty").notNull(),
+});
+
+export const reviewsTable = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  itemId: integer("item_id").notNull(),
+  userId: integer("user_id").notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const couponsTable = pgTable("coupons", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  type: text("type").notNull().default("percent"),
+  value: doublePrecision("value").notNull(),
+  minOrder: doublePrecision("min_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const adminLogsTable = pgTable("admin_logs", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id").notNull(),
+  adminName: text("admin_name").notNull().default(""),
+  action: text("action").notNull(),
+  target: text("target").notNull().default(""),
+  details: text("details").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const reportsTable = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  reporterId: integer("reporter_id").notNull(),
+  targetType: text("target_type").notNull().default("item"),
+  targetId: integer("target_id").notNull(),
+  reason: text("reason").notNull(),
+  details: text("details").notNull().default(""),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const blogPostsTable = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull().default(""),
+  excerpt: text("excerpt").notNull().default(""),
+  category: text("category").notNull().default("geral"),
+  authorId: integer("author_id").notNull(),
+  authorName: text("author_name").notNull().default(""),
+  published: boolean("published").notNull().default(false),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  seoTitle: text("seo_title").notNull().default(""),
+  seoDescription: text("seo_description").notNull().default(""),
+  coverImageUrl: text("cover_image_url"),
+  views: integer("views").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const bannersTable = pgTable("banners", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle").notNull().default(""),
+  ctaText: text("cta_text").notNull().default(""),
+  ctaUrl: text("cta_url").notNull().default("/"),
+  imageUrl: text("image_url").notNull().default(""),
+  bgColor: text("bg_color").notNull().default("#000000"),
+  order: integer("order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
+  durationSecs: integer("duration_secs").notNull().default(6),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const emailCampaignsTable = pgTable("email_campaigns", {
+  id: serial("id").primaryKey(),
+  subject: text("subject").notNull(),
+  body: text("body").notNull(),
+  targetFilter: text("target_filter").notNull().default("all"),
+  recipientCount: integer("recipient_count").notNull().default(0),
+  sentBy: integer("sent_by").notNull(),
+  sentByName: text("sent_by_name").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const subscriptionsTable = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  plan: text("plan").notNull(),
+  amount: doublePrecision("amount").notNull(),
+  status: text("status").notNull().default("awaiting_payment"),
+  pixCode: text("pix_code").notNull().default(""),
+  pixKey: text("pix_key").notNull().default(""),
+  proofUrl: text("proof_url"),
+  proofName: text("proof_name"),
+  adminNote: text("admin_note"),
+  approvedBy: integer("approved_by"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

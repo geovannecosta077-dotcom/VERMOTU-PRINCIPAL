@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MotoHub"
+version = "1.0.0"
+id = "artifacts/motohub"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26037
+
+[services.development]
+run = "pnpm --filter @workspace/motohub run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/motohub", "run", "build" ]
+publicDir = "artifacts/motohub/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26037"
+BASE_PATH = "/"

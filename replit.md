@@ -1,45 +1,57 @@
-# [Project name]
+# MotoHub
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Marketplace brasileiro (em português) de motos, peças e serviços de oficina — usuários compram/vendem motos e peças, encontram oficinas, leem o blog e anunciam seus produtos.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/api-server run dev` — roda o servidor da API (porta interna 8080, acessível via proxy em `/api`)
+- `pnpm --filter @workspace/motohub run dev` — roda o frontend (Vite)
+- `pnpm run typecheck` — typecheck completo de todos os pacotes
+- `pnpm run build` — typecheck + build de todos os pacotes
+- `pnpm --filter @workspace/api-spec run codegen` — regenera hooks de API e schemas Zod a partir do OpenAPI spec
+- `pnpm --filter @workspace/db run push` — aplica alterações do schema no banco (apenas dev)
+- Env obrigatório: `DATABASE_URL` (Postgres), `DEFAULT_OBJECT_STORAGE_BUCKET_ID`, `PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS` (Object Storage)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
+- Frontend: React + Vite, wouter (router), Tailwind v4, shadcn/ui, framer-motion, zustand (estado/sessão/carrinho)
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- DB: PostgreSQL + Drizzle ORM (schema em arquivo único)
+- Storage: Replit Object Storage (uploads via Uppy + presigned URLs)
+- Validação: Zod (`zod/v4`), `drizzle-zod`
+- API codegen: Orval (a partir do OpenAPI spec)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/motohub/src` — frontend (páginas em `src/pages`, componentes em `src/components`, estado em `src/lib/session.ts`)
+- `artifacts/api-server/src/routes` — rotas da API (admin, banners, blog, coupons, email, items, orders, reviews, social, storage, subscriptions, users)
+- `lib/db/src/schema/index.ts` — schema Drizzle único (users, items, orders/order_items, conversations/messages, subscriptions, admin_logs, reports, blog_posts, banners, email_campaigns)
+- `lib/api-spec/openapi.yaml` — contrato da API (fonte da verdade)
+- `lib/object-storage-web` — cliente Uppy/upload compartilhado usado pelo frontend
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Autenticação é customizada (bcrypt + zustand), não usa Replit Auth nem Clerk.
+- Acesso de admin é liberado por senha (passcodes) em vez de um sistema de roles completo.
+- Não há Stripe nem provedor de e-mail externo configurado — esses fluxos são simulados/manuais no código original.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Marketplace de motos, peças e oficinas com anúncios, carrinho, checkout, pedidos, chat entre comprador/vendedor, avaliações, cupons, assinaturas/planos premium, blog e painel admin.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Projeto migrado de um zip existente: preservar 100% da aparência, layout, componentes, cores, páginas, navegação e funcionalidade originais. Não redesenhar, não trocar bibliotecas, não fazer refatorações visuais.
+- Qualquer nova funcionalidade só deve ser adicionada mediante pedido explícito do usuário.
+- Sempre perguntar antes de alterar banco de dados, variáveis de ambiente ou contratos de API.
+- Usuário se comunica em português — manter respostas em português.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Sempre reiniciar o workflow do `api-server` depois de editar `src/app.ts` ou qualquer rota — o build é feito via esbuild e só é refeito no restart, então mudanças não pegam automaticamente como no Vite.
+- O banco e o object storage usam os recursos nativos do Replit (não Supabase/GCS direto).
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Veja a skill `pnpm-workspace` para estrutura do workspace, configuração de TypeScript e detalhes de pacotes.

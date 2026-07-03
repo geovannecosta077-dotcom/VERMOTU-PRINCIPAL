@@ -1,0 +1,1 @@
+- [api-server esbuild rebuild](api-server-esbuild-rebuild.md) — editing src after a build runs won't take effect until workflow restart; unlike Vite there's no hot rebuild.
