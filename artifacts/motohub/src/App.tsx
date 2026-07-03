@@ -7,6 +7,7 @@ import { Home } from "@/pages/home";
 import { Listings } from "@/pages/listings";
 import { ItemDetail } from "@/pages/item-detail";
 import { Anunciar } from "@/pages/anunciar";
+import { Busca } from "@/pages/busca";
 import { Conta } from "@/pages/conta";
 import { Chat } from "@/pages/chat";
 import { Admin } from "@/pages/admin";
@@ -48,6 +49,7 @@ function Router() {
         <Route path="/servicos">{() => <Listings type="servico" title="Serviços" subtitle="Oficinas e mecânicos parceiros" />}</Route>
         <Route path="/servicos/:id" component={ItemDetail} />
         <Route path="/oficinas" component={Oficinas} />
+        <Route path="/busca" component={Busca} />
         <Route path="/anunciar" component={Anunciar} />
         <Route path="/carrinho" component={Cart} />
         <Route path="/checkout" component={Checkout} />

@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useSession, useCart, imageUrl } from "@/lib/session";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, HardHat, ChevronRight } from "lucide-react";
+import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, HardHat, ChevronRight, Zap } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -214,6 +214,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Nav links — compact, after search */}
           <nav className="hidden lg:flex items-center shrink-0 ml-1">
+            <Link href="/busca" className="px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-accent rounded-md transition-colors flex items-center gap-1 whitespace-nowrap"><Zap className="w-3.5 h-3.5" />Busca Inteligente</Link>
             <Link href="/motos" className="px-2.5 py-1.5 text-sm font-medium hover:text-primary hover:bg-accent rounded-md transition-colors whitespace-nowrap">Motos</Link>
             <Link href="/pecas" className="px-2.5 py-1.5 text-sm font-medium hover:text-primary hover:bg-accent rounded-md transition-colors whitespace-nowrap">Peças</Link>
             <Link href="/oficinas" className="px-2.5 py-1.5 text-sm font-medium hover:text-primary hover:bg-accent rounded-md transition-colors whitespace-nowrap">Oficinas</Link>

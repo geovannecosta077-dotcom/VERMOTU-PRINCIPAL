@@ -815,6 +815,184 @@ export interface EmailCampaign {
   createdAt: string;
 }
 
+export interface ParseSearchInput {
+  /** @minLength 2 */
+  query: string;
+  /** @nullable */
+  city?: string | null;
+}
+
+export type ParsedSearchCategory = typeof ParsedSearchCategory[keyof typeof ParsedSearchCategory];
+
+
+export const ParsedSearchCategory = {
+  moto: 'moto',
+  peca: 'peca',
+  servico: 'servico',
+  oficina: 'oficina',
+  financiamento: 'financiamento',
+  seguro: 'seguro',
+  guincho: 'guincho',
+  concessionaria: 'concessionaria',
+} as const;
+
+export type ParsedSearchUrgency = typeof ParsedSearchUrgency[keyof typeof ParsedSearchUrgency];
+
+
+export const ParsedSearchUrgency = {
+  normal: 'normal',
+  urgente: 'urgente',
+} as const;
+
+export interface ParsedSearch {
+  rawQuery: string;
+  category: ParsedSearchCategory;
+  /** @nullable */
+  subcategory?: string | null;
+  /** @nullable */
+  brand?: string | null;
+  /** @nullable */
+  model?: string | null;
+  /** @nullable */
+  partType?: string | null;
+  /** @nullable */
+  serviceType?: string | null;
+  urgency: ParsedSearchUrgency;
+  confidence: number;
+  suggestedText: string;
+}
+
+export type ServiceRequestUrgency = typeof ServiceRequestUrgency[keyof typeof ServiceRequestUrgency];
+
+
+export const ServiceRequestUrgency = {
+  normal: 'normal',
+  urgente: 'urgente',
+} as const;
+
+export type ServiceRequestStatus = typeof ServiceRequestStatus[keyof typeof ServiceRequestStatus];
+
+
+export const ServiceRequestStatus = {
+  aberta: 'aberta',
+  em_andamento: 'em_andamento',
+  concluida: 'concluida',
+  cancelada: 'cancelada',
+} as const;
+
+export interface ServiceRequest {
+  id: number;
+  publicId: string;
+  customerId: number;
+  rawQuery: string;
+  category: string;
+  /** @nullable */
+  subcategory?: string | null;
+  /** @nullable */
+  brand?: string | null;
+  /** @nullable */
+  model?: string | null;
+  /** @nullable */
+  partType?: string | null;
+  /** @nullable */
+  serviceType?: string | null;
+  urgency: ServiceRequestUrgency;
+  city: string;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+  status: ServiceRequestStatus;
+  /** @nullable */
+  acceptedProposalId?: number | null;
+  createdAt: string;
+}
+
+export type ServiceProposalStatus = typeof ServiceProposalStatus[keyof typeof ServiceProposalStatus];
+
+
+export const ServiceProposalStatus = {
+  pendente: 'pendente',
+  aceita: 'aceita',
+  recusada: 'recusada',
+} as const;
+
+export interface ServiceProposal {
+  id: number;
+  requestId: number;
+  companyId: number;
+  /** @nullable */
+  companyName?: string | null;
+  /** @nullable */
+  companyCity?: string | null;
+  /** @nullable */
+  price?: number | null;
+  /** @nullable */
+  timeframe?: string | null;
+  /** @nullable */
+  availability?: string | null;
+  message: string;
+  status: ServiceProposalStatus;
+  createdAt: string;
+  /** @nullable */
+  contactPhone?: string | null;
+  /** @nullable */
+  contactName?: string | null;
+}
+
+export interface ServiceRequestWithProposals {
+  request: ServiceRequest;
+  proposals: ServiceProposal[];
+}
+
+export type CreateServiceRequestUrgency = typeof CreateServiceRequestUrgency[keyof typeof CreateServiceRequestUrgency];
+
+
+export const CreateServiceRequestUrgency = {
+  normal: 'normal',
+  urgente: 'urgente',
+} as const;
+
+export interface CreateServiceRequest {
+  customerId: number;
+  /** @minLength 2 */
+  rawQuery: string;
+  category: string;
+  /** @nullable */
+  subcategory?: string | null;
+  /** @nullable */
+  brand?: string | null;
+  /** @nullable */
+  model?: string | null;
+  /** @nullable */
+  partType?: string | null;
+  /** @nullable */
+  serviceType?: string | null;
+  urgency: CreateServiceRequestUrgency;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+}
+
+export interface CreateServiceProposal {
+  companyId: number;
+  /** @nullable */
+  price?: number | null;
+  /** @nullable */
+  timeframe?: string | null;
+  /** @nullable */
+  availability?: string | null;
+  /** @minLength 1 */
+  message: string;
+}
+
+export interface AcceptServiceProposal {
+  customerId: number;
+}
+
 export type ListItemsParams = {
 type?: ListItemsType;
 q?: string;
@@ -869,5 +1047,13 @@ all?: boolean;
 
 export type AdminDeleteBanner200 = {
   ok: boolean;
+};
+
+export type ListMyServiceRequestsParams = {
+customerId: number;
+};
+
+export type ListIncomingServiceRequestsParams = {
+companyId: number;
 };
 

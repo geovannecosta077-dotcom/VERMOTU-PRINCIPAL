@@ -15,16 +15,20 @@ import {
   useDeleteItem,
   useListOrders,
   useUpdateOrderStatus,
+  useListIncomingServiceRequests,
+  useCreateServiceProposal,
   getListItemsQueryKey,
   getGetUserQueryKey,
   getListFavoritesQueryKey,
   getListAppointmentsQueryKey,
   getListOrdersQueryKey,
+  getListIncomingServiceRequestsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2, CheckCircle2, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck } from "lucide-react";
-import { formatPhone } from "@/lib/session";
+import { Trash2, CheckCircle2, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck, Zap, MapPin, Clock, Send } from "lucide-react";
+import { formatPhone, formatRelative } from "@/lib/session";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 export function Conta() {
   const currentUserId = useSession((s) => s.currentUserId);
@@ -46,6 +50,8 @@ export function Conta() {
     { userId: currentUserId ?? 0 },
     { query: { enabled: !!currentUserId, queryKey: getListAppointmentsQueryKey({ userId: currentUserId ?? 0 }) } },
   );
+
+  const isCompany = !!user && (user.accountType === "empresa" || !!user.storeName);
 
   const myItems = (allItems ?? []).filter((i) => i.sellerId === currentUserId);
   const favItems = (allItems ?? []).filter((i) => (favorites ?? []).includes(i.id));
@@ -116,6 +122,11 @@ export function Conta() {
             <TabsTrigger value="compras">Minhas compras</TabsTrigger>
             <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
             <TabsTrigger value="agendamentos">Agendamentos</TabsTrigger>
+            {isCompany && (
+              <TabsTrigger value="solicitacoes" className="gap-1" data-testid="tab-solicitacoes">
+                <Zap className="w-3.5 h-3.5" /> Busca Inteligente
+              </TabsTrigger>
+            )}
             <TabsTrigger value="conta">Conta</TabsTrigger>
           </TabsList>
 
@@ -269,6 +280,12 @@ export function Conta() {
             )}
           </TabsContent>
 
+          {isCompany && (
+            <TabsContent value="solicitacoes">
+              <CompanyRequestsTab companyId={currentUserId!} />
+            </TabsContent>
+          )}
+
           <TabsContent value="conta">
             <Card>
               <CardHeader>
@@ -345,6 +362,132 @@ function Empty({ title, subtitle, cta }: { title: string; subtitle?: string; cta
       <p className="font-medium">{title}</p>
       {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
       {cta && <div className="mt-4">{cta}</div>}
+    </div>
+  );
+}
+
+function CompanyRequestsTab({ companyId }: { companyId: number }) {
+  const queryClient = useQueryClient();
+  const { data: requests, isLoading } = useListIncomingServiceRequests(
+    { companyId },
+    { query: { refetchInterval: 5000, queryKey: getListIncomingServiceRequestsQueryKey({ companyId }) } },
+  );
+  const createProposal = useCreateServiceProposal();
+  const [forms, setForms] = useState<Record<number, { price: string; timeframe: string; availability: string; message: string }>>({});
+
+  const setField = (requestId: number, field: string, value: string) => {
+    setForms((prev) => ({
+      ...prev,
+      [requestId]: { price: "", timeframe: "", availability: "", message: "", ...prev[requestId], [field]: value },
+    }));
+  };
+
+  const submitProposal = (requestId: number) => {
+    const form = forms[requestId];
+    if (!form?.message?.trim()) {
+      toast.error("Escreva uma mensagem para o cliente.");
+      return;
+    }
+    createProposal.mutate(
+      {
+        id: requestId,
+        data: {
+          companyId,
+          price: form.price ? Number(form.price) : undefined,
+          timeframe: form.timeframe || undefined,
+          availability: form.availability || undefined,
+          message: form.message.trim(),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Proposta enviada ao cliente!");
+          setForms((prev) => ({ ...prev, [requestId]: { price: "", timeframe: "", availability: "", message: "" } }));
+          queryClient.invalidateQueries({ queryKey: getListIncomingServiceRequestsQueryKey({ companyId }) });
+        },
+        onError: () => toast.error("Não foi possível enviar a proposta."),
+      },
+    );
+  };
+
+  if (isLoading) {
+    return <p className="text-muted-foreground text-sm py-6">Carregando solicitações...</p>;
+  }
+
+  if (!requests || requests.length === 0) {
+    return <Empty title="Nenhuma solicitação aberta no momento" subtitle="Assim que um cliente descrever uma necessidade compatível, ela aparece aqui em tempo real." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground flex items-center gap-2">
+        <Zap className="w-4 h-4 text-primary" /> Solicitações abertas de clientes — responda para enviar sua proposta.
+      </p>
+      {requests.map(({ request, proposals }) => {
+        const already = proposals.find((p) => p.companyId === companyId);
+        const form = forms[request.id] ?? { price: "", timeframe: "", availability: "", message: "" };
+        return (
+          <Card key={request.id} data-testid={`card-solicitacao-${request.id}`}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
+                <div>
+                  <p className="font-semibold">{request.rawQuery}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="capitalize">{request.category}</Badge>
+                    {request.urgency === "urgente" && <Badge className="bg-primary">Urgente</Badge>}
+                    {request.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{request.city}</span>}
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatRelative(request.createdAt)}</span>
+                  </div>
+                </div>
+                <Badge variant="secondary">{proposals.length} proposta(s)</Badge>
+              </div>
+
+              {already ? (
+                <div className="rounded-lg bg-accent/40 border border-border p-3 text-sm">
+                  Você já enviou uma proposta para essa solicitação
+                  {already.status === "aceita" && <span className="text-primary font-medium"> — foi aceita! Confira o chat.</span>}
+                  {already.status === "recusada" && <span className="text-muted-foreground"> — o cliente escolheu outra empresa.</span>}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input
+                    placeholder="Orçamento (R$)"
+                    type="number"
+                    value={form.price}
+                    onChange={(e) => setField(request.id, "price", e.target.value)}
+                    data-testid={`input-preco-${request.id}`}
+                  />
+                  <Input
+                    placeholder="Prazo (ex: 2 dias)"
+                    value={form.timeframe}
+                    onChange={(e) => setField(request.id, "timeframe", e.target.value)}
+                  />
+                  <Input
+                    placeholder="Disponibilidade"
+                    value={form.availability}
+                    onChange={(e) => setField(request.id, "availability", e.target.value)}
+                  />
+                  <Input
+                    placeholder="Mensagem para o cliente"
+                    className="sm:col-span-2"
+                    value={form.message}
+                    onChange={(e) => setField(request.id, "message", e.target.value)}
+                    data-testid={`input-mensagem-${request.id}`}
+                  />
+                  <Button
+                    className="gap-2"
+                    disabled={createProposal.isPending}
+                    onClick={() => submitProposal(request.id)}
+                    data-testid={`button-enviar-proposta-${request.id}`}
+                  >
+                    <Send className="w-4 h-4" /> Enviar
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

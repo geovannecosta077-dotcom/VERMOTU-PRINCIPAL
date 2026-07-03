@@ -12,6 +12,7 @@ import subscriptionsRouter from "./subscriptions";
 import blogRouter from "./blog";
 import emailRouter from "./email";
 import bannersRouter from "./banners";
+import searchRouter from "./search";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(subscriptionsRouter);
 router.use(blogRouter);
 router.use(emailRouter);
 router.use(bannersRouter);
+router.use(searchRouter);
 
 export default router;

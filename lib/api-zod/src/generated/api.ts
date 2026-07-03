@@ -1401,3 +1401,293 @@ export const AdminDeleteBannerResponse = zod.object({
 })
 
 
+/**
+ * @summary Parse a free-text query into structured search intent
+ */
+export const parseSearchQueryBodyQueryMin = 2;
+
+
+
+export const ParseSearchQueryBody = zod.object({
+  "query": zod.string().min(parseSearchQueryBodyQueryMin),
+  "city": zod.string().nullish()
+})
+
+export const ParseSearchQueryResponse = zod.object({
+  "rawQuery": zod.string(),
+  "category": zod.enum(['moto', 'peca', 'servico', 'oficina', 'financiamento', 'seguro', 'guincho', 'concessionaria']),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "confidence": zod.number(),
+  "suggestedText": zod.string()
+})
+
+
+/**
+ * @summary Create a service/purchase request broadcast to matching companies
+ */
+export const createServiceRequestBodyRawQueryMin = 2;
+
+
+
+export const CreateServiceRequestBody = zod.object({
+  "customerId": zod.number(),
+  "rawQuery": zod.string().min(createServiceRequestBodyRawQueryMin),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string().nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+})
+
+export const CreateServiceRequestResponse = zod.object({
+  "id": zod.number(),
+  "publicId": zod.string(),
+  "customerId": zod.number(),
+  "rawQuery": zod.string(),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "status": zod.enum(['aberta', 'em_andamento', 'concluida', 'cancelada']),
+  "acceptedProposalId": zod.number().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List service requests created by a customer
+ */
+export const ListMyServiceRequestsQueryParams = zod.object({
+  "customerId": zod.coerce.number()
+})
+
+export const ListMyServiceRequestsResponseItem = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "publicId": zod.string(),
+  "customerId": zod.number(),
+  "rawQuery": zod.string(),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "status": zod.enum(['aberta', 'em_andamento', 'concluida', 'cancelada']),
+  "acceptedProposalId": zod.number().nullish(),
+  "createdAt": zod.string()
+}),
+  "proposals": zod.array(zod.object({
+  "id": zod.number(),
+  "requestId": zod.number(),
+  "companyId": zod.number(),
+  "companyName": zod.string().nullish(),
+  "companyCity": zod.string().nullish(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string(),
+  "status": zod.enum(['pendente', 'aceita', 'recusada']),
+  "createdAt": zod.string(),
+  "contactPhone": zod.string().nullish(),
+  "contactName": zod.string().nullish()
+}))
+})
+export const ListMyServiceRequestsResponse = zod.array(ListMyServiceRequestsResponseItem)
+
+
+/**
+ * @summary List open service requests visible to a company
+ */
+export const ListIncomingServiceRequestsQueryParams = zod.object({
+  "companyId": zod.coerce.number()
+})
+
+export const ListIncomingServiceRequestsResponseItem = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "publicId": zod.string(),
+  "customerId": zod.number(),
+  "rawQuery": zod.string(),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "status": zod.enum(['aberta', 'em_andamento', 'concluida', 'cancelada']),
+  "acceptedProposalId": zod.number().nullish(),
+  "createdAt": zod.string()
+}),
+  "proposals": zod.array(zod.object({
+  "id": zod.number(),
+  "requestId": zod.number(),
+  "companyId": zod.number(),
+  "companyName": zod.string().nullish(),
+  "companyCity": zod.string().nullish(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string(),
+  "status": zod.enum(['pendente', 'aceita', 'recusada']),
+  "createdAt": zod.string(),
+  "contactPhone": zod.string().nullish(),
+  "contactName": zod.string().nullish()
+}))
+})
+export const ListIncomingServiceRequestsResponse = zod.array(ListIncomingServiceRequestsResponseItem)
+
+
+/**
+ * @summary Get a service request with its proposals
+ */
+export const GetServiceRequestParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetServiceRequestResponse = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "publicId": zod.string(),
+  "customerId": zod.number(),
+  "rawQuery": zod.string(),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "status": zod.enum(['aberta', 'em_andamento', 'concluida', 'cancelada']),
+  "acceptedProposalId": zod.number().nullish(),
+  "createdAt": zod.string()
+}),
+  "proposals": zod.array(zod.object({
+  "id": zod.number(),
+  "requestId": zod.number(),
+  "companyId": zod.number(),
+  "companyName": zod.string().nullish(),
+  "companyCity": zod.string().nullish(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string(),
+  "status": zod.enum(['pendente', 'aceita', 'recusada']),
+  "createdAt": zod.string(),
+  "contactPhone": zod.string().nullish(),
+  "contactName": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary A company submits a proposal for a service request
+ */
+export const CreateServiceProposalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const CreateServiceProposalBody = zod.object({
+  "companyId": zod.number(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string().min(1)
+})
+
+export const CreateServiceProposalResponse = zod.object({
+  "id": zod.number(),
+  "requestId": zod.number(),
+  "companyId": zod.number(),
+  "companyName": zod.string().nullish(),
+  "companyCity": zod.string().nullish(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string(),
+  "status": zod.enum(['pendente', 'aceita', 'recusada']),
+  "createdAt": zod.string(),
+  "contactPhone": zod.string().nullish(),
+  "contactName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Customer accepts a proposal, unlocking chat and contact info
+ */
+export const AcceptServiceProposalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AcceptServiceProposalBody = zod.object({
+  "customerId": zod.number()
+})
+
+export const AcceptServiceProposalResponse = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "publicId": zod.string(),
+  "customerId": zod.number(),
+  "rawQuery": zod.string(),
+  "category": zod.string(),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "city": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "status": zod.enum(['aberta', 'em_andamento', 'concluida', 'cancelada']),
+  "acceptedProposalId": zod.number().nullish(),
+  "createdAt": zod.string()
+}),
+  "proposals": zod.array(zod.object({
+  "id": zod.number(),
+  "requestId": zod.number(),
+  "companyId": zod.number(),
+  "companyName": zod.string().nullish(),
+  "companyCity": zod.string().nullish(),
+  "price": zod.number().nullish(),
+  "timeframe": zod.string().nullish(),
+  "availability": zod.string().nullish(),
+  "message": zod.string(),
+  "status": zod.enum(['pendente', 'aceita', 'recusada']),
+  "createdAt": zod.string(),
+  "contactPhone": zod.string().nullish(),
+  "contactName": zod.string().nullish()
+}))
+})
+
+

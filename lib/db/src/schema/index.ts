@@ -199,6 +199,38 @@ export const emailCampaignsTable = pgTable("email_campaigns", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const serviceRequestsTable = pgTable("service_requests", {
+  id: serial("id").primaryKey(),
+  publicId: text("public_id").notNull().unique(),
+  customerId: integer("customer_id").notNull(),
+  rawQuery: text("raw_query").notNull(),
+  category: text("category").notNull(),
+  subcategory: text("subcategory"),
+  brand: text("brand"),
+  model: text("model"),
+  partType: text("part_type"),
+  serviceType: text("service_type"),
+  urgency: text("urgency").notNull().default("normal"),
+  city: text("city").notNull().default(""),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
+  status: text("status").notNull().default("aberta"),
+  acceptedProposalId: integer("accepted_proposal_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const serviceProposalsTable = pgTable("service_proposals", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull(),
+  companyId: integer("company_id").notNull(),
+  price: doublePrecision("price"),
+  timeframe: text("timeframe"),
+  availability: text("availability"),
+  message: text("message").notNull().default(""),
+  status: text("status").notNull().default("pendente"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const subscriptionsTable = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),

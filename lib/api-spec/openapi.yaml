@@ -24,6 +24,8 @@ tags:
   - name: banners
   - name: Storage
     description: Object storage upload and serving endpoints.
+  - name: search
+    description: Uber-style natural language smart search and matching.
 paths:
   /storage/uploads/request-url:
     post:
@@ -1043,6 +1045,174 @@ paths:
                 properties:
                   ok: { type: boolean }
 
+  /search/parse:
+    post:
+      operationId: parseSearchQuery
+      tags: [search]
+      summary: Parse a free-text query into structured search intent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParseSearchInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ParsedSearch" }
+
+  /requests:
+    post:
+      operationId: createServiceRequest
+      tags: [search]
+      summary: Create a service/purchase request broadcast to matching companies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateServiceRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequest" }
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /requests/mine:
+    get:
+      operationId: listMyServiceRequests
+      tags: [search]
+      summary: List service requests created by a customer
+      parameters:
+        - name: customerId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ServiceRequestWithProposals" }
+
+  /requests/incoming:
+    get:
+      operationId: listIncomingServiceRequests
+      tags: [search]
+      summary: List open service requests visible to a company
+      parameters:
+        - name: companyId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ServiceRequestWithProposals" }
+
+  /requests/{id}:
+    get:
+      operationId: getServiceRequest
+      tags: [search]
+      summary: Get a service request with its proposals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestWithProposals" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /requests/{id}/proposals:
+    post:
+      operationId: createServiceProposal
+      tags: [search]
+      summary: A company submits a proposal for a service request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateServiceProposal" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceProposal" }
+        "400":
+          description: Invalid data or request no longer open
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /proposals/{id}/accept:
+    patch:
+      operationId: acceptServiceProposal
+      tags: [search]
+      summary: Customer accepts a proposal, unlocking chat and contact info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AcceptServiceProposal" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestWithProposals" }
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "403":
+          description: Not the request owner
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
 components:
   schemas:
     UploadUrlRequest:
@@ -1690,3 +1860,107 @@ components:
         sentBy: { type: integer }
         sentByName: { type: string }
         createdAt: { type: string }
+
+    ParseSearchInput:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string, minLength: 2 }
+        city: { type: ["string", "null"] }
+
+    ParsedSearch:
+      type: object
+      required: [rawQuery, category, urgency, confidence, suggestedText]
+      properties:
+        rawQuery: { type: string }
+        category: { type: string, enum: [moto, peca, servico, oficina, financiamento, seguro, guincho, concessionaria] }
+        subcategory: { type: ["string", "null"] }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        partType: { type: ["string", "null"] }
+        serviceType: { type: ["string", "null"] }
+        urgency: { type: string, enum: [normal, urgente] }
+        confidence: { type: number }
+        suggestedText: { type: string }
+
+    ServiceRequest:
+      type: object
+      required: [id, publicId, customerId, rawQuery, category, urgency, city, status, createdAt]
+      properties:
+        id: { type: integer }
+        publicId: { type: string }
+        customerId: { type: integer }
+        rawQuery: { type: string }
+        category: { type: string }
+        subcategory: { type: ["string", "null"] }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        partType: { type: ["string", "null"] }
+        serviceType: { type: ["string", "null"] }
+        urgency: { type: string, enum: [normal, urgente] }
+        city: { type: string }
+        lat: { type: ["number", "null"] }
+        lng: { type: ["number", "null"] }
+        status: { type: string, enum: [aberta, em_andamento, concluida, cancelada] }
+        acceptedProposalId: { type: ["integer", "null"] }
+        createdAt: { type: string }
+
+    ServiceProposal:
+      type: object
+      required: [id, requestId, companyId, message, status, createdAt]
+      properties:
+        id: { type: integer }
+        requestId: { type: integer }
+        companyId: { type: integer }
+        companyName: { type: ["string", "null"] }
+        companyCity: { type: ["string", "null"] }
+        price: { type: ["number", "null"] }
+        timeframe: { type: ["string", "null"] }
+        availability: { type: ["string", "null"] }
+        message: { type: string }
+        status: { type: string, enum: [pendente, aceita, recusada] }
+        createdAt: { type: string }
+        contactPhone: { type: ["string", "null"] }
+        contactName: { type: ["string", "null"] }
+
+    ServiceRequestWithProposals:
+      type: object
+      required: [request, proposals]
+      properties:
+        request: { $ref: "#/components/schemas/ServiceRequest" }
+        proposals:
+          type: array
+          items: { $ref: "#/components/schemas/ServiceProposal" }
+
+    CreateServiceRequest:
+      type: object
+      required: [customerId, rawQuery, category, urgency]
+      properties:
+        customerId: { type: integer }
+        rawQuery: { type: string, minLength: 2 }
+        category: { type: string }
+        subcategory: { type: ["string", "null"] }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        partType: { type: ["string", "null"] }
+        serviceType: { type: ["string", "null"] }
+        urgency: { type: string, enum: [normal, urgente] }
+        city: { type: ["string", "null"] }
+        lat: { type: ["number", "null"] }
+        lng: { type: ["number", "null"] }
+
+    CreateServiceProposal:
+      type: object
+      required: [companyId, message]
+      properties:
+        companyId: { type: integer }
+        price: { type: ["number", "null"] }
+        timeframe: { type: ["string", "null"] }
+        availability: { type: ["string", "null"] }
+        message: { type: string, minLength: 1 }
+
+    AcceptServiceProposal:
+      type: object
+      required: [customerId]
+      properties:
+        customerId: { type: integer }

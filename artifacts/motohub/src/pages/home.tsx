@@ -31,6 +31,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import motoImg from "@/assets/categories/moto.png";
+import capaceteImg from "@/assets/categories/capacete.png";
+import pneuImg from "@/assets/categories/pneu.png";
+import escapamentoImg from "@/assets/categories/escapamento.png";
+import eletricaImg from "@/assets/categories/eletrica.png";
+import oleoImg from "@/assets/categories/oleo.png";
+import oficinaImg from "@/assets/categories/oficina.png";
+import trocaImg from "@/assets/categories/troca.png";
 
 const CATEGORY_CARDS = [
   {
@@ -38,7 +46,7 @@ const CATEGORY_CARDS = [
     label: "Motos",
     sub: "Comprar e vender",
     href: "/motos",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=75",
+    img: motoImg,
     from: "#7f1d1d",
     to: "#dc2626",
   },
@@ -47,7 +55,7 @@ const CATEGORY_CARDS = [
     label: "Capacetes",
     sub: "Proteção e estilo",
     href: "/pecas?cat=capacete",
-    img: "https://images.unsplash.com/photo-1590767950092-42b8362368da?auto=format&fit=crop&w=600&q=75",
+    img: capaceteImg,
     from: "#78350f",
     to: "#ea580c",
   },
@@ -56,7 +64,7 @@ const CATEGORY_CARDS = [
     label: "Pneus",
     sub: "Todas as medidas",
     href: "/pecas?cat=pneu",
-    img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=600&q=75",
+    img: pneuImg,
     from: "#1c1917",
     to: "#44403c",
   },
@@ -65,7 +73,7 @@ const CATEGORY_CARDS = [
     label: "Escapamentos",
     sub: "Performance",
     href: "/pecas?cat=escapamento",
-    img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=75",
+    img: escapamentoImg,
     from: "#1e293b",
     to: "#475569",
   },
@@ -74,7 +82,7 @@ const CATEGORY_CARDS = [
     label: "Elétrica",
     sub: "Peças e kits",
     href: "/pecas?cat=eletrica",
-    img: "https://images.unsplash.com/photo-1609473997291-41c7b1cad2d5?auto=format&fit=crop&w=600&q=75",
+    img: eletricaImg,
     from: "#713f12",
     to: "#ca8a04",
   },
@@ -83,7 +91,7 @@ const CATEGORY_CARDS = [
     label: "Óleos e filtros",
     sub: "Manutenção",
     href: "/pecas?cat=oleo",
-    img: "https://images.unsplash.com/photo-1635351007767-4b9a9f5d9c99?auto=format&fit=crop&w=600&q=75",
+    img: oleoImg,
     from: "#14532d",
     to: "#16a34a",
   },
@@ -92,7 +100,7 @@ const CATEGORY_CARDS = [
     label: "Oficinas",
     sub: "Mecânicos parceiros",
     href: "/oficinas",
-    img: "https://images.unsplash.com/photo-1615906655593-ad0386982a0f?auto=format&fit=crop&w=600&q=75",
+    img: oficinaImg,
     from: "#1e3a5f",
     to: "#2563eb",
   },
@@ -101,7 +109,7 @@ const CATEGORY_CARDS = [
     label: "Troca de peças",
     sub: "Rápido e seguro",
     href: "/oficinas?cat=troca",
-    img: "https://images.unsplash.com/photo-1558618047-3c8c76ca0d8d?auto=format&fit=crop&w=600&q=75",
+    img: trocaImg,
     from: "#3b0764",
     to: "#7c3aed",
   },
