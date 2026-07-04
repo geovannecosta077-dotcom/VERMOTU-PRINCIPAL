@@ -375,11 +375,13 @@ function CompanyRequestsTab({ companyId }: { companyId: number }) {
   const createProposal = useCreateServiceProposal();
   const [forms, setForms] = useState<Record<number, { price: string; timeframe: string; availability: string; message: string }>>({});
 
-  const setField = (requestId: number, field: string, value: string) => {
-    setForms((prev) => ({
-      ...prev,
-      [requestId]: { price: "", timeframe: "", availability: "", message: "", ...prev[requestId], [field]: value },
-    }));
+  const emptyForm = { price: "", timeframe: "", availability: "", message: "" };
+
+  const setField = (requestId: number, field: keyof typeof emptyForm, value: string) => {
+    setForms((prev) => {
+      const current = prev[requestId] ?? emptyForm;
+      return { ...prev, [requestId]: { ...current, [field]: value } };
+    });
   };
 
   const submitProposal = (requestId: number) => {
