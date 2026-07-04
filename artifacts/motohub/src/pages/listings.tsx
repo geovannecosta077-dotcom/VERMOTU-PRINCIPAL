@@ -5,7 +5,8 @@ import { ItemCard } from "@/components/item-card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useListItems, type Item } from "@workspace/api-client-react";
+import { useListItems, useSmartSearch, type Item } from "@workspace/api-client-react";
+import { useSession, getAnonSessionId } from "@/lib/session";
 import { Search } from "lucide-react";
 
 interface Props {
@@ -19,7 +20,8 @@ export function Listings({ type, title, subtitle }: Props) {
   const initialQ = useMemo(() => new URLSearchParams(search).get("q") ?? "", [search]);
   const [q, setQ] = useState(initialQ);
   const [brand, setBrand] = useState<string>("all");
-  const [sort, setSort] = useState<string>("recent");
+  const [sort, setSort] = useState<string>("inteligente");
+  const currentUserId = useSession((s) => s.currentUserId);
 
   useEffect(() => {
     document.title = `${title} — MotoHub`;
@@ -33,6 +35,12 @@ export function Listings({ type, title, subtitle }: Props) {
     brand: brand !== "all" ? brand : undefined,
   });
 
+  // Smart-ranked order (relevance + quality + proximity) — the Vermotu ranking algorithm
+  const { data: smart, isLoading: smartLoading } = useSmartSearch(
+    { type, query: q || undefined, userId: currentUserId ?? undefined, sessionId: getAnonSessionId(), limit: 60 },
+    { query: { enabled: sort === "inteligente", queryKey: ["smart-search", type, q, currentUserId] as readonly unknown[] } },
+  );
+
   const brands = useMemo(() => {
     const all = new Set<string>();
     (data ?? []).forEach((i) => i.brand && all.add(i.brand));
@@ -40,12 +48,18 @@ export function Listings({ type, title, subtitle }: Props) {
   }, [data]);
 
   const items: Item[] = useMemo(() => {
+    if (sort === "inteligente") {
+      const brandFiltered = (smart?.results ?? []).filter((i) => brand === "all" || i.brand === brand);
+      return brandFiltered;
+    }
     const arr = [...(data ?? [])];
     if (sort === "price-asc") arr.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") arr.sort((a, b) => b.price - a.price);
     else arr.sort((a, b) => Number(b.premium) - Number(a.premium));
     return arr;
-  }, [data, sort]);
+  }, [data, smart, sort, brand]);
+
+  const loading = sort === "inteligente" ? smartLoading : isLoading;
 
   return (
     <Layout>
@@ -76,6 +90,7 @@ export function Listings({ type, title, subtitle }: Props) {
           <Select value={sort} onValueChange={setSort}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="inteligente">Recomendados</SelectItem>
               <SelectItem value="recent">Mais recentes</SelectItem>
               <SelectItem value="price-asc">Menor preço</SelectItem>
               <SelectItem value="price-desc">Maior preço</SelectItem>
@@ -83,7 +98,7 @@ export function Listings({ type, title, subtitle }: Props) {
           </Select>
         </div>
 
-        {isLoading ? (
+        {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="h-72 rounded-xl" />

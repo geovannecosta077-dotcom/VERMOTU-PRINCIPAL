@@ -11,6 +11,7 @@ import {
   useListReviews,
   useCreateReview,
   useCreateReport,
+  useTrackEvent,
   getListFavoritesQueryKey,
   getListConversationsQueryKey,
   getListAppointmentsQueryKey,
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Heart, MessageCircle, MapPin, Calendar, Gauge, Cog, ChevronLeft, ChevronRight, CalendarPlus, ShoppingCart, Star, ShieldCheck, Truck, Package, Flag, Check } from "lucide-react";
-import { useSession, useCart, formatBRL, formatDateBR, formatRelative, whatsappLink, imageUrl, parseImages } from "@/lib/session";
+import { useSession, useCart, formatBRL, formatDateBR, formatRelative, whatsappLink, imageUrl, parseImages, getAnonSessionId } from "@/lib/session";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,10 +69,21 @@ export function ItemDetail() {
   const createAppt = useCreateAppointment();
   const createRev = useCreateReview();
   const createReport = useCreateReport();
+  const trackEvent = useTrackEvent();
+
+  const track = (eventType: "view" | "click" | "favorite" | "unfavorite" | "share" | "contact", targetType: "item" | "company", targetId: number) =>
+    trackEvent.mutate({
+      data: { userId: currentUserId ?? null, sessionId: getAnonSessionId(), eventType, targetType, targetId },
+    });
 
   useEffect(() => {
     if (item) document.title = `${item.title} — MotoHub`;
   }, [item]);
+
+  useEffect(() => {
+    if (item) track("view", "item", item.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.id]);
 
   if (isLoading || !item) {
     return (
@@ -97,6 +109,7 @@ export function ItemDetail() {
         {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: getListFavoritesQueryKey({ userId: currentUserId! }) });
+            track(isFavorite ? "unfavorite" : "favorite", "item", item.id);
             toast.success(isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos");
           },
         },
@@ -114,6 +127,8 @@ export function ItemDetail() {
         {
           onSuccess: (conv) => {
             queryClient.invalidateQueries({ queryKey: getListConversationsQueryKey({ userId: currentUserId! }) });
+            track("contact", "item", item.id);
+            track("contact", "company", item.sellerId);
             setLocation(`/chat/${conv.id}`);
           },
         },
@@ -376,7 +391,13 @@ export function ItemDetail() {
                 </>
               )}
               {wa && (
-                <a href={wa} target="_blank" rel="noopener noreferrer" className="block">
+                <a
+                  href={wa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                  onClick={() => { track("contact", "item", item.id); track("contact", "company", item.sellerId); }}
+                >
                   <div className="rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-colors px-5 py-3.5 flex items-center justify-center gap-3 cursor-pointer shadow-lg shadow-emerald-900/30">
                     <SiWhatsapp className="w-5 h-5 text-white shrink-0" />
                     <div className="text-white">
@@ -396,6 +417,7 @@ export function ItemDetail() {
                   size="lg"
                   className="flex-1"
                   onClick={() => {
+                    track("share", "item", item.id);
                     navigator.share?.({ title: item.title, url: window.location.href })
                       .catch(() => { navigator.clipboard.writeText(window.location.href); });
                   }}

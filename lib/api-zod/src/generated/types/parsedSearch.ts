@@ -18,6 +18,8 @@ export interface ParsedSearch {
   /** @nullable */
   model?: string | null;
   /** @nullable */
+  year?: number | null;
+  /** @nullable */
   partType?: string | null;
   /** @nullable */
   serviceType?: string | null;

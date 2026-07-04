@@ -1,1 +1,2 @@
 - [api-server esbuild rebuild](api-server-esbuild-rebuild.md) — editing src after a build runs won't take effect until workflow restart; unlike Vite there's no hot rebuild.
+- [MotoHub user CPF field](motohub-user-cpf-endpoint.md) — CPF can't be set via generic PATCH /users/:id; use dedicated /users/:id/cpf endpoint with a checksum-valid CPF.

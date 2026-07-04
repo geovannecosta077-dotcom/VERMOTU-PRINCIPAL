@@ -13,6 +13,7 @@ import blogRouter from "./blog";
 import emailRouter from "./email";
 import bannersRouter from "./banners";
 import searchRouter from "./search";
+import rankingRouter from "./ranking";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(blogRouter);
 router.use(emailRouter);
 router.use(bannersRouter);
 router.use(searchRouter);
+router.use(rankingRouter);
 
 export default router;

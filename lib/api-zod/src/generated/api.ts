@@ -1419,6 +1419,7 @@ export const ParseSearchQueryResponse = zod.object({
   "subcategory": zod.string().nullish(),
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
+  "year": zod.number().nullish(),
   "partType": zod.string().nullish(),
   "serviceType": zod.string().nullish(),
   "urgency": zod.enum(['normal', 'urgente']),
@@ -1689,5 +1690,146 @@ export const AcceptServiceProposalResponse = zod.object({
   "contactName": zod.string().nullish()
 }))
 })
+
+
+/**
+ * @summary Log a learning signal (click, view, favorite, contact, search, purchase, etc.) used by the ranking algorithm
+ */
+export const TrackEventBody = zod.object({
+  "userId": zod.number().nullish(),
+  "sessionId": zod.string().nullish(),
+  "eventType": zod.enum(['view', 'click', 'search', 'favorite', 'unfavorite', 'share', 'contact', 'message', 'request_created', 'purchase', 'review']),
+  "targetType": zod.enum(['item', 'company', 'request']),
+  "targetId": zod.number().nullish(),
+  "query": zod.string().nullish(),
+  "metadata": zod.record(zod.string(), zod.unknown()).nullish()
+})
+
+export const TrackEventResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+/**
+ * @summary Natural-language search ranked by the Vermotu smart algorithm (relevance + quality + proximity)
+ */
+export const SmartSearchQueryParams = zod.object({
+  "query": zod.coerce.string().optional(),
+  "type": zod.coerce.string().optional(),
+  "category": zod.coerce.string().optional(),
+  "city": zod.coerce.string().optional(),
+  "state": zod.coerce.string().optional(),
+  "lat": zod.coerce.number().optional(),
+  "lng": zod.coerce.number().optional(),
+  "userId": zod.coerce.number().optional(),
+  "sessionId": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const SmartSearchResponse = zod.object({
+  "parsed": zod.union([zod.object({
+  "rawQuery": zod.string(),
+  "category": zod.enum(['moto', 'peca', 'servico', 'oficina', 'financiamento', 'seguro', 'guincho', 'concessionaria']),
+  "subcategory": zod.string().nullish(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "year": zod.number().nullish(),
+  "partType": zod.string().nullish(),
+  "serviceType": zod.string().nullish(),
+  "urgency": zod.enum(['normal', 'urgente']),
+  "confidence": zod.number(),
+  "suggestedText": zod.string()
+}),zod.null()]).optional(),
+  "results": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['moto', 'peca', 'servico']),
+  "category": zod.string(),
+  "title": zod.string(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "condition": zod.enum(['novo', 'usado']),
+  "price": zod.number(),
+  "year": zod.number().nullish(),
+  "mileage": zod.number().nullish(),
+  "engineSize": zod.number().nullish(),
+  "image": zod.string(),
+  "description": zod.string(),
+  "location": zod.string(),
+  "sellerId": zod.number(),
+  "status": zod.enum(['active', 'sold', 'pending']),
+  "createdAt": zod.string(),
+  "premium": zod.boolean(),
+  "stock": zod.number(),
+  "ratingAvg": zod.number(),
+  "ratingCount": zod.number(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "workingHours": zod.string().nullish(),
+  "color": zod.string().nullish(),
+  "fuelType": zod.string().nullish(),
+  "optionals": zod.string().nullish(),
+  "tradeInfo": zod.string().nullish(),
+  "extras": zod.string().nullish()
+}).and(zod.object({
+  "matchScore": zod.number(),
+  "scoreBreakdown": zod.record(zod.string(), zod.unknown()).optional()
+})))
+})
+
+
+/**
+ * @summary Personalized item recommendations based on the user's own click/search/favorite/purchase history
+ */
+export const GetRecommendationsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const GetRecommendationsResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['moto', 'peca', 'servico']),
+  "category": zod.string(),
+  "title": zod.string(),
+  "brand": zod.string().nullish(),
+  "model": zod.string().nullish(),
+  "condition": zod.enum(['novo', 'usado']),
+  "price": zod.number(),
+  "year": zod.number().nullish(),
+  "mileage": zod.number().nullish(),
+  "engineSize": zod.number().nullish(),
+  "image": zod.string(),
+  "description": zod.string(),
+  "location": zod.string(),
+  "sellerId": zod.number(),
+  "status": zod.enum(['active', 'sold', 'pending']),
+  "createdAt": zod.string(),
+  "premium": zod.boolean(),
+  "stock": zod.number(),
+  "ratingAvg": zod.number(),
+  "ratingCount": zod.number(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "workingHours": zod.string().nullish(),
+  "color": zod.string().nullish(),
+  "fuelType": zod.string().nullish(),
+  "optionals": zod.string().nullish(),
+  "tradeInfo": zod.string().nullish(),
+  "extras": zod.string().nullish()
+}).and(zod.object({
+  "matchScore": zod.number(),
+  "scoreBreakdown": zod.record(zod.string(), zod.unknown()).optional()
+}))
+export const GetRecommendationsResponse = zod.array(GetRecommendationsResponseItem)
+
+
+/**
+ * @summary Recompute the precomputed quality score for one item/company, or the whole catalog if omitted
+ */
+export const RecomputeRankingBody = zod.object({
+  "targetType": zod.union([zod.literal('item'),zod.literal('company'),zod.literal(null)]).nullish(),
+  "targetId": zod.number().nullish()
+})
+
+export const RecomputeRankingResponse = zod.record(zod.string(), zod.unknown())
 
 

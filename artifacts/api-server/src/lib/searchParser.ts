@@ -14,6 +14,7 @@ export interface ParsedSearchResult {
   subcategory: string | null;
   brand: string | null;
   model: string | null;
+  year: number | null;
   partType: string | null;
   serviceType: string | null;
   urgency: "normal" | "urgente";
@@ -104,9 +105,19 @@ export function parseNaturalQuery(query: string, city?: string | null): ParsedSe
   let subcategory: string | null = null;
   let brand: string | null = null;
   let model: string | null = null;
+  let year: number | null = null;
   let partType: string | null = null;
   let serviceType: string | null = null;
   let confidence = 0.4;
+
+  const yearMatch = q.match(/\b(19[5-9]\d|20[0-4]\d)\b/);
+  if (yearMatch) {
+    const y = Number(yearMatch[0]);
+    if (y >= 1950 && y <= new Date().getFullYear() + 1) {
+      year = y;
+      confidence += 0.1;
+    }
+  }
 
   for (const b of BRANDS) {
     if (includesWord(norm, b)) {
@@ -194,6 +205,7 @@ export function parseNaturalQuery(query: string, city?: string | null): ParsedSe
   const parts: string[] = [CATEGORY_LABELS[category]];
   if (brand) parts.push(brand);
   if (model) parts.push(model);
+  if (year) parts.push(String(year));
   if (partType) parts.push(partType.replace(/_/g, " "));
   if (serviceType) parts.push(serviceType.replace(/_/g, " "));
   if (city) parts.push(`em ${city}`);
@@ -205,6 +217,7 @@ export function parseNaturalQuery(query: string, city?: string | null): ParsedSe
     subcategory,
     brand,
     model,
+    year,
     partType,
     serviceType,
     urgency,

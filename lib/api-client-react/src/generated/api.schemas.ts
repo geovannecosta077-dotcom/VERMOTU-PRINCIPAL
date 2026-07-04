@@ -854,6 +854,8 @@ export interface ParsedSearch {
   /** @nullable */
   model?: string | null;
   /** @nullable */
+  year?: number | null;
+  /** @nullable */
   partType?: string | null;
   /** @nullable */
   serviceType?: string | null;
@@ -993,6 +995,82 @@ export interface AcceptServiceProposal {
   customerId: number;
 }
 
+export type TrackEventEventType = typeof TrackEventEventType[keyof typeof TrackEventEventType];
+
+
+export const TrackEventEventType = {
+  view: 'view',
+  click: 'click',
+  search: 'search',
+  favorite: 'favorite',
+  unfavorite: 'unfavorite',
+  share: 'share',
+  contact: 'contact',
+  message: 'message',
+  request_created: 'request_created',
+  purchase: 'purchase',
+  review: 'review',
+} as const;
+
+export type TrackEventTargetType = typeof TrackEventTargetType[keyof typeof TrackEventTargetType];
+
+
+export const TrackEventTargetType = {
+  item: 'item',
+  company: 'company',
+  request: 'request',
+} as const;
+
+/**
+ * @nullable
+ */
+export type TrackEventMetadata = { [key: string]: unknown } | null;
+
+export interface TrackEvent {
+  /** @nullable */
+  userId?: number | null;
+  /** @nullable */
+  sessionId?: string | null;
+  eventType: TrackEventEventType;
+  targetType: TrackEventTargetType;
+  /** @nullable */
+  targetId?: number | null;
+  /** @nullable */
+  query?: string | null;
+  /** @nullable */
+  metadata?: TrackEventMetadata;
+}
+
+export type RankedItemScoreBreakdown = { [key: string]: unknown };
+
+export type RankedItem = Item & {
+  matchScore: number;
+  scoreBreakdown?: RankedItemScoreBreakdown;
+};
+
+export interface SmartSearchResults {
+  parsed?: ParsedSearch | null;
+  results: RankedItem[];
+}
+
+/**
+ * @nullable
+ */
+export type RecomputeRankingTargetType = typeof RecomputeRankingTargetType[keyof typeof RecomputeRankingTargetType] | null;
+
+
+export const RecomputeRankingTargetType = {
+  item: 'item',
+  company: 'company',
+} as const;
+
+export interface RecomputeRanking {
+  /** @nullable */
+  targetType?: RecomputeRankingTargetType;
+  /** @nullable */
+  targetId?: number | null;
+}
+
 export type ListItemsParams = {
 type?: ListItemsType;
 q?: string;
@@ -1056,4 +1134,28 @@ customerId: number;
 export type ListIncomingServiceRequestsParams = {
 companyId: number;
 };
+
+export type TrackEvent201 = {
+  ok: boolean;
+};
+
+export type SmartSearchParams = {
+query?: string;
+type?: string;
+category?: string;
+city?: string;
+state?: string;
+lat?: number;
+lng?: number;
+userId?: number;
+sessionId?: string;
+limit?: number;
+};
+
+export type GetRecommendationsParams = {
+userId?: number;
+limit?: number;
+};
+
+export type RecomputeRanking200 = { [key: string]: unknown };
 

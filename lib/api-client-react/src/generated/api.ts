@@ -48,6 +48,7 @@ import type {
   CreateSubscription,
   EmailCampaign,
   ErrorEnvelope,
+  GetRecommendationsParams,
   HealthStatus,
   Item,
   ListAppointmentsParams,
@@ -65,6 +66,9 @@ import type {
   Order,
   ParseSearchInput,
   ParsedSearch,
+  RankedItem,
+  RecomputeRanking,
+  RecomputeRanking200,
   Report,
   Review,
   SendMessageInput,
@@ -73,9 +77,13 @@ import type {
   ServiceRequestWithProposals,
   SetCpfRequest,
   SignInRequest,
+  SmartSearchParams,
+  SmartSearchResults,
   Subscription,
   ToggleFavoriteInput,
   ToggleFavoriteResult,
+  TrackEvent,
+  TrackEvent201,
   UpdateBanner,
   UpdateBlogPost,
   UpdateItem,
@@ -4730,5 +4738,313 @@ export const useAcceptServiceProposal = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getAcceptServiceProposalMutationOptions(options));
+    }
+
+export const getTrackEventUrl = () => {
+
+
+
+
+  return `/api/events`
+}
+
+/**
+ * @summary Log a learning signal (click, view, favorite, contact, search, purchase, etc.) used by the ranking algorithm
+ */
+export const trackEvent = async (trackEvent: TrackEvent, options?: RequestInit): Promise<TrackEvent201> => {
+
+  return customFetch<TrackEvent201>(getTrackEventUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(trackEvent)
+  }
+);}
+
+
+
+
+export const getTrackEventMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof trackEvent>>, TError,{data: BodyType<TrackEvent>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof trackEvent>>, TError,{data: BodyType<TrackEvent>}, TContext> => {
+
+const mutationKey = ['trackEvent'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof trackEvent>>, {data: BodyType<TrackEvent>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  trackEvent(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TrackEventMutationResult = NonNullable<Awaited<ReturnType<typeof trackEvent>>>
+    export type TrackEventMutationBody = BodyType<TrackEvent>
+    export type TrackEventMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Log a learning signal (click, view, favorite, contact, search, purchase, etc.) used by the ranking algorithm
+ */
+export const useTrackEvent = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof trackEvent>>, TError,{data: BodyType<TrackEvent>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof trackEvent>>,
+        TError,
+        {data: BodyType<TrackEvent>},
+        TContext
+      > => {
+      return useMutation(getTrackEventMutationOptions(options));
+    }
+
+export const getSmartSearchUrl = (params?: SmartSearchParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/search/results?${stringifiedParams}` : `/api/search/results`
+}
+
+/**
+ * @summary Natural-language search ranked by the Vermotu smart algorithm (relevance + quality + proximity)
+ */
+export const smartSearch = async (params?: SmartSearchParams, options?: RequestInit): Promise<SmartSearchResults> => {
+
+  return customFetch<SmartSearchResults>(getSmartSearchUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSmartSearchQueryKey = (params?: SmartSearchParams,) => {
+    return [
+    `/api/search/results`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSmartSearchQueryOptions = <TData = Awaited<ReturnType<typeof smartSearch>>, TError = ErrorType<unknown>>(params?: SmartSearchParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof smartSearch>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSmartSearchQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof smartSearch>>> = ({ signal }) => smartSearch(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof smartSearch>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SmartSearchQueryResult = NonNullable<Awaited<ReturnType<typeof smartSearch>>>
+export type SmartSearchQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Natural-language search ranked by the Vermotu smart algorithm (relevance + quality + proximity)
+ */
+
+export function useSmartSearch<TData = Awaited<ReturnType<typeof smartSearch>>, TError = ErrorType<unknown>>(
+ params?: SmartSearchParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof smartSearch>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSmartSearchQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetRecommendationsUrl = (params?: GetRecommendationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/recommendations?${stringifiedParams}` : `/api/recommendations`
+}
+
+/**
+ * @summary Personalized item recommendations based on the user's own click/search/favorite/purchase history
+ */
+export const getRecommendations = async (params?: GetRecommendationsParams, options?: RequestInit): Promise<RankedItem[]> => {
+
+  return customFetch<RankedItem[]>(getGetRecommendationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRecommendationsQueryKey = (params?: GetRecommendationsParams,) => {
+    return [
+    `/api/recommendations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRecommendationsQueryOptions = <TData = Awaited<ReturnType<typeof getRecommendations>>, TError = ErrorType<unknown>>(params?: GetRecommendationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecommendations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecommendationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecommendations>>> = ({ signal }) => getRecommendations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecommendations>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRecommendationsQueryResult = NonNullable<Awaited<ReturnType<typeof getRecommendations>>>
+export type GetRecommendationsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Personalized item recommendations based on the user's own click/search/favorite/purchase history
+ */
+
+export function useGetRecommendations<TData = Awaited<ReturnType<typeof getRecommendations>>, TError = ErrorType<unknown>>(
+ params?: GetRecommendationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecommendations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRecommendationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRecomputeRankingUrl = () => {
+
+
+
+
+  return `/api/ranking/recompute`
+}
+
+/**
+ * @summary Recompute the precomputed quality score for one item/company, or the whole catalog if omitted
+ */
+export const recomputeRanking = async (recomputeRanking?: RecomputeRanking, options?: RequestInit): Promise<RecomputeRanking200> => {
+
+  return customFetch<RecomputeRanking200>(getRecomputeRankingUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(recomputeRanking)
+  }
+);}
+
+
+
+
+export const getRecomputeRankingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recomputeRanking>>, TError,{data?: BodyType<RecomputeRanking>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recomputeRanking>>, TError,{data?: BodyType<RecomputeRanking>}, TContext> => {
+
+const mutationKey = ['recomputeRanking'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recomputeRanking>>, {data?: BodyType<RecomputeRanking>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  recomputeRanking(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecomputeRankingMutationResult = NonNullable<Awaited<ReturnType<typeof recomputeRanking>>>
+    export type RecomputeRankingMutationBody = BodyType<RecomputeRanking> | undefined
+    export type RecomputeRankingMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Recompute the precomputed quality score for one item/company, or the whole catalog if omitted
+ */
+export const useRecomputeRanking = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recomputeRanking>>, TError,{data?: BodyType<RecomputeRanking>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recomputeRanking>>,
+        TError,
+        {data?: BodyType<RecomputeRanking>},
+        TContext
+      > => {
+      return useMutation(getRecomputeRankingMutationOptions(options));
     }
 

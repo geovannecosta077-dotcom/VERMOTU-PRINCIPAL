@@ -19,6 +19,7 @@ import {
   AcceptServiceProposalBody,
 } from "@workspace/api-zod";
 import { parseNaturalQuery } from "../lib/searchParser.js";
+import { logEvent, recomputeCompanyScore, computeProximityScore } from "../lib/ranking.js";
 
 const router: IRouter = Router();
 
@@ -94,6 +95,14 @@ router.post("/requests", async (req, res): Promise<void> => {
       lng: b.data.lng ?? null,
     })
     .returning();
+  await logEvent({
+    userId: b.data.customerId,
+    eventType: "request_created",
+    targetType: "request",
+    targetId: row!.id,
+    query: b.data.rawQuery,
+    metadata: { category: b.data.category },
+  });
   res.status(201).json(serializeRequest(row!));
 });
 
@@ -126,11 +135,17 @@ router.get("/requests/incoming", async (req, res): Promise<void> => {
     .from(serviceRequestsTable)
     .where(eq(serviceRequestsTable.status, "aberta"))
     .orderBy(desc(serviceRequestsTable.createdAt));
-  const sorted = company?.city
+  // Closest requests first (GPS-first, falls back to city/state) — urgent requests are nudged ahead too
+  const companyOrigin = company
+    ? { lat: company.lat, lng: company.lng, city: company.city, state: company.state }
+    : null;
+  const sorted = companyOrigin
     ? [...rows].sort((a, b) => {
-        const aMatch = a.city && a.city.toLowerCase() === company.city.toLowerCase() ? 0 : 1;
-        const bMatch = b.city && b.city.toLowerCase() === company.city.toLowerCase() ? 0 : 1;
-        return aMatch - bMatch;
+        const aProx = computeProximityScore(companyOrigin, { lat: a.lat, lng: a.lng, city: a.city, state: null });
+        const bProx = computeProximityScore(companyOrigin, { lat: b.lat, lng: b.lng, city: b.city, state: null });
+        const aScore = aProx.score + (a.urgency === "urgente" ? 0.1 : 0);
+        const bScore = bProx.score + (b.urgency === "urgente" ? 0.1 : 0);
+        return bScore - aScore;
       })
     : rows;
   const result = await Promise.all(sorted.map((r) => buildRequestWithProposals(r)));
@@ -183,6 +198,8 @@ router.post("/requests/:id/proposals", async (req, res): Promise<void> => {
       message: b.data.message,
     })
     .returning();
+  await logEvent({ userId: b.data.companyId, eventType: "message", targetType: "request", targetId: request.id, metadata: { proposalId: row!.id } });
+  await recomputeCompanyScore(b.data.companyId);
   const [serialized] = await serializeProposals([row!]);
   res.status(201).json(serialized);
 });
@@ -247,6 +264,9 @@ router.patch("/proposals/:id/accept", async (req, res): Promise<void> => {
   if (!existingConv) {
     await db.insert(conversationsTable).values({ buyerId: request.customerId, sellerId: proposal.companyId, itemId: 0 });
   }
+
+  await logEvent({ userId: b.data.customerId, eventType: "contact", targetType: "company", targetId: proposal.companyId, metadata: { requestId: request.id } });
+  await recomputeCompanyScore(proposal.companyId);
 
   res.json(await buildRequestWithProposals(updatedRequest!));
 });

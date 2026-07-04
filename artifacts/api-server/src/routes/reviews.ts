@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, desc, sql } from "drizzle-orm";
 import { db, reviewsTable, usersTable, itemsTable } from "@workspace/db";
 import { ListReviewsQueryParams, CreateReviewBody } from "@workspace/api-zod";
+import { logEvent, recomputeItemScore, recomputeCompanyScore } from "../lib/ranking.js";
 
 const router: IRouter = Router();
 
@@ -57,6 +58,10 @@ router.post("/reviews", async (req, res): Promise<void> => {
     .set({ ratingAvg: Number(agg.avg), ratingCount: Number(agg.count) })
     .where(eq(itemsTable.id, b.data.itemId));
   const [u] = await db.select().from(usersTable).where(eq(usersTable.id, row.userId));
+  await logEvent({ userId: row.userId, eventType: "review", targetType: "item", targetId: b.data.itemId, metadata: { rating } });
+  await recomputeItemScore(b.data.itemId);
+  const [item] = await db.select().from(itemsTable).where(eq(itemsTable.id, b.data.itemId));
+  if (item) await recomputeCompanyScore(item.sellerId);
   res.status(201).json({ ...row, userName: u?.name ?? "Anônimo", createdAt: row.createdAt.toISOString() });
 });
 

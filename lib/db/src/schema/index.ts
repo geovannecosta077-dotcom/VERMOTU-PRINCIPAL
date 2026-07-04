@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, doublePrecision, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, doublePrecision, boolean, timestamp, primaryKey, unique } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -22,6 +22,11 @@ export const usersTable = pgTable("users", {
   storeName: text("store_name").notNull().default(""),
   bio: text("bio").notNull().default(""),
   city: text("city").notNull().default(""),
+  state: text("state").notNull().default(""),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
+  businessHoursOpen: text("business_hours_open"),
+  businessHoursClose: text("business_hours_close"),
   loginAttempts: integer("login_attempts").notNull().default(0),
   lockedUntil: timestamp("locked_until", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -50,6 +55,9 @@ export const itemsTable = pgTable("items", {
   image: text("image").notNull(),
   description: text("description").notNull(),
   location: text("location").notNull(),
+  state: text("state").notNull().default(""),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
   sellerId: integer("seller_id").notNull(),
   status: text("status").notNull().default("active"),
   premium: boolean("premium").notNull().default(false),
@@ -228,6 +236,59 @@ export const serviceProposalsTable = pgTable("service_proposals", {
   availability: text("availability"),
   message: text("message").notNull().default(""),
   status: text("status").notNull().default("pendente"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Learning signal log for the Vermotu smart-ranking algorithm.
+ * Every click, view, favorite, search, contact, request, purchase and review
+ * is recorded here so the ranking engine can keep improving recommendations
+ * over time without needing a separate ML pipeline up front.
+ */
+export const eventsTable = pgTable("events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  sessionId: text("session_id"),
+  eventType: text("event_type").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: integer("target_id"),
+  query: text("query"),
+  metadata: text("metadata"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Precomputed composite ranking score per item/company, so that search and
+ * matching endpoints don't have to recompute the full quality score on every
+ * request. Recomputed incrementally whenever a relevant signal changes
+ * (review, order, proposal response, etc.) and periodically in bulk.
+ */
+export const rankingScoresTable = pgTable("ranking_scores", {
+  id: serial("id").primaryKey(),
+  targetType: text("target_type").notNull(),
+  targetId: integer("target_id").notNull(),
+  score: doublePrecision("score").notNull().default(0),
+  breakdown: text("breakdown").notNull().default("{}"),
+  computedAt: timestamp("computed_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ uniq: unique().on(t.targetType, t.targetId) }));
+
+/**
+ * Raw search history (natural-language queries + parsed intent), used both
+ * as an audit trail and as training/personalization signal for recommendations.
+ */
+export const searchHistoryTable = pgTable("search_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  sessionId: text("session_id"),
+  rawQuery: text("raw_query").notNull(),
+  category: text("category"),
+  brand: text("brand"),
+  model: text("model"),
+  year: integer("year"),
+  city: text("city"),
+  state: text("state"),
+  urgency: text("urgency"),
+  resultsCount: integer("results_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

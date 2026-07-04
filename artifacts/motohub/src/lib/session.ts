@@ -33,6 +33,19 @@ export const useSession = create<SessionState>()(
   ),
 );
 
+// Anonymous client id used to attribute click/search/favorite signals to the same
+// visitor across requests when there is no logged-in user, feeding the ranking algorithm.
+export function getAnonSessionId(): string {
+  if (typeof window === "undefined") return "server";
+  const KEY = "motohub-anon-session";
+  let id = window.localStorage.getItem(KEY);
+  if (!id) {
+    id = `anon_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+    window.localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+
 export interface CartLine {
   itemId: number;
   title: string;

@@ -14,6 +14,7 @@ import {
   UpdateOrderStatusParams,
   UpdateOrderStatusBody,
 } from "@workspace/api-zod";
+import { recomputeItemScore, recomputeCompanyScore, logEvent } from "../lib/ranking.js";
 
 const router: IRouter = Router();
 
@@ -112,6 +113,12 @@ router.post("/orders", async (req, res): Promise<void> => {
   for (const r of orderItemRows) {
     await db.update(itemsTable).set({ stock: sql`GREATEST(${itemsTable.stock} - ${r.qty}, 0)` }).where(eq(itemsTable.id, r.itemId));
   }
+  await logEvent({ userId: b.data.buyerId, eventType: "purchase", targetType: "company", targetId: sellerId, metadata: { orderId: order.id } });
+  for (const r of orderItemRows) {
+    await logEvent({ userId: b.data.buyerId, eventType: "purchase", targetType: "item", targetId: r.itemId, metadata: { orderId: order.id } });
+    await recomputeItemScore(r.itemId);
+  }
+  await recomputeCompanyScore(sellerId);
   const full = await expand(order.id);
   res.status(201).json(full);
 });
@@ -147,6 +154,7 @@ router.patch("/orders/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Pedido não encontrado" });
     return;
   }
+  await recomputeCompanyScore(o.sellerId);
   res.json(o);
 });
 

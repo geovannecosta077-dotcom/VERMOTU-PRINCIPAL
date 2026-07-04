@@ -1213,6 +1213,127 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
+  /events:
+    post:
+      operationId: trackEvent
+      tags: [search]
+      summary: Log a learning signal (click, view, favorite, contact, search, purchase, etc.) used by the ranking algorithm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TrackEvent" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean }
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /search/results:
+    get:
+      operationId: smartSearch
+      tags: [search]
+      summary: Natural-language search ranked by the Vermotu smart algorithm (relevance + quality + proximity)
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema: { type: string }
+        - name: type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+        - name: city
+          in: query
+          required: false
+          schema: { type: string }
+        - name: state
+          in: query
+          required: false
+          schema: { type: string }
+        - name: lat
+          in: query
+          required: false
+          schema: { type: number }
+        - name: lng
+          in: query
+          required: false
+          schema: { type: number }
+        - name: userId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: sessionId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmartSearchResults" }
+
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [search]
+      summary: Personalized item recommendations based on the user's own click/search/favorite/purchase history
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RankedItem" }
+
+  /ranking/recompute:
+    post:
+      operationId: recomputeRanking
+      tags: [search]
+      summary: Recompute the precomputed quality score for one item/company, or the whole catalog if omitted
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecomputeRanking" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
 components:
   schemas:
     UploadUrlRequest:
@@ -1877,6 +1998,7 @@ components:
         subcategory: { type: ["string", "null"] }
         brand: { type: ["string", "null"] }
         model: { type: ["string", "null"] }
+        year: { type: ["integer", "null"] }
         partType: { type: ["string", "null"] }
         serviceType: { type: ["string", "null"] }
         urgency: { type: string, enum: [normal, urgente] }
@@ -1964,3 +2086,44 @@ components:
       required: [customerId]
       properties:
         customerId: { type: integer }
+
+    TrackEvent:
+      type: object
+      required: [eventType, targetType]
+      properties:
+        userId: { type: ["integer", "null"] }
+        sessionId: { type: ["string", "null"] }
+        eventType:
+          type: string
+          enum: [view, click, search, favorite, unfavorite, share, contact, message, request_created, purchase, review]
+        targetType: { type: string, enum: [item, company, request] }
+        targetId: { type: ["integer", "null"] }
+        query: { type: ["string", "null"] }
+        metadata: { type: ["object", "null"], additionalProperties: true }
+
+    RankedItem:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          required: [matchScore]
+          properties:
+            matchScore: { type: number }
+            scoreBreakdown: { type: object, additionalProperties: true }
+
+    SmartSearchResults:
+      type: object
+      required: [results]
+      properties:
+        parsed:
+          anyOf:
+            - $ref: "#/components/schemas/ParsedSearch"
+            - type: "null"
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/RankedItem" }
+
+    RecomputeRanking:
+      type: object
+      properties:
+        targetType: { type: ["string", "null"], enum: [item, company, null] }
+        targetId: { type: ["integer", "null"] }
