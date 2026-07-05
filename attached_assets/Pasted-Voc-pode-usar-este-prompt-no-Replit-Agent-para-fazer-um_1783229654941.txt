@@ -1,0 +1,292 @@
+Você pode usar este prompt no Replit Agent para fazer uma revisão completa do projeto antes do lançamento:
+
+
+---
+
+PROMPT
+
+Estamos em fase final de lançamento da plataforma Vermotu. Quero que você faça uma revisão completa do projeto e entregue uma versão pronta para produção (production-ready), corrigindo qualquer problema encontrado.
+
+Objetivos
+
+Corrigir todos os bugs existentes.
+
+Eliminar erros de compilação, TypeScript, ESLint e runtime.
+
+Corrigir problemas de responsividade em celular, tablet e desktop.
+
+Melhorar o desempenho geral.
+
+Otimizar SEO.
+
+Melhorar acessibilidade.
+
+Garantir carregamento rápido.
+
+Remover código morto, duplicado e arquivos sem uso.
+
+Melhorar segurança da aplicação.
+
+Garantir que todas as páginas funcionem corretamente.
+
+Garantir que todas as APIs respondam corretamente.
+
+Corrigir qualquer link quebrado.
+
+Corrigir qualquer erro de navegação.
+
+
+Página inicial
+
+Quero uma Home extremamente profissional.
+
+Verifique:
+
+Banner principal.
+
+Barra de pesquisa.
+
+Busca inteligente funcionando.
+
+Categorias.
+
+Destaques.
+
+Empresas.
+
+Blog.
+
+Botões.
+
+Rodapé.
+
+Menu.
+
+Logo.
+
+Login.
+
+Cadastro.
+
+Responsividade.
+
+
+Sistema de busca
+
+A busca inteligente deve estar 100% funcional.
+
+Ela deve considerar:
+
+Nome da peça.
+
+Marca.
+
+Modelo.
+
+Ano.
+
+Categoria.
+
+Empresa.
+
+Cidade.
+
+Estado.
+
+Sinônimos.
+
+Correção automática de palavras digitadas incorretamente.
+
+Ordenação inteligente por relevância.
+
+
+Marketplace
+
+Verifique:
+
+Cadastro de empresas.
+
+Cadastro de peças.
+
+Cadastro de motos.
+
+Favoritos.
+
+Compartilhamento.
+
+Contato via WhatsApp.
+
+Solicitação de peças.
+
+Painel da empresa.
+
+Painel administrativo.
+
+
+Empresas
+
+Cada empresa deve possuir:
+
+Perfil completo.
+
+Logo.
+
+Endereço.
+
+Mapa.
+
+WhatsApp.
+
+Redes sociais.
+
+Avaliações.
+
+Produtos.
+
+Horário de funcionamento.
+
+
+Blog
+
+Corrigir totalmente.
+
+Quero imagens reais dos artigos.
+
+Não quero emojis como capa.
+
+Adicionar:
+
+Categorias.
+
+Busca.
+
+Compartilhamento.
+
+SEO.
+
+Leitura agradável.
+
+
+Design
+
+Melhorar completamente.
+
+Quero aparência de plataforma grande, semelhante a Webmotors, Mercado Livre e Uber.
+
+Melhorar:
+
+Espaçamentos.
+
+Tipografia.
+
+Ícones.
+
+Cores.
+
+Botões.
+
+Cards.
+
+Sombras.
+
+Animações suaves.
+
+Skeleton loading.
+
+Estados de carregamento.
+
+
+Performance
+
+Otimizar:
+
+Lazy Loading.
+
+Compressão de imagens.
+
+Cache.
+
+Code Splitting.
+
+Tree Shaking.
+
+Minificação.
+
+Lighthouse acima de 95.
+
+
+SEO
+
+Implementar:
+
+Meta Tags.
+
+Open Graph.
+
+Sitemap.
+
+robots.txt.
+
+Schema.org.
+
+URLs amigáveis.
+
+Canonical.
+
+Favicons.
+
+
+Segurança
+
+Verificar:
+
+Validação dos formulários.
+
+Sanitização.
+
+Rate Limit.
+
+Proteção contra XSS.
+
+Proteção contra SQL Injection.
+
+Tratamento de erros.
+
+Logs.
+
+
+Banco de dados
+
+Revisar completamente.
+
+Garantir integridade.
+
+Eliminar consultas desnecessárias.
+
+Otimizar índices.
+
+Testes
+
+Executar testes completos.
+
+Corrigir qualquer erro encontrado.
+
+Não finalizar enquanto existir algum erro.
+
+Deploy
+
+Preparar para produção.
+
+Verificar variáveis de ambiente.
+
+Verificar build.
+
+Verificar Vercel.
+
+Verificar domínio.
+
+Verificar SSL.
+
+Resultado esperado
+
+Quero uma plataforma pronta para lançamento, totalmente funcional, moderna, rápida, segura e profissional, sem erros de build, sem erros de console e sem funcionalidades incompletas. Ao terminar, gere um relatório detalhado com tudo o que foi corrigido, otimizado e implementado, além de listar quaisquer pendências que dependam de APIs, serviços externos ou decisões de negócio. Não deixe nenhuma funcionalidade pela metade.
