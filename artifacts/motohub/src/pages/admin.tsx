@@ -433,60 +433,88 @@ export function Admin() {
     { id: "settings", label: "Configurações", icon: Settings },
   ];
 
-  return (
-    <div className="dark min-h-screen bg-background flex">
-      <aside className="w-60 shrink-0 border-r border-border bg-card/40 flex flex-col">
-        <div className="p-5 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <div className="font-bold text-sm leading-none">Vermotu</div>
-              <div className="text-xs text-muted-foreground">Admin Panel</div>
-            </div>
+  const AdminNav = ({ onSelect }: { onSelect?: () => void }) => (
+    <>
+      <div className="p-4 md:p-5 border-b border-border">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <Shield className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="font-bold text-sm leading-none">Vermotu</div>
+            <div className="text-xs text-muted-foreground">Admin Panel</div>
           </div>
         </div>
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          {navItems.map(({ id, label, icon: Icon, badge }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                activeTab === id
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span className="flex-1 text-left">{label}</span>
-              {badge != null && badge > 0 && (
-                <Badge className="h-5 px-1.5 text-[10px] bg-destructive text-white">{badge}</Badge>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-border space-y-1">
+      </div>
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        {navItems.map(({ id, label, icon: Icon, badge }) => (
           <button
-            onClick={() => setLocation("/")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            key={id}
+            onClick={() => { setActiveTab(id); onSelect?.(); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              activeTab === id
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
-            <Activity className="w-4 h-4" />
-            Ver site
-            <ChevronRight className="w-3 h-3 ml-auto" />
+            <Icon className="w-4 h-4 shrink-0" />
+            <span className="flex-1 text-left">{label}</span>
+            {badge != null && badge > 0 && (
+              <Badge className="h-5 px-1.5 text-[10px] bg-destructive text-white">{badge}</Badge>
+            )}
           </button>
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair
-          </button>
-        </div>
+        ))}
+      </nav>
+      <div className="p-3 border-t border-border space-y-1">
+        <button
+          onClick={() => setLocation("/")}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+        >
+          <Activity className="w-4 h-4" />
+          Ver site
+          <ChevronRight className="w-3 h-3 ml-auto" />
+        </button>
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Sair
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="dark min-h-screen bg-background flex flex-col md:flex-row">
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-60 shrink-0 border-r border-border bg-card/40 flex-col min-h-screen">
+        <AdminNav />
       </aside>
 
+      {/* Mobile top bar */}
+      <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card/40 shrink-0">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0 flex flex-col bg-card">
+            <AdminNav onSelect={() => {}} />
+          </SheetContent>
+        </Sheet>
+        <div className="flex items-center gap-2 flex-1">
+          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center shrink-0">
+            <Shield className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="font-bold text-sm">Vermotu Admin</span>
+        </div>
+        <Badge variant="outline" className="text-xs capitalize">{activeTab}</Badge>
+      </div>
+
       <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-7xl">
+        <div className="p-4 md:p-6 max-w-7xl">
 
           {/* ─── DASHBOARD ─── */}
           {activeTab === "dashboard" && (
@@ -576,14 +604,15 @@ export function Admin() {
           {activeTab === "items" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Anúncios</h1>
+                <h1 className="text-xl md:text-2xl font-bold">Anúncios</h1>
                 <Badge variant="outline">{filteredItems.length} total</Badge>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input className="pl-9" placeholder="Buscar por título ou marca..." value={itemSearch} onChange={(e) => setItemSearch(e.target.value)} />
               </div>
-              <Card>
+              {/* Desktop table */}
+              <Card className="hidden md:block">
                 <CardContent className="p-0 overflow-auto">
                   <Table>
                     <TableHeader>
@@ -607,9 +636,7 @@ export function Admin() {
                             <div className="line-clamp-1">{i.title}</div>
                             {i.brand && <div className="text-xs text-muted-foreground">{i.brand}</div>}
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize text-xs">{i.type}</Badge>
-                          </TableCell>
+                          <TableCell><Badge variant="outline" className="capitalize text-xs">{i.type}</Badge></TableCell>
                           <TableCell className="font-mono text-sm">{formatBRL(i.price)}</TableCell>
                           <TableCell>
                             <Badge variant={i.status === "active" ? "default" : i.status === "pending" ? "secondary" : "outline"} className="capitalize text-xs">{i.status}</Badge>
@@ -619,35 +646,48 @@ export function Admin() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              {i.status !== "active" && (
-                                <Button size="sm" variant="outline" onClick={() => setItemStatus(i.id, "active")} title="Aprovar">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                </Button>
-                              )}
-                              {i.status !== "pending" && (
-                                <Button size="sm" variant="outline" onClick={() => setItemStatus(i.id, "pending")} title="Suspender">
-                                  <XCircle className="w-3.5 h-3.5" />
-                                </Button>
-                              )}
-                              <Button size="sm" variant={i.premium ? "secondary" : "outline"} onClick={() => featureItem(i.id, !i.premium)} title={i.premium ? "Remover destaque" : "Destacar"}>
-                                <Star className={`w-3.5 h-3.5 ${i.premium ? "fill-current" : ""}`} />
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => removeItem(i.id)} title="Excluir">
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              {i.status !== "active" && <Button size="sm" variant="outline" onClick={() => setItemStatus(i.id, "active")} title="Aprovar"><CheckCircle2 className="w-3.5 h-3.5" /></Button>}
+                              {i.status !== "pending" && <Button size="sm" variant="outline" onClick={() => setItemStatus(i.id, "pending")} title="Suspender"><XCircle className="w-3.5 h-3.5" /></Button>}
+                              <Button size="sm" variant={i.premium ? "secondary" : "outline"} onClick={() => featureItem(i.id, !i.premium)} title={i.premium ? "Remover destaque" : "Destacar"}><Star className={`w-3.5 h-3.5 ${i.premium ? "fill-current" : ""}`} /></Button>
+                              <Button size="sm" variant="destructive" onClick={() => removeItem(i.id)} title="Excluir"><Trash2 className="w-3.5 h-3.5" /></Button>
                             </div>
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredItems.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center text-muted-foreground py-10">Nenhum anúncio encontrado</TableCell>
-                        </TableRow>
-                      )}
+                      {filteredItems.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">Nenhum anúncio encontrado</TableCell></TableRow>}
                     </TableBody>
                   </Table>
                 </CardContent>
               </Card>
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {filteredItems.length === 0 && <p className="text-center text-muted-foreground py-10 text-sm">Nenhum anúncio encontrado</p>}
+                {filteredItems.map((i) => (
+                  <Card key={i.id}>
+                    <CardContent className="p-4">
+                      <div className="flex gap-3">
+                        <img src={imageUrl(i.image)} alt="" className="w-14 h-14 rounded-lg object-cover bg-muted shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm line-clamp-1">{i.title}</div>
+                          {i.brand && <div className="text-xs text-muted-foreground">{i.brand}</div>}
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            <Badge variant="outline" className="capitalize text-xs">{i.type}</Badge>
+                            <Badge variant={i.status === "active" ? "default" : i.status === "pending" ? "secondary" : "outline"} className="capitalize text-xs">{i.status}</Badge>
+                            {i.premium && <Badge className="text-xs bg-amber-500 hover:bg-amber-500">Destaque</Badge>}
+                          </div>
+                          <div className="font-mono text-sm font-semibold mt-1">{formatBRL(i.price)}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-3 pt-3 border-t border-border/60">
+                        {i.status !== "active" && <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => setItemStatus(i.id, "active")}><CheckCircle2 className="w-3.5 h-3.5" />Aprovar</Button>}
+                        {i.status !== "pending" && <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => setItemStatus(i.id, "pending")}><XCircle className="w-3.5 h-3.5" />Suspender</Button>}
+                        <Button size="sm" variant={i.premium ? "secondary" : "outline"} className="gap-1.5 text-xs" onClick={() => featureItem(i.id, !i.premium)}><Star className={`w-3.5 h-3.5 ${i.premium ? "fill-current" : ""}`} /></Button>
+                        <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={() => removeItem(i.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
 
@@ -662,7 +702,8 @@ export function Admin() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input className="pl-9" placeholder="Buscar por nome ou e-mail..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
               </div>
-              <Card>
+              {/* Desktop table */}
+              <Card className="hidden md:block">
                 <CardContent className="p-0 overflow-auto">
                   <Table>
                     <TableHeader>
@@ -688,12 +729,8 @@ export function Admin() {
                             <div className="text-xs text-muted-foreground">{u.email}</div>
                           </TableCell>
                           <TableCell className="text-sm">{u.phone ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                          <TableCell>
-                            {u.cpf ? <BadgeCheck className="w-4 h-4 text-emerald-500" /> : <span className="text-muted-foreground text-xs">—</span>}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize text-xs">{u.plan}</Badge>
-                          </TableCell>
+                          <TableCell>{u.cpf ? <BadgeCheck className="w-4 h-4 text-emerald-500" /> : <span className="text-muted-foreground text-xs">—</span>}</TableCell>
+                          <TableCell><Badge variant="outline" className="capitalize text-xs">{u.plan}</Badge></TableCell>
                           <TableCell>
                             {u.banned ? <Badge variant="destructive" className="text-xs">Suspenso</Badge> :
                               u.isAdmin ? <Badge className="text-xs">Admin</Badge> :
@@ -702,9 +739,7 @@ export function Admin() {
                           </TableCell>
                           <TableCell>
                             <Select value={u.plan} onValueChange={(v) => changeUserPlan(u.id, v as "free" | "pro" | "premium")}>
-                              <SelectTrigger className="h-7 text-xs w-24">
-                                <SelectValue />
-                              </SelectTrigger>
+                              <SelectTrigger className="h-7 text-xs w-24"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="free">Free</SelectItem>
                                 <SelectItem value="pro">Pro</SelectItem>
@@ -714,28 +749,59 @@ export function Admin() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button size="sm" variant={u.accountVerified ? "secondary" : "outline"} onClick={() => verifyUser(u.id, !u.accountVerified)} title={u.accountVerified ? "Remover verificação" : "Verificar conta"}>
-                                <BadgeCheck className={`w-3.5 h-3.5 ${u.accountVerified ? "text-emerald-500" : ""}`} />
-                              </Button>
-                              <Button size="sm" variant={u.isAdmin ? "secondary" : "outline"} onClick={() => promoteAdmin(u.id, !u.isAdmin)} title={u.isAdmin ? "Remover admin" : "Promover a admin"}>
-                                <Shield className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button size="sm" variant={u.banned ? "outline" : "destructive"} onClick={() => banUser(u.id, !u.banned)} title={u.banned ? "Reativar" : "Suspender"}>
-                                <Ban className="w-3.5 h-3.5" />
-                              </Button>
+                              <Button size="sm" variant={u.accountVerified ? "secondary" : "outline"} onClick={() => verifyUser(u.id, !u.accountVerified)} title={u.accountVerified ? "Remover verificação" : "Verificar conta"}><BadgeCheck className={`w-3.5 h-3.5 ${u.accountVerified ? "text-emerald-500" : ""}`} /></Button>
+                              <Button size="sm" variant={u.isAdmin ? "secondary" : "outline"} onClick={() => promoteAdmin(u.id, !u.isAdmin)} title={u.isAdmin ? "Remover admin" : "Promover a admin"}><Shield className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant={u.banned ? "outline" : "destructive"} onClick={() => banUser(u.id, !u.banned)} title={u.banned ? "Reativar" : "Suspender"}><Ban className="w-3.5 h-3.5" /></Button>
                             </div>
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredUsers.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center text-muted-foreground py-10">Nenhum usuário encontrado</TableCell>
-                        </TableRow>
-                      )}
+                      {filteredUsers.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">Nenhum usuário encontrado</TableCell></TableRow>}
                     </TableBody>
                   </Table>
                 </CardContent>
               </Card>
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {filteredUsers.length === 0 && <p className="text-center text-muted-foreground py-10 text-sm">Nenhum usuário encontrado</p>}
+                {filteredUsers.map((u) => (
+                  <Card key={u.id} className={u.banned ? "opacity-60" : ""}>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm flex items-center gap-1.5 flex-wrap">
+                            {u.name}
+                            {u.isAdmin && <Shield className="w-3.5 h-3.5 text-primary shrink-0" />}
+                            {u.accountVerified && <BadgeCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                          {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
+                        </div>
+                        <div className="flex flex-wrap gap-1 shrink-0">
+                          <Badge variant="outline" className="capitalize text-xs">{u.plan}</Badge>
+                          {u.banned ? <Badge variant="destructive" className="text-xs">Suspenso</Badge> :
+                            u.isAdmin ? <Badge className="text-xs">Admin</Badge> :
+                            u.accountVerified ? <Badge variant="secondary" className="text-xs bg-emerald-500/15 text-emerald-500">Verificado</Badge> :
+                            <Badge variant="secondary" className="text-xs">Ativo</Badge>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={u.plan} onValueChange={(v) => changeUserPlan(u.id, v as "free" | "pro" | "premium")}>
+                          <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="free">Free</SelectItem>
+                            <SelectItem value="pro">Pro</SelectItem>
+                            <SelectItem value="premium">Premium</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" variant={u.accountVerified ? "secondary" : "outline"} className="gap-1.5 text-xs" onClick={() => verifyUser(u.id, !u.accountVerified)}><BadgeCheck className={`w-3.5 h-3.5 ${u.accountVerified ? "text-emerald-500" : ""}`} />{u.accountVerified ? "Verificado" : "Verificar"}</Button>
+                        <Button size="sm" variant={u.isAdmin ? "secondary" : "outline"} className="gap-1.5 text-xs" onClick={() => promoteAdmin(u.id, !u.isAdmin)}><Shield className="w-3.5 h-3.5" />{u.isAdmin ? "Admin" : "Promover"}</Button>
+                        <Button size="sm" variant={u.banned ? "outline" : "destructive"} className="gap-1.5 text-xs" onClick={() => banUser(u.id, !u.banned)}><Ban className="w-3.5 h-3.5" />{u.banned ? "Reativar" : "Suspender"}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
 
