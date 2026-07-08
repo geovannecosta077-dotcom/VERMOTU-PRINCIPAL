@@ -217,6 +217,10 @@ export interface User {
   storeName: string;
   bio: string;
   city: string;
+  /** @nullable */
+  businessHoursOpen?: string | null;
+  /** @nullable */
+  businessHoursClose?: string | null;
   createdAt: string;
 }
 
@@ -259,6 +263,10 @@ export interface PublicUserSummary {
   storeName: string;
   bio: string;
   city: string;
+  /** @nullable */
+  businessHoursOpen?: string | null;
+  /** @nullable */
+  businessHoursClose?: string | null;
   createdAt: string;
 }
 
@@ -783,8 +791,8 @@ export interface CreateBlogPost {
   seoTitle?: string | null;
   /** @nullable */
   seoDescription?: string | null;
-  /** @nullable */
-  coverImageUrl?: string | null;
+  /** @minLength 1 */
+  coverImageUrl: string;
 }
 
 export interface UpdateBlogPost {

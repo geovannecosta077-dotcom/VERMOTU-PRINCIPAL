@@ -223,6 +223,7 @@ export function Anunciar() {
       {
         onSuccess: (created) => {
           queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListItemsQueryKey({ sellerId: currentUserId }) });
           toast.success("Anúncio publicado com sucesso!");
           const section = itemType === "moto" ? "motos" : itemType === "peca" ? "pecas" : "servicos";
           setLocation(`/${section}/${created.id}`);

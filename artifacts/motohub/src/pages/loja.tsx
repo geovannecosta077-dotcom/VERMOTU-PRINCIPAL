@@ -6,7 +6,7 @@ import { ItemCard } from "@/components/item-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Store, MapPin, ShieldCheck, Phone, Crown, Star, Instagram, Facebook, ExternalLink, Clock } from "lucide-react";
+import { Store, MapPin, ShieldCheck, Phone, Crown, Star, ExternalLink, Clock } from "lucide-react";
 
 function MapEmbed({ city }: { city: string }) {
   const query = encodeURIComponent(`${city}, Brasil`);
@@ -177,18 +177,6 @@ export function Loja() {
                 {seller.phone}
               </a>
             )}
-            {seller.accountType === "empresa" && (
-              <div className="pt-2 border-t border-border flex gap-2">
-                <a href="https://instagram.com" target="_blank" rel="noreferrer"
-                  className="w-8 h-8 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors" aria-label="Instagram">
-                  <Instagram className="w-3.5 h-3.5" />
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer"
-                  className="w-8 h-8 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors" aria-label="Facebook">
-                  <Facebook className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            )}
           </div>
 
           {/* Business hours */}
@@ -196,19 +184,11 @@ export function Loja() {
             <h3 className="font-bold text-sm uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" /> Horário de atendimento
             </h3>
-            {seller.accountType === "empresa" ? (
+            {seller.accountType === "empresa" && seller.businessHoursOpen && seller.businessHoursClose ? (
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Seg – Sex</span>
-                  <span className="font-medium">8h – 18h</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sábado</span>
-                  <span className="font-medium">8h – 13h</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Domingo</span>
-                  <span className="text-muted-foreground">Fechado</span>
+                  <span className="text-muted-foreground">Horário</span>
+                  <span className="font-medium">{seller.businessHoursOpen} – {seller.businessHoursClose}</span>
                 </div>
               </div>
             ) : (

@@ -4,3 +4,4 @@
 - [Item moderation & visibility](item-approval.md) — public/owner/admin item views need distinct status filters; don't collapse them via a shared sellerId query param.
 - [Stripe Invoice subscription field](stripe-invoice-subscription-field.md) — Stripe SDK v22 moved Invoice.subscription to invoice.parent?.subscription_details?.subscription.
 - [Vermotu matching engine exists](vermotu-matching-engine.md) — "Busca Inteligente" (search parser + ranking + service requests/proposals) is already built; extend, don't rebuild.
+- [Honest empty states](honest-empty-states.md) — don't fabricate data (social links, hours, blog covers); hide the section or require a real field instead of a placeholder.

@@ -288,6 +288,8 @@ export const ListUsersResponseItem = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListUsersResponse = zod.array(ListUsersResponseItem)
@@ -329,6 +331,8 @@ export const UpsertUserResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -356,6 +360,8 @@ export const GetUserResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -398,6 +404,8 @@ export const UpdateUserResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -429,6 +437,8 @@ export const SignInResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -464,6 +474,8 @@ export const SetUserCpfResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -495,6 +507,8 @@ export const UpdateUserPlanResponse = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -909,6 +923,8 @@ export const ListAdminUsersResponseItem = zod.object({
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
+  "businessHoursOpen": zod.string().nullish(),
+  "businessHoursClose": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
@@ -1217,6 +1233,7 @@ export const adminCreateBlogPostBodySlugMin = 3;
 
 
 
+
 export const AdminCreateBlogPostBody = zod.object({
   "title": zod.string().min(adminCreateBlogPostBodyTitleMin),
   "slug": zod.string().min(adminCreateBlogPostBodySlugMin),
@@ -1228,7 +1245,7 @@ export const AdminCreateBlogPostBody = zod.object({
   "published": zod.boolean().nullish(),
   "seoTitle": zod.string().nullish(),
   "seoDescription": zod.string().nullish(),
-  "coverImageUrl": zod.string().nullish()
+  "coverImageUrl": zod.string().min(1)
 })
 
 export const AdminCreateBlogPostResponse = zod.object({

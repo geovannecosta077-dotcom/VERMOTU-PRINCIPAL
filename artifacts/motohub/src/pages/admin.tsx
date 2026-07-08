@@ -1375,8 +1375,8 @@ export function Admin() {
                         </select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>URL da imagem de capa</Label>
-                        <Input value={blogForm.coverImageUrl} onChange={(e) => setBlogForm((f) => ({ ...f, coverImageUrl: e.target.value }))} placeholder="https://exemplo.com/imagem.jpg" />
+                        <Label>URL da imagem de capa <span className="text-destructive">*</span></Label>
+                        <Input value={blogForm.coverImageUrl} onChange={(e) => setBlogForm((f) => ({ ...f, coverImageUrl: e.target.value }))} placeholder="https://exemplo.com/imagem.jpg (obrigatório)" />
                         {blogForm.coverImageUrl && (
                           <div className="mt-2 h-36 rounded-lg overflow-hidden border border-border">
                             <img src={blogForm.coverImageUrl} alt="Preview da capa" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
@@ -1438,12 +1438,13 @@ export function Admin() {
                     <div className="flex gap-2 pt-2">
                       <Button onClick={async () => {
                         if (!blogForm.title || !blogForm.content) { toast.error("Título e conteúdo são obrigatórios."); return; }
+                        if (!blogForm.coverImageUrl.trim()) { toast.error("A imagem de capa é obrigatória."); return; }
                         try {
                           if (editingPostId) {
-                            await updateBlogPost.mutateAsync({ id: editingPostId, data: { ...blogForm, coverImageUrl: blogForm.coverImageUrl || null } });
+                            await updateBlogPost.mutateAsync({ id: editingPostId, data: { ...blogForm, coverImageUrl: blogForm.coverImageUrl } });
                             toast.success("Artigo atualizado!");
                           } else {
-                            await createBlogPost.mutateAsync({ data: { ...blogForm, authorId: currentUserId ?? 1, authorName: "Admin Vermotu", coverImageUrl: blogForm.coverImageUrl || null } });
+                            await createBlogPost.mutateAsync({ data: { ...blogForm, authorId: currentUserId ?? 1, authorName: "Admin Vermotu", coverImageUrl: blogForm.coverImageUrl } });
                             toast.success("Artigo criado!");
                           }
                           setBlogView("list");

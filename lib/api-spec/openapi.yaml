@@ -1503,6 +1503,8 @@ components:
         storeName: { type: string }
         bio: { type: string }
         city: { type: string }
+        businessHoursOpen: { type: ["string", "null"] }
+        businessHoursClose: { type: ["string", "null"] }
         createdAt: { type: string }
 
     PublicUserSummary:
@@ -1525,6 +1527,8 @@ components:
         storeName: { type: string }
         bio: { type: string }
         city: { type: string }
+        businessHoursOpen: { type: ["string", "null"] }
+        businessHoursClose: { type: ["string", "null"] }
         createdAt: { type: string }
 
     UpsertUser:
@@ -1962,7 +1966,7 @@ components:
 
     CreateBlogPost:
       type: object
-      required: [title, slug, content, authorId]
+      required: [title, slug, content, authorId, coverImageUrl]
       properties:
         title: { type: string, minLength: 3 }
         slug: { type: string, minLength: 3 }
@@ -1974,7 +1978,7 @@ components:
         published: { type: ["boolean", "null"] }
         seoTitle: { type: ["string", "null"] }
         seoDescription: { type: ["string", "null"] }
-        coverImageUrl: { type: ["string", "null"] }
+        coverImageUrl: { type: string, minLength: 1 }
 
     UpdateBlogPost:
       type: object

@@ -24,7 +24,7 @@ import {
   getListOrdersQueryKey,
   getListIncomingServiceRequestsQueryKey,
 } from "@workspace/api-client-react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Trash2, CheckCircle2, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck, Zap, MapPin, Clock, Send } from "lucide-react";
 import { formatPhone, formatRelative } from "@/lib/session";
 import { toast } from "sonner";
@@ -43,16 +43,14 @@ export function Conta() {
   });
   const { data: allItems } = useListItems({});
 
-  // Dedicated query for seller's own items (server-side filter by sellerId)
-  const { data: myItems } = useQuery<Array<{ id: number; type: string; title: string; price: number; status: string; sellerId: number; premium: boolean; image: string | null; createdAt: string; location: string; category: string; brand: string | null; condition: string; ratingAvg: number | null; ratingCount: number | null; stock: number }>>({
-    queryKey: ["my-items", currentUserId],
-    enabled: !!currentUserId,
-    queryFn: async () => {
-      const res = await fetch(`/api/items?sellerId=${currentUserId}`);
-      if (!res.ok) return [];
-      return res.json();
-    },
-  });
+  // Dedicated query for seller's own items (server-side filter by sellerId).
+  // Goes through the generated hook so the shared x-user-id header is sent
+  // automatically — the API only returns non-active (pending/rejected)
+  // items for this sellerId when the caller's own id matches it.
+  const { data: myItems } = useListItems(
+    { sellerId: currentUserId ?? 0 },
+    { query: { enabled: !!currentUserId, queryKey: getListItemsQueryKey({ sellerId: currentUserId ?? 0 }) } },
+  );
 
   const { data: favorites } = useListFavorites(
     { userId: currentUserId ?? 0 },
@@ -88,6 +86,7 @@ export function Conta() {
     updateItem.mutate({ id, data: { status: "sold" } }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListItemsQueryKey({ sellerId: currentUserId ?? 0 }) });
         toast.success("Marcado como vendido");
       },
     });
@@ -96,6 +95,7 @@ export function Conta() {
     deleteItem.mutate({ id }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListItemsQueryKey({ sellerId: currentUserId ?? 0 }) });
         toast.success("Anúncio removido");
       },
     });

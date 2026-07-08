@@ -32,5 +32,9 @@ export interface User {
   storeName: string;
   bio: string;
   city: string;
+  /** @nullable */
+  businessHoursOpen?: string | null;
+  /** @nullable */
+  businessHoursClose?: string | null;
   createdAt: string;
 }

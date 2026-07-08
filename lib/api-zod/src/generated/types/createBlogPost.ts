@@ -25,6 +25,6 @@ export interface CreateBlogPost {
   seoTitle?: string | null;
   /** @nullable */
   seoDescription?: string | null;
-  /** @nullable */
-  coverImageUrl?: string | null;
+  /** @minLength 1 */
+  coverImageUrl: string;
 }
