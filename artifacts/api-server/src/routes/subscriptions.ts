@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
 import { eq, desc } from "drizzle-orm";
 import { db, subscriptionsTable, usersTable } from "@workspace/db";
-import { stripe, STRIPE_WEBHOOK_SECRET, PLAN_PRICING, priceIdForPlan } from "../lib/stripe";
+import { getStripe, isStripeConfigured, STRIPE_WEBHOOK_SECRET, PLAN_PRICING, priceIdForPlan } from "../lib/stripe";
+import { requireAdmin } from "../middlewares/requireAdmin";
 import type Stripe from "stripe";
 
 const router: IRouter = Router();
@@ -131,7 +132,13 @@ router.post("/subscriptions/checkout", async (req, res): Promise<void> => {
     return;
   }
 
+  if (!isStripeConfigured()) {
+    res.status(503).json({ error: "Pagamento com cartão indisponível no momento. Use o Pix." });
+    return;
+  }
+
   try {
+    const stripe = getStripe();
     let stripeCustomerId = user.stripeCustomerId;
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
@@ -198,7 +205,7 @@ router.post("/subscriptions/webhook", async (req, res): Promise<void> => {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(req.body as Buffer, signature, STRIPE_WEBHOOK_SECRET);
+    event = getStripe().webhooks.constructEvent(req.body as Buffer, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     req.log.error({ err }, "Assinatura de webhook do Stripe inválida");
     res.status(400).json({ error: "Assinatura inválida." });
@@ -339,7 +346,7 @@ router.post("/subscriptions/webhook", async (req, res): Promise<void> => {
   }
 });
 
-router.get("/admin/subscriptions", async (_req, res): Promise<void> => {
+router.get("/admin/subscriptions", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select({
       id: subscriptionsTable.id,
@@ -376,7 +383,7 @@ router.get("/admin/subscriptions", async (_req, res): Promise<void> => {
   );
 });
 
-router.patch("/admin/subscriptions/:id", async (req, res): Promise<void> => {
+router.patch("/admin/subscriptions/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id ?? "");
   if (isNaN(id)) {
     res.status(400).json({ error: "ID inválido." });

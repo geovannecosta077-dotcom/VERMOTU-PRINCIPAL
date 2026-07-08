@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { desc } from "drizzle-orm";
 import { db, emailCampaignsTable, usersTable } from "@workspace/db";
 import { AdminSendEmailBody } from "@workspace/api-zod";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
-router.post("/admin/email/send", async (req, res): Promise<void> => {
+router.post("/admin/email/send", requireAdmin, async (req, res): Promise<void> => {
   const parsed = AdminSendEmailBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Dados inválidos. Informe assunto, corpo e sentBy." });
@@ -32,7 +33,7 @@ router.post("/admin/email/send", async (req, res): Promise<void> => {
   res.json({ recipientCount, campaignId: campaign!.id });
 });
 
-router.get("/admin/email/campaigns", async (_req, res): Promise<void> => {
+router.get("/admin/email/campaigns", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(emailCampaignsTable)

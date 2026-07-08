@@ -9,6 +9,7 @@ import {
   AdminUpdateBlogPostBody,
   AdminDeleteBlogPostParams,
 } from "@workspace/api-zod";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -54,7 +55,7 @@ router.get("/blog/posts/:slug", async (req, res): Promise<void> => {
   res.json({ ...post, views: post.views + 1 });
 });
 
-router.get("/admin/blog/posts", async (_req, res): Promise<void> => {
+router.get("/admin/blog/posts", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(blogPostsTable)
@@ -62,7 +63,7 @@ router.get("/admin/blog/posts", async (_req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.post("/admin/blog/posts", async (req, res): Promise<void> => {
+router.post("/admin/blog/posts", requireAdmin, async (req, res): Promise<void> => {
   const parsed = AdminCreateBlogPostBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Dados inválidos." }); return; }
   const { title, slug, content, excerpt, category, authorId, authorName, published, seoTitle, seoDescription, coverImageUrl } = parsed.data;
@@ -87,7 +88,7 @@ router.post("/admin/blog/posts", async (req, res): Promise<void> => {
   res.status(201).json(created!);
 });
 
-router.patch("/admin/blog/posts/:id", async (req, res): Promise<void> => {
+router.patch("/admin/blog/posts/:id", requireAdmin, async (req, res): Promise<void> => {
   const params = AdminUpdateBlogPostParams.safeParse(req.params);
   const body = AdminUpdateBlogPostBody.safeParse(req.body);
   if (!params.success || !body.success) { res.status(400).json({ error: "Dados inválidos." }); return; }
@@ -102,7 +103,7 @@ router.patch("/admin/blog/posts/:id", async (req, res): Promise<void> => {
   res.json(updated);
 });
 
-router.delete("/admin/blog/posts/:id", async (req, res): Promise<void> => {
+router.delete("/admin/blog/posts/:id", requireAdmin, async (req, res): Promise<void> => {
   const parsed = AdminDeleteBlogPostParams.safeParse(req.params);
   if (!parsed.success) { res.status(400).json({ error: "ID inválido." }); return; }
   await db.delete(blogPostsTable).where(eq(blogPostsTable.id, parsed.data.id));

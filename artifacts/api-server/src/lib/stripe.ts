@@ -1,12 +1,26 @@
 import Stripe from "stripe";
 
-const secretKey = process.env["STRIPE_SECRET_KEY"];
+let _stripe: Stripe | null = null;
 
-if (!secretKey) {
-  throw new Error("STRIPE_SECRET_KEY environment variable is required but was not provided.");
+export function isStripeConfigured(): boolean {
+  return Boolean(process.env["STRIPE_SECRET_KEY"]);
 }
 
-export const stripe = new Stripe(secretKey);
+/**
+ * Lazily construct the Stripe client. Throws only when a Stripe-dependent
+ * route is actually invoked without STRIPE_SECRET_KEY configured, instead of
+ * at module load time — this keeps the API server able to boot and serve
+ * every non-payment route in environments without Stripe configured.
+ */
+export function getStripe(): Stripe {
+  if (_stripe) return _stripe;
+  const secretKey = process.env["STRIPE_SECRET_KEY"];
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY environment variable is required but was not provided.");
+  }
+  _stripe = new Stripe(secretKey);
+  return _stripe;
+}
 
 export const STRIPE_WEBHOOK_SECRET = process.env["STRIPE_WEBHOOK_SECRET"];
 

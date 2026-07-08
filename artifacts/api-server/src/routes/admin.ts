@@ -10,10 +10,11 @@ import {
   adminLogsTable,
   reportsTable,
 } from "@workspace/db";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
-router.get("/admin/stats", async (_req, res): Promise<void> => {
+router.get("/admin/stats", requireAdmin, async (_req, res): Promise<void> => {
   const [{ count: totalItems }] = await db.select({ count: sql<number>`count(*)::int` }).from(itemsTable);
   const [{ count: totalUsers }] = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable);
   const [{ count: totalMessages }] = await db.select({ count: sql<number>`count(*)::int` }).from(messagesTable);
@@ -78,7 +79,7 @@ router.get("/admin/stats", async (_req, res): Promise<void> => {
   });
 });
 
-router.get("/admin/orders", async (_req, res): Promise<void> => {
+router.get("/admin/orders", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select({
       id: ordersTable.id,
@@ -95,7 +96,7 @@ router.get("/admin/orders", async (_req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.get("/admin/logs", async (_req, res): Promise<void> => {
+router.get("/admin/logs", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(adminLogsTable)
@@ -104,7 +105,7 @@ router.get("/admin/logs", async (_req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.post("/admin/logs", async (req, res): Promise<void> => {
+router.post("/admin/logs", requireAdmin, async (req, res): Promise<void> => {
   const { adminId, adminName, action, target, details } = req.body ?? {};
   if (!adminId || !action) {
     res.status(400).json({ error: "adminId e action são obrigatórios." });
@@ -123,7 +124,7 @@ router.post("/admin/logs", async (req, res): Promise<void> => {
   res.status(201).json(row);
 });
 
-router.get("/admin/reports", async (_req, res): Promise<void> => {
+router.get("/admin/reports", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(reportsTable)
@@ -132,7 +133,7 @@ router.get("/admin/reports", async (_req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.patch("/admin/reports/:id", async (req, res): Promise<void> => {
+router.patch("/admin/reports/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id ?? "");
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido." }); return; }
   const { status } = req.body ?? {};
@@ -149,7 +150,7 @@ router.patch("/admin/reports/:id", async (req, res): Promise<void> => {
   res.json(row);
 });
 
-router.delete("/admin/reports/:id", async (req, res): Promise<void> => {
+router.delete("/admin/reports/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id ?? "");
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido." }); return; }
   await db.delete(reportsTable).where(eq(reportsTable.id, id));
@@ -175,7 +176,7 @@ router.post("/reports", async (req, res): Promise<void> => {
   res.status(201).json(row);
 });
 
-router.get("/admin/items", async (_req, res): Promise<void> => {
+router.get("/admin/items", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(itemsTable)

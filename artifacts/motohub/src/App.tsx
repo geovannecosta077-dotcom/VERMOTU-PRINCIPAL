@@ -25,9 +25,18 @@ import { Blog } from "@/pages/blog";
 import { BlogPost } from "@/pages/blog-post";
 import { useSession } from "@/lib/session";
 import { useEffect } from "react";
+import { setExtraHeadersGetter } from "@workspace/api-client-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+});
+
+// Send the logged-in user's id on every API request so the server can
+// enforce admin-only endpoints (see requireAdmin middleware). This mirrors
+// the app's lightweight, passcode-based admin model rather than full RBAC.
+setExtraHeadersGetter(() => {
+  const userId = useSession.getState().currentUserId;
+  return userId ? { "x-user-id": String(userId) } : null;
 });
 
 function ScrollToTop() {

@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, asc, and, or, gte, lte, isNull } from "drizzle-orm";
 import { db, bannersTable } from "@workspace/db";
 import { z } from "zod";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -43,12 +44,12 @@ router.get("/banners", async (req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.get("/admin/banners", async (_req, res): Promise<void> => {
+router.get("/admin/banners", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db.select().from(bannersTable).orderBy(asc(bannersTable.order));
   res.json(rows);
 });
 
-router.post("/admin/banners", async (req, res): Promise<void> => {
+router.post("/admin/banners", requireAdmin, async (req, res): Promise<void> => {
   const parsed = CreateBannerSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Dados inválidos." }); return; }
   const { startsAt, endsAt, ...rest } = parsed.data;
@@ -60,7 +61,7 @@ router.post("/admin/banners", async (req, res): Promise<void> => {
   res.status(201).json(row);
 });
 
-router.put("/admin/banners/:id", async (req, res): Promise<void> => {
+router.put("/admin/banners/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido." }); return; }
   const parsed = UpdateBannerSchema.safeParse(req.body);
@@ -74,7 +75,7 @@ router.put("/admin/banners/:id", async (req, res): Promise<void> => {
   res.json(row);
 });
 
-router.delete("/admin/banners/:id", async (req, res): Promise<void> => {
+router.delete("/admin/banners/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido." }); return; }
   await db.delete(bannersTable).where(eq(bannersTable.id, id));
