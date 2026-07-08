@@ -6,6 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AcceptServiceProposal {
-  customerId: number;
+export interface SubscriptionCheckoutSession {
+  url: string;
 }

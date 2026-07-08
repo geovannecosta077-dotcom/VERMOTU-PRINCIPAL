@@ -56,6 +56,10 @@ app.use(
     },
   }),
 );
+// Stripe webhook needs the raw request body to validate the signature,
+// so it must be parsed before the global JSON body parser runs.
+app.use("/api/subscriptions/webhook", express.raw({ type: "application/json" }));
+
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 

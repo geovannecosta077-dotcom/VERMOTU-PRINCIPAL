@@ -5,6 +5,7 @@ import {
   useGetUser,
   useListSubscriptions,
   useCreateSubscription,
+  useCreateSubscriptionCheckout,
   getGetUserQueryKey,
   getListSubscriptionsQueryKey,
 } from "@workspace/api-client-react";
@@ -82,6 +83,8 @@ export function Planos() {
     { query: { enabled: !!currentUserId, queryKey: getListSubscriptionsQueryKey({ userId: currentUserId ?? 0 }) } },
   );
   const createSubscription = useCreateSubscription();
+  const createSubscriptionCheckout = useCreateSubscriptionCheckout();
+  const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<"pro" | "premium" | null>(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -101,6 +104,22 @@ export function Planos() {
 
   useEffect(() => { document.title = "Planos — Vermotu"; }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkoutStatus = params.get("checkout");
+    if (checkoutStatus === "success") {
+      toast.success("Pagamento confirmado! Seu plano será ativado em instantes.");
+      if (currentUserId) {
+        queryClient.invalidateQueries({ queryKey: getListSubscriptionsQueryKey({ userId: currentUserId }) });
+        queryClient.invalidateQueries({ queryKey: getGetUserQueryKey(currentUserId) });
+      }
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (checkoutStatus === "cancel") {
+      toast.info("Pagamento cancelado.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [currentUserId, queryClient]);
+
   const activeSub = (subscriptions ?? []).find((s) => ["proof_submitted", "in_review", "approved"].includes(s.status));
   const pendingSub = (subscriptions ?? []).find((s) => ["awaiting_payment", "proof_submitted", "in_review"].includes(s.status));
 
@@ -112,6 +131,23 @@ export function Planos() {
     setProofName("");
     setCopied(false);
     setDialogOpen(true);
+  };
+
+  const handleStripeCheckout = (plan: "pro" | "premium") => {
+    if (!currentUserId) { setLoginOpen(true); return; }
+    setCheckoutLoadingPlan(plan);
+    createSubscriptionCheckout.mutate(
+      { data: { userId: currentUserId, plan } },
+      {
+        onSuccess: (session) => {
+          window.location.href = session.url;
+        },
+        onError: () => {
+          toast.error("Erro ao iniciar pagamento com cartão. Tente novamente.");
+          setCheckoutLoadingPlan(null);
+        },
+      },
+    );
   };
 
   const copyCode = (text: string) => {
@@ -153,7 +189,7 @@ export function Planos() {
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-4xl font-bold mb-3">Planos premium</h1>
           <p className="text-muted-foreground text-lg">
-            Mais visibilidade, mais vendas. Pague via PIX e tenha seu plano ativado em até 24h.
+            Mais visibilidade, mais vendas. Pague com cartão e ative na hora, ou via PIX em até 24h.
           </p>
         </div>
 
@@ -216,14 +252,33 @@ export function Planos() {
                       {isCurrent ? "Plano atual" : "Selecionar"}
                     </Button>
                   ) : (
-                    <Button
-                      className="w-full"
-                      variant={p.popular ? "default" : "outline"}
-                      onClick={() => openDialog(p.id)}
-                      disabled={isCurrent || !!hasPending}
-                    >
-                      {isCurrent ? "Plano atual" : hasPending ? "Aguardando aprovação" : `Assinar via PIX`}
-                    </Button>
+                    <div className="space-y-2">
+                      <Button
+                        className="w-full"
+                        variant={p.popular ? "default" : "outline"}
+                        onClick={() => handleStripeCheckout(p.id)}
+                        disabled={isCurrent || !!hasPending || checkoutLoadingPlan === p.id}
+                      >
+                        {checkoutLoadingPlan === p.id ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecionando...</>
+                        ) : isCurrent ? (
+                          "Plano atual"
+                        ) : hasPending ? (
+                          "Aguardando aprovação"
+                        ) : (
+                          <><CreditCard className="w-4 h-4 mr-2" /> Assinar com cartão</>
+                        )}
+                      </Button>
+                      <Button
+                        className="w-full"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDialog(p.id)}
+                        disabled={isCurrent || !!hasPending}
+                      >
+                        Assinar via PIX
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -236,13 +291,12 @@ export function Planos() {
             <CreditCard className="w-4 h-4 text-primary" /> Como funciona o pagamento
           </h3>
           <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-            <li>Escolha seu plano e clique em "Assinar via PIX"</li>
-            <li>Copie o código PIX e realize o pagamento</li>
-            <li>Envie o comprovante de pagamento</li>
-            <li>Nossa equipe ativa seu plano em até 24h</li>
+            <li>Pague com cartão de crédito e ative seu plano na hora, ou</li>
+            <li>Pague via PIX: copie o código, realize o pagamento e envie o comprovante</li>
+            <li>Pagamentos via PIX são analisados e o plano é ativado em até 24h</li>
           </ol>
           <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-            Beneficiário: <strong>Geovanne Barboza Costa</strong> · Instituição: PagSeguro
+            PIX — Beneficiário: <strong>Geovanne Barboza Costa</strong> · Instituição: PagSeguro
           </div>
         </div>
       </section>

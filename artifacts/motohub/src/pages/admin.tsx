@@ -1260,6 +1260,12 @@ export function Admin() {
                                 <div className="text-xs text-muted-foreground">{sub.userEmail}</div>
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs ${sub.provider === "stripe" ? "border-indigo-500/30 text-indigo-400" : "border-emerald-500/30 text-emerald-400"}`}
+                                >
+                                  {sub.provider === "stripe" ? "Cartão (Stripe)" : "PIX"}
+                                </Badge>
                                 <Badge className={`text-xs ${st.className}`}>{st.label}</Badge>
                                 <span className="text-sm font-bold">
                                   {sub.plan === "pro" ? "Básico" : "Premium"} — R$ {sub.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}

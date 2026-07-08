@@ -791,6 +791,37 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Subscription" }
 
+  /subscriptions/checkout:
+    post:
+      operationId: createSubscriptionCheckout
+      tags: [subscriptions]
+      summary: Create a Stripe Checkout session for a subscription plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateSubscriptionCheckout" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubscriptionCheckoutSession" }
+
+  /subscriptions/webhook:
+    post:
+      operationId: stripeSubscriptionWebhook
+      tags: [subscriptions]
+      summary: Stripe webhook endpoint for subscription lifecycle events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        "200":
+          description: OK
+
   /admin/subscriptions:
     get:
       operationId: listAdminSubscriptions
@@ -1791,38 +1822,46 @@ components:
 
     Subscription:
       type: object
-      required: [id, userId, plan, amount, status, pixCode, pixKey, createdAt, updatedAt]
+      required: [id, userId, plan, amount, status, provider, pixCode, pixKey, createdAt, updatedAt]
       properties:
         id: { type: integer }
         userId: { type: integer }
         plan: { type: string }
         amount: { type: number }
         status: { type: string }
+        provider: { type: string }
         pixCode: { type: string }
         pixKey: { type: string }
         proofUrl: { type: ["string", "null"] }
         proofName: { type: ["string", "null"] }
         adminNote: { type: ["string", "null"] }
         approvedBy: { type: ["integer", "null"] }
+        stripeCustomerId: { type: ["string", "null"] }
+        stripeSubscriptionId: { type: ["string", "null"] }
+        stripeCheckoutSessionId: { type: ["string", "null"] }
         expiresAt: { type: ["string", "null"] }
         createdAt: { type: string }
         updatedAt: { type: string }
 
     AdminSubscription:
       type: object
-      required: [id, userId, plan, amount, status, pixCode, pixKey, createdAt, updatedAt]
+      required: [id, userId, plan, amount, status, provider, pixCode, pixKey, createdAt, updatedAt]
       properties:
         id: { type: integer }
         userId: { type: integer }
         plan: { type: string }
         amount: { type: number }
         status: { type: string }
+        provider: { type: string }
         pixCode: { type: string }
         pixKey: { type: string }
         proofUrl: { type: ["string", "null"] }
         proofName: { type: ["string", "null"] }
         adminNote: { type: ["string", "null"] }
         approvedBy: { type: ["integer", "null"] }
+        stripeCustomerId: { type: ["string", "null"] }
+        stripeSubscriptionId: { type: ["string", "null"] }
+        stripeCheckoutSessionId: { type: ["string", "null"] }
         expiresAt: { type: ["string", "null"] }
         createdAt: { type: string }
         updatedAt: { type: string }
@@ -1844,6 +1883,19 @@ components:
         proofUrl: { type: string }
         proofName: { type: string }
         status: { type: string }
+
+    CreateSubscriptionCheckout:
+      type: object
+      required: [userId, plan]
+      properties:
+        userId: { type: integer }
+        plan: { type: string, enum: [pro, premium] }
+
+    SubscriptionCheckoutSession:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string }
 
     AdminUpdateSubscription:
       type: object
