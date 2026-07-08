@@ -285,8 +285,6 @@ export const ListUsersResponseItem = zod.object({
   "phoneVerified": zod.boolean(),
   "accountVerified": zod.boolean(),
   "plan": zod.enum(['free', 'pro', 'premium']),
-  "isAdmin": zod.boolean(),
-  "banned": zod.boolean(),
   "storeName": zod.string(),
   "bio": zod.string(),
   "city": zod.string(),
@@ -890,6 +888,30 @@ export const CreateAdminLogResponse = zod.object({
   "details": zod.string(),
   "createdAt": zod.string()
 })
+
+
+export const ListAdminUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "publicId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "cpf": zod.string().nullish(),
+  "cnpj": zod.string().nullish(),
+  "accountType": zod.enum(['pessoa', 'empresa']),
+  "avatarUrl": zod.string().nullish(),
+  "acceptedTerms": zod.boolean(),
+  "phoneVerified": zod.boolean(),
+  "accountVerified": zod.boolean(),
+  "plan": zod.enum(['free', 'pro', 'premium']),
+  "isAdmin": zod.boolean(),
+  "banned": zod.boolean(),
+  "storeName": zod.string(),
+  "bio": zod.string(),
+  "city": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
 
 
 export const ListAdminReportsResponseItem = zod.object({

@@ -19,8 +19,19 @@ router.get("/items", async (req, res): Promise<void> => {
     return;
   }
   const filters = [];
-  // Public listing: always returns active items only.
-  filters.push(eq(itemsTable.status, "active"));
+  // Public listing (storefront pages, search, etc.) always returns active
+  // items only. The one exception: when the caller is requesting their own
+  // items (sellerId matches the x-user-id of the logged-in caller, e.g. the
+  // seller viewing "Minha conta"), include every status so they can see
+  // pending/rejected listings too. This must stay scoped to the owner only
+  // — otherwise anyone could pass someone else's sellerId to see their
+  // pending/rejected listings on a public storefront page.
+  const rawViewerId = req.headers["x-user-id"];
+  const viewerId = rawViewerId ? parseInt(String(rawViewerId), 10) : NaN;
+  const isOwnerRequest = q.data.sellerId != null && viewerId === q.data.sellerId;
+  if (!isOwnerRequest) {
+    filters.push(eq(itemsTable.status, "active"));
+  }
   if (q.data.type) filters.push(eq(itemsTable.type, q.data.type));
   if (q.data.brand) filters.push(eq(itemsTable.brand, q.data.brand));
   if (q.data.category) filters.push(eq(itemsTable.category, q.data.category));

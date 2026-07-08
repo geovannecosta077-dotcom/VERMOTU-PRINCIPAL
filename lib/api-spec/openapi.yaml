@@ -221,7 +221,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/User" }
+                items: { $ref: "#/components/schemas/PublicUserSummary" }
     post:
       operationId: upsertUser
       tags: [users]
@@ -676,6 +676,19 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AdminLog" }
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
 
   /admin/reports:
     get:
@@ -1487,6 +1500,28 @@ components:
         plan: { type: string, enum: [free, pro, premium] }
         isAdmin: { type: boolean }
         banned: { type: boolean }
+        storeName: { type: string }
+        bio: { type: string }
+        city: { type: string }
+        createdAt: { type: string }
+
+    PublicUserSummary:
+      type: object
+      required: [id, name, email, plan, storeName, bio, city, phoneVerified, accountVerified, accountType, acceptedTerms, createdAt]
+      properties:
+        id: { type: integer }
+        publicId: { type: ["string", "null"] }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        cpf: { type: ["string", "null"] }
+        cnpj: { type: ["string", "null"] }
+        accountType: { type: string, enum: [pessoa, empresa] }
+        avatarUrl: { type: ["string", "null"] }
+        acceptedTerms: { type: boolean }
+        phoneVerified: { type: boolean }
+        accountVerified: { type: boolean }
+        plan: { type: string, enum: [free, pro, premium] }
         storeName: { type: string }
         bio: { type: string }
         city: { type: string }

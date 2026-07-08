@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useSession, formatBRL, formatDateBR, imageUrl } from "@/lib/session";
 import {
   useGetAdminStats,
-  useListUsers,
+  useListAdminUsers,
   useUpdateItem,
   useDeleteItem,
   useUpdateUser,
@@ -31,6 +31,7 @@ import {
   useSignIn,
   getGetAdminStatsQueryKey,
   getListUsersQueryKey,
+  getListAdminUsersQueryKey,
   getListCouponsQueryKey,
   getListAdminLogsQueryKey,
   getListAdminReportsQueryKey,
@@ -116,7 +117,7 @@ export function Admin() {
       return res.json();
     },
   });
-  const { data: users } = useListUsers({ query: { enabled, queryKey: getListUsersQueryKey() } });
+  const { data: users } = useListAdminUsers({ query: { enabled, queryKey: getListAdminUsersQueryKey() } });
   const { data: coupons } = useListCoupons({ query: { enabled, queryKey: getListCouponsQueryKey() } });
   const { data: adminLogs } = useListAdminLogs({ query: { enabled, queryKey: getListAdminLogsQueryKey() } });
   const { data: adminReports, refetch: refetchReports } = useListAdminReports({ query: { enabled, queryKey: getListAdminReportsQueryKey() } });
@@ -198,6 +199,7 @@ export function Admin() {
     updateUser.mutate({ id, data: { banned } }, {
       onSuccess: (u) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
         toast.success(banned ? "Usuário suspenso" : "Usuário reativado");
         logAction(banned ? "Suspender usuário" : "Reativar usuário", `Usuário #${id} — ${u.name}`);
       },
@@ -207,6 +209,7 @@ export function Admin() {
     updateUser.mutate({ id, data: { accountVerified: verified } }, {
       onSuccess: (u) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
         toast.success(verified ? "Conta verificada" : "Verificação removida");
         logAction(verified ? "Verificar conta" : "Remover verificação", `Usuário #${id} — ${u.name}`);
       },
@@ -216,6 +219,7 @@ export function Admin() {
     updateUser.mutate({ id, data: { isAdmin } }, {
       onSuccess: (u) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
         toast.success(isAdmin ? "Usuário promovido a admin" : "Admin removido");
         logAction(isAdmin ? "Promover a admin" : "Remover admin", `Usuário #${id} — ${u.name}`);
       },
@@ -225,6 +229,7 @@ export function Admin() {
     updateUser.mutate({ id, data: { plan } }, {
       onSuccess: (u) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
         toast.success(`Plano alterado para ${plan}`);
         logAction("Alterar plano", `Usuário #${id} — ${u.name}`, `Novo plano: ${plan}`);
       },
@@ -341,6 +346,7 @@ export function Admin() {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListAdminSubscriptionsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
           toast.success("Assinatura aprovada! Plano ativado.");
           logAction("Aprovar assinatura", `Usuário #${userId} — Plano ${plan}`);
         },

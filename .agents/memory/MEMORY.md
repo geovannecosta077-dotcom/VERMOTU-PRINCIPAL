@@ -1,6 +1,6 @@
 - [api-server esbuild rebuild](api-server-esbuild-rebuild.md) — editing src after a build runs won't take effect until workflow restart; unlike Vite there's no hot rebuild.
 - [MotoHub user CPF field](motohub-user-cpf-endpoint.md) — CPF can't be set via generic PATCH /users/:id; use dedicated /users/:id/cpf endpoint with a checksum-valid CPF.
-- [Admin access pattern](admin-access.md) — admin login via email+senha; is_admin no BD; admin.tsx usa useQuery direto com /api/items?status=all para ver todos os itens.
-- [Item approval flow](item-approval.md) — POST /items cria com status="pending"; GET /items filtra active por padrão; ?status=all retorna todos (para admin).
+- [Admin access model](admin-access.md) — requireAdmin trusts a spoofable x-user-id header; the mitigation is never leaking isAdmin on public endpoints, not the header itself.
+- [Item moderation & visibility](item-approval.md) — public/owner/admin item views need distinct status filters; don't collapse them via a shared sellerId query param.
 - [Stripe Invoice subscription field](stripe-invoice-subscription-field.md) — Stripe SDK v22 moved Invoice.subscription to invoice.parent?.subscription_details?.subscription.
 - [Vermotu matching engine exists](vermotu-matching-engine.md) — "Busca Inteligente" (search parser + ranking + service requests/proposals) is already built; extend, don't rebuild.

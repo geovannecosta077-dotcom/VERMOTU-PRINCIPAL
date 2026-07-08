@@ -220,6 +220,48 @@ export interface User {
   createdAt: string;
 }
 
+export type PublicUserSummaryAccountType = typeof PublicUserSummaryAccountType[keyof typeof PublicUserSummaryAccountType];
+
+
+export const PublicUserSummaryAccountType = {
+  pessoa: 'pessoa',
+  empresa: 'empresa',
+} as const;
+
+export type PublicUserSummaryPlan = typeof PublicUserSummaryPlan[keyof typeof PublicUserSummaryPlan];
+
+
+export const PublicUserSummaryPlan = {
+  free: 'free',
+  pro: 'pro',
+  premium: 'premium',
+} as const;
+
+export interface PublicUserSummary {
+  id: number;
+  /** @nullable */
+  publicId?: string | null;
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  cpf?: string | null;
+  /** @nullable */
+  cnpj?: string | null;
+  accountType: PublicUserSummaryAccountType;
+  /** @nullable */
+  avatarUrl?: string | null;
+  acceptedTerms: boolean;
+  phoneVerified: boolean;
+  accountVerified: boolean;
+  plan: PublicUserSummaryPlan;
+  storeName: string;
+  bio: string;
+  city: string;
+  createdAt: string;
+}
+
 export interface UpsertUser {
   /** @minLength 2 */
   name: string;

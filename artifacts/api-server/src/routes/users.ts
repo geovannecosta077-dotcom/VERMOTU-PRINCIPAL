@@ -14,6 +14,7 @@ import {
   SetUserCpfBody,
 } from "@workspace/api-zod";
 import { isValidCpf, normalizeCpf, normalizePhone, isValidPhone } from "../utils/cpf.js";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -27,7 +28,24 @@ function publicUser(row: UserRow): PublicUser {
   return rest;
 }
 
+// This bulk listing is used by regular (non-admin) users too — e.g. the
+// chat page resolves "userId -> name" for conversation partners — so it
+// must stay publicly readable. To avoid leaking isAdmin/banned for every
+// account (which would let anyone discover an admin's id and spoof
+// x-user-id on /admin/* routes), strip those admin-only fields here. The
+// full shape (including isAdmin/banned) is only available via the
+// admin-gated GET /admin/users below.
 router.get("/users", async (_req, res): Promise<void> => {
+  const rows = await db.select().from(usersTable);
+  res.json(
+    rows.map((row) => {
+      const { isAdmin: _isAdmin, banned: _banned, ...rest } = publicUser(row);
+      return rest;
+    }),
+  );
+});
+
+router.get("/admin/users", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db.select().from(usersTable);
   res.json(rows.map(publicUser));
 });
