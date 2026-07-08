@@ -4,7 +4,6 @@ import { useSession, formatBRL } from "@/lib/session";
 import {
   useGetUser,
   useListSubscriptions,
-  useCreateSubscription,
   useCreateSubscriptionCheckout,
   getGetUserQueryKey,
   getListSubscriptionsQueryKey,
@@ -12,29 +11,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useUpload } from "@workspace/object-storage-web";
 import {
-  Check, Crown, Copy, Upload, Loader2, CheckCircle2, Clock,
-  X, CreditCard, ImageIcon,
+  Check, Crown, Loader2, CheckCircle2, Clock, CreditCard,
 } from "lucide-react";
-
-const PIX_INFO = {
-  pro: {
-    label: "Básico",
-    amount: 49,
-    code: "00020126580014br.gov.bcb.pix01362504a042-8fee-4e1c-a908-17dff6449c8627600016BR.COM.PAGSEGURO01368C053B4F-1F47-4BBF-8275-488BC62E9F3B520489995303986540549.005802BR5922GEOVANNE BARBOZA COSTA6014RIO DE JANEIRO62290525PAGS0000049002606120212566304C61B",
-    key: "2504a042-8fee-4e1c-a908-17dff6449c86",
-  },
-  premium: {
-    label: "Premium",
-    amount: 99,
-    code: "00020126580014br.gov.bcb.pix01362504a042-8fee-4e1c-a908-17dff6449c8627600016BR.COM.PAGSEGURO0136B58F4176-640D-4C60-97B9-A6160F874438520489995303986540599.005802BR5922GEOVANNE BARBOZA COSTA6014RIO DE JANEIRO62290525PAGS00000990026061202136363044330",
-    key: "2504a042-8fee-4e1c-a908-17dff6449c86",
-  },
-};
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   awaiting_payment: { label: "Aguardando pagamento", color: "bg-amber-500/15 text-amber-500" },
@@ -82,25 +63,8 @@ export function Planos() {
     { userId: currentUserId ?? 0 },
     { query: { enabled: !!currentUserId, queryKey: getListSubscriptionsQueryKey({ userId: currentUserId ?? 0 }) } },
   );
-  const createSubscription = useCreateSubscription();
   const createSubscriptionCheckout = useCreateSubscriptionCheckout();
   const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<"pro" | "premium" | null>(null);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedPlan, setSelectedPlan] = useState<"pro" | "premium">("pro");
-  const [proofUrl, setProofUrl] = useState("");
-  const [proofName, setProofName] = useState("");
-  const [copied, setCopied] = useState(false);
-
-  const { uploadFile, isUploading, progress } = useUpload({
-    onSuccess: (res) => {
-      setProofUrl(res.objectPath);
-      setProofName(res.objectPath.split("/").pop() ?? "comprovante");
-      toast.success("Comprovante enviado! Agora clique em Confirmar.");
-    },
-    onError: () => toast.error("Falha no upload do comprovante. Tente novamente."),
-  });
 
   useEffect(() => { document.title = "Planos — Vermotu"; }, []);
 
@@ -120,18 +84,7 @@ export function Planos() {
     }
   }, [currentUserId, queryClient]);
 
-  const activeSub = (subscriptions ?? []).find((s) => ["proof_submitted", "in_review", "approved"].includes(s.status));
-  const pendingSub = (subscriptions ?? []).find((s) => ["awaiting_payment", "proof_submitted", "in_review"].includes(s.status));
-
-  const openDialog = (plan: "pro" | "premium") => {
-    if (!currentUserId) { setLoginOpen(true); return; }
-    setSelectedPlan(plan);
-    setStep(1);
-    setProofUrl("");
-    setProofName("");
-    setCopied(false);
-    setDialogOpen(true);
-  };
+  const pendingSub = (subscriptions ?? []).find((s) => ["awaiting_payment", "proof_submitted", "in_review", "approved"].includes(s.status));
 
   const handleStripeCheckout = (plan: "pro" | "premium") => {
     if (!currentUserId) { setLoginOpen(true); return; }
@@ -139,49 +92,14 @@ export function Planos() {
     createSubscriptionCheckout.mutate(
       { data: { userId: currentUserId, plan } },
       {
-        onSuccess: (session) => {
-          window.location.href = session.url;
-        },
+        onSuccess: (session) => { window.location.href = session.url; },
         onError: () => {
-          toast.error("Erro ao iniciar pagamento com cartão. Tente novamente.");
+          toast.error("Erro ao iniciar pagamento. Tente novamente.");
           setCheckoutLoadingPlan(null);
         },
       },
     );
   };
-
-  const copyCode = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      toast.success("Código PIX copiado!");
-      setTimeout(() => setCopied(false), 3000);
-    });
-  };
-
-  const onPickProof = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    uploadFile(file);
-  };
-
-  const submitSubscription = () => {
-    if (!currentUserId || !proofUrl) {
-      toast.error("Envie o comprovante antes de confirmar.");
-      return;
-    }
-    createSubscription.mutate(
-      { data: { userId: currentUserId, plan: selectedPlan, proofUrl, proofName } },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListSubscriptionsQueryKey({ userId: currentUserId }) });
-          setStep(3);
-        },
-        onError: () => toast.error("Erro ao registrar assinatura. Tente novamente."),
-      },
-    );
-  };
-
-  const pix = PIX_INFO[selectedPlan];
 
   return (
     <Layout>
@@ -189,7 +107,7 @@ export function Planos() {
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-4xl font-bold mb-3">Planos premium</h1>
           <p className="text-muted-foreground text-lg">
-            Mais visibilidade, mais vendas. Pague com cartão e ative na hora, ou via PIX em até 24h.
+            Mais visibilidade, mais vendas. Assine com cartão de crédito e ative na hora.
           </p>
         </div>
 
@@ -252,33 +170,22 @@ export function Planos() {
                       {isCurrent ? "Plano atual" : "Selecionar"}
                     </Button>
                   ) : (
-                    <div className="space-y-2">
-                      <Button
-                        className="w-full"
-                        variant={p.popular ? "default" : "outline"}
-                        onClick={() => handleStripeCheckout(p.id)}
-                        disabled={isCurrent || !!hasPending || checkoutLoadingPlan === p.id}
-                      >
-                        {checkoutLoadingPlan === p.id ? (
-                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecionando...</>
-                        ) : isCurrent ? (
-                          "Plano atual"
-                        ) : hasPending ? (
-                          "Aguardando aprovação"
-                        ) : (
-                          <><CreditCard className="w-4 h-4 mr-2" /> Assinar com cartão</>
-                        )}
-                      </Button>
-                      <Button
-                        className="w-full"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openDialog(p.id)}
-                        disabled={isCurrent || !!hasPending}
-                      >
-                        Assinar via PIX
-                      </Button>
-                    </div>
+                    <Button
+                      className="w-full"
+                      variant={p.popular ? "default" : "outline"}
+                      onClick={() => handleStripeCheckout(p.id)}
+                      disabled={isCurrent || !!hasPending || checkoutLoadingPlan === p.id}
+                    >
+                      {checkoutLoadingPlan === p.id ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecionando...</>
+                      ) : isCurrent ? (
+                        "Plano atual"
+                      ) : hasPending ? (
+                        pendingSub?.status === "approved" ? "Plano ativo" : "Aguardando confirmação"
+                      ) : (
+                        <><CreditCard className="w-4 h-4 mr-2" /> Assinar com cartão</>
+                      )}
+                    </Button>
                   )}
                 </CardContent>
               </Card>
@@ -291,140 +198,15 @@ export function Planos() {
             <CreditCard className="w-4 h-4 text-primary" /> Como funciona o pagamento
           </h3>
           <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-            <li>Pague com cartão de crédito e ative seu plano na hora, ou</li>
-            <li>Pague via PIX: copie o código, realize o pagamento e envie o comprovante</li>
-            <li>Pagamentos via PIX são analisados e o plano é ativado em até 24h</li>
+            <li>Clique em "Assinar com cartão" no plano desejado</li>
+            <li>Você será redirecionado para a página segura de pagamento do Stripe</li>
+            <li>Após o pagamento confirmado, seu plano é ativado imediatamente</li>
           </ol>
           <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-            PIX — Beneficiário: <strong>Geovanne Barboza Costa</strong> · Instituição: PagSeguro
+            Pagamentos processados com segurança pelo Stripe. Cancele a qualquer momento.
           </div>
         </div>
       </section>
-
-      <Dialog open={dialogOpen} onOpenChange={(v) => { if (!v && step !== 3) setDialogOpen(false); else if (!v) { setDialogOpen(false); setStep(1); } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {step === 1 && `Assinar Plano ${pix?.label} — ${formatBRL(pix?.amount ?? 0)}/mês`}
-              {step === 2 && "Enviar comprovante"}
-              {step === 3 && "Solicitação enviada!"}
-            </DialogTitle>
-            <DialogDescription>
-              {step === 1 && "Realize o pagamento via PIX e depois envie o comprovante."}
-              {step === 2 && "Envie a foto ou print do comprovante de pagamento."}
-              {step === 3 && "Nossa equipe analisará seu pagamento em até 24 horas."}
-            </DialogDescription>
-          </DialogHeader>
-
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="rounded-lg bg-muted/50 border border-border p-4 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Beneficiário</span>
-                  <span className="font-medium">Geovanne Barboza Costa</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Instituição</span>
-                  <span>PagSeguro</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Valor</span>
-                  <span className="font-bold text-primary">{formatBRL(pix?.amount ?? 0)}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Código PIX — Copia e Cola</div>
-                <div className="bg-muted rounded-lg p-3 text-xs font-mono break-all leading-relaxed text-muted-foreground">
-                  {pix?.code}
-                </div>
-                <Button
-                  onClick={() => copyCode(pix?.code ?? "")}
-                  className="w-full"
-                  variant={copied ? "secondary" : "default"}
-                >
-                  {copied ? (
-                    <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> Copiado!</>
-                  ) : (
-                    <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>
-                  )}
-                </Button>
-              </div>
-
-              <Button onClick={() => setStep(2)} variant="outline" className="w-full">
-                Já efetuei o pagamento →
-              </Button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-4">
-              <div className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-6 text-center">
-                {proofUrl ? (
-                  <div className="space-y-2">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-                    <div className="text-sm font-medium text-emerald-500">Comprovante enviado!</div>
-                    <Button variant="ghost" size="sm" onClick={() => { setProofUrl(""); setProofName(""); }} className="text-destructive text-xs">
-                      <X className="w-3 h-3 mr-1" /> Remover e enviar outro
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="cursor-pointer block space-y-2">
-                    {isUploading ? (
-                      <div className="space-y-2">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                        <div className="text-sm text-muted-foreground">Enviando... {progress > 0 ? `${progress}%` : ""}</div>
-                      </div>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-8 h-8 mx-auto text-muted-foreground" />
-                        <div className="text-sm font-medium">Clique para enviar o comprovante</div>
-                        <div className="text-xs text-muted-foreground">JPG, PNG ou PDF</div>
-                      </>
-                    )}
-                    <input type="file" accept="image/*,.pdf" className="hidden" onChange={onPickProof} disabled={isUploading} />
-                  </label>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  Voltar
-                </Button>
-                <Button
-                  onClick={submitSubscription}
-                  disabled={!proofUrl || createSubscription.isPending}
-                  className="flex-1"
-                >
-                  {createSubscription.isPending ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Confirmando...</>
-                  ) : (
-                    "Confirmar pagamento"
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4 text-center py-4">
-              <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
-              <div>
-                <div className="font-semibold text-lg">Comprovante recebido!</div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  Nossa equipe irá verificar seu pagamento e ativar o Plano {pix?.label} em até 24 horas.
-                </div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
-                Você receberá uma confirmação quando seu plano for ativado. Em caso de dúvidas, entre em contato com o suporte.
-              </div>
-              <Button onClick={() => { setDialogOpen(false); setStep(1); }} className="w-full">
-                Entendido
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </Layout>
   );
 }
