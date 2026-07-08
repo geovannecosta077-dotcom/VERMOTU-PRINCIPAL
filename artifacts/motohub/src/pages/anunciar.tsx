@@ -12,7 +12,8 @@ import { useSession, imageUrl } from "@/lib/session";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useUpload } from "@workspace/object-storage-web";
-import { Upload, ImageIcon, X, Loader2, ShieldCheck, Lock, Bike, RefreshCw, Wrench, Zap, Building2, ChevronLeft } from "lucide-react";
+import { Upload, ImageIcon, X, Loader2, ShieldCheck, Lock, Bike, RefreshCw, Wrench, Zap, Building2, ChevronLeft, AlertCircle } from "lucide-react";
+import { ESTADOS, CIDADES_POR_ESTADO, formatLocalidade } from "@/lib/localidades";
 
 function formatCpfInput(v: string): string {
   const d = v.replace(/\D/g, "").slice(0, 11);
@@ -43,6 +44,26 @@ const PECA_TYPES = ["Motor", "Freio", "Suspensão", "Elétrica", "Carroceria / F
 const SERVICO_TYPES = ["Revisão geral", "Troca de óleo", "Freio", "Suspensão", "Motor", "Elétrica / Injeção", "Funilaria / Pintura", "Estética", "Personalização", "Outro"];
 const OFICINA_SERVICES = ["Revisão geral", "Troca de óleo", "Freio", "Suspensão", "Motor", "Elétrica", "Funilaria", "Estética", "Personalização", "Troca de pneus"];
 const FUEL_TYPES = ["Gasolina", "Flex (gasolina/álcool)", "Álcool", "Elétrica", "Híbrida"];
+const CRASH_HISTORY = [
+  { value: "nunca_caiu", label: "Nunca caiu" },
+  { value: "pequena_queda", label: "Pequena queda / arranhado" },
+  { value: "acidente", label: "Acidente (com danos) " },
+];
+const DOCS_STATUS = [
+  { value: "quitada", label: "Quitada" },
+  { value: "financiada", label: "Financiada" },
+  { value: "alienada", label: "Alienada (com gravame)" },
+];
+const MECHANICS_STATUS = [
+  { value: "original", label: "Motor original" },
+  { value: "retificado", label: "Motor retificado" },
+  { value: "revisada", label: "Revisada recentemente" },
+];
+const TIRES_STATUS = [
+  { value: "novos", label: "Pneus novos" },
+  { value: "bons", label: "Pneus bons" },
+  { value: "trocar", label: "Precisam de troca" },
+];
 const CONDITIONS = [
   { value: "novo", label: "Novo" },
   { value: "excelente", label: "Excelente estado" },
@@ -70,8 +91,10 @@ export function Anunciar() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocationField] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cidade, setCidade] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const location = cidade && estado ? formatLocalidade(cidade, estado) : "";
   const image = images[0] ?? "";
 
   // Moto + Troca fields
@@ -84,6 +107,13 @@ export function Anunciar() {
   const [fuelType, setFuelType] = useState("");
   const [condition, setCondition] = useState("usado");
   const [selectedOptionals, setSelectedOptionals] = useState<string[]>([]);
+  // Phase 4: extra moto condition fields
+  const [crashHistory, setCrashHistory] = useState("nunca_caiu");
+  const [docsStatus, setDocsStatus] = useState("quitada");
+  const [mechanicsStatus, setMechanicsStatus] = useState("original");
+  const [tiresStatus, setTiresStatus] = useState("bons");
+  const [hasManual, setHasManual] = useState(false);
+  const [hasSpareKey, setHasSpareKey] = useState(false);
 
   // Troca specific
   const [desiredMoto, setDesiredMoto] = useState("");
@@ -170,8 +200,9 @@ export function Anunciar() {
     if (!user.cpf) { toast.error("Cadastre seu CPF antes de anunciar."); return; }
     if (!title.trim() || title.trim().length < 3) { toast.error("Informe um título com ao menos 3 caracteres."); return; }
     if (!Number(price) || Number(price) < 0) { toast.error("Informe um preço válido (0 para consultar)."); return; }
-    if (description.trim().length < 10) { toast.error("Descreva seu anúncio com mais detalhes (mín. 10 caracteres)."); return; }
-    if (!location.trim()) { toast.error("Informe a cidade/localização."); return; }
+    if (description.trim().length < 100) { toast.error("Descreva seu anúncio com mais detalhes (mín. 100 caracteres)."); return; }
+    if (description.trim().length > 5000) { toast.error("Descrição muito longa (máx. 5.000 caracteres)."); return; }
+    if (!cidade || !estado) { toast.error("Selecione o estado e a cidade do anúncio."); return; }
     if (images.length === 0) { toast.error("Envie pelo menos uma foto do anúncio."); return; }
     if (formType === "oficina" && !phone.trim()) { toast.error("Informe o WhatsApp da oficina."); return; }
 
@@ -180,7 +211,10 @@ export function Anunciar() {
     let extras: string | undefined;
     let tradeInfo: string | undefined;
 
-    if (formType === "moto") { itemType = "moto"; category = "geral"; }
+    if (formType === "moto") {
+      itemType = "moto"; category = "geral";
+      extras = JSON.stringify({ crashHistory, docsStatus, mechanicsStatus, tiresStatus, hasManual, hasSpareKey });
+    }
     else if (formType === "troca") {
       itemType = "moto"; category = "troca";
       tradeInfo = JSON.stringify({ desiredMoto, cashback: acceptCashback ? Number(cashback) : 0, acceptCashback });
@@ -383,6 +417,58 @@ export function Anunciar() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Phase 4: detailed moto condition */}
+                  <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
+                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Informações detalhadas</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Histórico de quedas</Label>
+                        <Select value={crashHistory} onValueChange={setCrashHistory}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{CRASH_HISTORY.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Documentação</Label>
+                        <Select value={docsStatus} onValueChange={setDocsStatus}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{DOCS_STATUS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Estado do motor</Label>
+                        <Select value={mechanicsStatus} onValueChange={setMechanicsStatus}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{MECHANICS_STATUS.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Pneus</Label>
+                        <Select value={tiresStatus} onValueChange={setTiresStatus}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{TIRES_STATUS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Itens inclusos</Label>
+                      <div className="flex flex-wrap gap-3">
+                        {[
+                          { label: "Manual do proprietário", checked: hasManual, set: setHasManual },
+                          { label: "Chave reserva", checked: hasSpareKey, set: setHasSpareKey },
+                        ].map(({ label, checked, set }) => (
+                          <label key={label} className={`flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer text-sm transition-colors ${checked ? "border-primary bg-primary/5 text-primary" : "border-border"}`}>
+                            <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => set(e.target.checked)} />
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${checked ? "bg-primary border-primary" : "border-muted-foreground"}`}>
+                              {checked && <span className="text-white text-[10px] font-bold">✓</span>}
+                            </div>
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </>
               )}
 
@@ -558,39 +644,68 @@ export function Anunciar() {
                 />
               </div>
 
-              {/* ─── PRICE ─── */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ─── PRICE + LOCATION ─── */}
+              <div className="space-y-2">
+                <Label>
+                  {formType === "oficina" ? "Preço médio (0 = a consultar)" :
+                   formType === "troca" ? "Valor de referência da moto (R$)" :
+                   "Preço (R$) *"}
+                </Label>
+                <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={formType === "oficina" ? "0" : "15500"} required />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>
-                    {formType === "oficina" ? "Preço médio (0 = a consultar)" :
-                     formType === "troca" ? "Valor de referência da moto (R$)" :
-                     "Preço (R$) *"}
-                  </Label>
-                  <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={formType === "oficina" ? "0" : "15500"} required />
+                  <Label>Estado *</Label>
+                  <Select value={estado} onValueChange={(v) => { setEstado(v); setCidade(""); }}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o estado" /></SelectTrigger>
+                    <SelectContent>
+                      {ESTADOS.map((e) => (
+                        <SelectItem key={e.uf} value={e.uf}>{e.nome} ({e.uf})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Cidade / Localização *</Label>
-                  <Input value={location} onChange={(e) => setLocationField(e.target.value)} placeholder="Rio de Janeiro, RJ" required />
+                  <Label>Cidade *</Label>
+                  <Select value={cidade} onValueChange={setCidade} disabled={!estado}>
+                    <SelectTrigger><SelectValue placeholder={estado ? "Selecione a cidade" : "Escolha o estado primeiro"} /></SelectTrigger>
+                    <SelectContent>
+                      {(CIDADES_POR_ESTADO[estado] ?? []).map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               {/* ─── DESCRIPTION ─── */}
               <div className="space-y-2">
-                <Label>Descrição *</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Descrição *</Label>
+                  <span className={`text-xs font-medium ${description.length < 100 ? "text-orange-500" : description.length > 5000 ? "text-destructive" : "text-muted-foreground"}`}>
+                    {description.length}/5000
+                    {description.length < 100 && ` (mín. 100)`}
+                  </span>
+                </div>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={5}
+                  rows={6}
                   placeholder={
-                    formType === "moto" ? "Descreva o estado da moto, histórico de revisões, motivo da venda..." :
-                    formType === "troca" ? "Informe detalhes sobre a sua moto e o que você busca na troca..." :
-                    formType === "peca" ? "Descreva a condição da peça, origem, garantia..." :
-                    formType === "servico" ? "Descreva o serviço, diferencial, tempo de entrega..." :
-                    "Descreva a oficina, anos de experiência, estrutura..."
+                    formType === "moto" ? "Descreva o estado da moto, histórico de revisões, motivo da venda, melhorias realizadas, acessórios inclusos..." :
+                    formType === "troca" ? "Informe detalhes sobre a sua moto e o que você busca na troca. Quanto mais detalhes, maior a chance de encontrar o parceiro ideal..." :
+                    formType === "peca" ? "Descreva a condição da peça, origem, garantia, compatibilidade verificada..." :
+                    formType === "servico" ? "Descreva o serviço, diferencial, tempo de entrega, garantia oferecida..." :
+                    "Descreva a oficina, anos de experiência, estrutura, equipe e especialidades..."
                   }
                   required
-                  minLength={10}
+                  maxLength={5000}
                 />
+                {description.length < 100 && description.length > 0 && (
+                  <p className="text-xs text-orange-500 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> Faltam {100 - description.length} caracteres para o mínimo obrigatório
+                  </p>
+                )}
               </div>
 
               {/* ─── PHOTOS (até 5) ─── */}

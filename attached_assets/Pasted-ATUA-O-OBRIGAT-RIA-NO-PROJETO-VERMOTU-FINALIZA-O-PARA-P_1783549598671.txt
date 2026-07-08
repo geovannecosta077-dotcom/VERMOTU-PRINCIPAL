@@ -1,0 +1,644 @@
+ATUAÇÃO OBRIGATÓRIA NO PROJETO VERMOTU — FINALIZAÇÃO PARA PRODUÇÃO
+
+IMPORTANTE:
+
+Antes de executar qualquer alteração, analise todo o projeto existente.
+
+O Vermotu já possui estrutura, páginas, banco de dados, autenticação, anúncios, painel administrativo, integração de pagamentos e regras de negócio implementadas.
+
+NÃO recriar funcionalidades existentes.
+
+NÃO substituir componentes que já funcionam.
+
+NÃO refatorar o projeto inteiro.
+
+NÃO alterar arquitetura sem necessidade.
+
+NÃO remover regras de negócio existentes.
+
+NÃO criar novas funcionalidades sem antes verificar se já existe implementação parcial ou completa.
+
+OBJETIVO:
+
+Finalizar o Vermotu para produção transformando-o em uma plataforma híbrida de:
+
+- Marketplace de motos
+- Marketplace de peças
+- Marketplace de acessórios
+- Marketplace de oficinas
+- Plataforma de oportunidades
+- Plataforma de matching inteligente
+- Plataforma de agendamento de serviços
+- Plataforma de intermediação financeira segura
+
+Modelo de referência:
+
+- Uber (matching)
+- iFood (pedidos em tempo real)
+- Mercado Livre (marketplace)
+- GetNinjas (solicitação de orçamento)
+
+==================================================
+FASE 1 — AUDITORIA COMPLETA
+
+Antes de qualquer implementação:
+
+1. Mapear toda estrutura atual.
+2. Identificar funcionalidades existentes.
+3. Identificar funcionalidades incompletas.
+4. Identificar erros.
+5. Identificar gargalos.
+6. Identificar tabelas existentes.
+7. Identificar integrações existentes.
+8. Aproveitar ao máximo o código atual.
+
+Auditar:
+
+- Login
+- Cadastro
+- Recuperação de senha
+- Permissões
+- Upload de imagens
+- Upload de arquivos
+- Anúncios
+- Edição de anúncios
+- Busca
+- Filtros
+- Stripe
+- Notificações
+- Dashboard
+- Banco de dados
+- APIs
+- Responsividade
+- Mobile
+- Desktop
+
+Corrigir todos os problemas encontrados antes de criar novas funcionalidades.
+
+==================================================
+FASE 2 — LOCALIZAÇÃO SEM ERROS
+
+Eliminar campos livres para localização.
+
+NÃO permitir digitação manual de:
+
+- Estado
+- Cidade
+
+Implementar:
+
+Estado
+↓
+Cidade
+↓
+Bairro (opcional)
+
+Utilizar base oficial.
+
+Evitar:
+
+- Curitiba PR
+- Curitba
+- Rio Janeiro
+- RJ Capital
+
+Todos os registros devem permanecer padronizados.
+
+==================================================
+FASE 3 — CADASTRO INTELIGENTE DE MOTOS
+
+Transformar o cadastro em fluxo guiado.
+
+Marca
+↓
+Modelo
+↓
+Ano
+↓
+Versão
+
+Após seleção:
+
+Preencher automaticamente:
+
+- cilindrada
+- categoria
+- fabricante
+
+Evitar cadastro inconsistente.
+
+==================================================
+FASE 4 — ANÚNCIOS MAIS ROBUSTOS
+
+Adicionar informações estruturadas.
+
+Estado da moto:
+
+- Nunca caiu
+- Pequena queda
+- Acidente
+
+Documentação:
+
+- Quitada
+- Financiada
+- Alienada
+
+Mecânica:
+
+- Motor original
+- Retificado
+- Revisada
+
+Pneus:
+
+- Novos
+- Bons
+- Trocar
+
+Itens:
+
+- Manual
+- Chave reserva
+
+Descrição:
+
+mínimo 100 caracteres
+
+máximo 5000 caracteres
+
+Exibir contador visual.
+
+==================================================
+FASE 5 — SISTEMA UBER / IFOOD PARA MOTOS
+
+Criar ou finalizar sistema de solicitações inteligentes.
+
+Fluxo:
+
+Cliente não encontra o que procura.
+
+Clica:
+
+"Não encontrou o que procura?"
+
+Preenche:
+
+- Produto
+- Peça
+- Moto
+- Serviço
+- Urgência
+
+Exemplos:
+
+- Motor Titan 160
+- Escapamento Coyote
+- XRE até R$ 25.000
+- Troca de embreagem
+- Mecânico urgente
+
+Criar ou finalizar:
+
+service_requests
+
+Campos mínimos:
+
+- id
+- user_id
+- category
+- title
+- description
+- urgency
+- latitude
+- longitude
+- city
+- state
+- status
+- expires_at
+- created_at
+
+==================================================
+FASE 6 — MATCHING INTELIGENTE
+
+Ao criar solicitação:
+
+Localizar fornecedores aptos.
+
+Ranking baseado em:
+
+- Distância
+- Avaliação
+- Urgência
+- Tempo médio de resposta
+- Plano contratado
+- Taxa de aceitação
+- Histórico de atendimento
+
+Criar score único.
+
+Entregar primeiro para quem possui maior chance de atender rapidamente.
+
+==================================================
+FASE 7 — PROPOSTAS
+
+Criar ou finalizar:
+
+service_proposals
+
+Campos:
+
+- id
+- request_id
+- provider_id
+- price
+- message
+- estimated_time
+- status
+- created_at
+
+Fluxo:
+
+Fornecedor recebe solicitação.
+
+Envia:
+
+- preço
+- prazo
+- disponibilidade
+
+Cliente recebe várias propostas.
+
+Escolhe uma.
+
+==================================================
+FASE 8 — DASHBOARD TEMPO REAL
+
+Criar painel estilo iFood.
+
+Exibir:
+
+- Novas solicitações
+- Distância
+- Categoria
+- Urgência
+- Tempo restante
+
+Atualização em tempo real.
+
+Botões:
+
+- Fazer proposta
+- Ignorar
+
+==================================================
+FASE 9 — NOTIFICAÇÕES INTELIGENTES
+
+Ao criar solicitação urgente:
+
+Enviar para:
+
+- Top 10 fornecedores mais relevantes
+- Online
+- Ativos
+- Verificados
+
+Implementar:
+
+- WebSocket
+- Push Notification
+- Notificação interna
+
+Evitar spam.
+
+==================================================
+FASE 10 — CHAT INTERNO SEGURO
+
+Implementar ou finalizar chat.
+
+Recursos:
+
+- Texto
+- Fotos
+- Arquivos
+- Orçamentos
+
+Antes da contratação:
+
+Ocultar:
+
+- WhatsApp
+- Telefone
+- Email
+
+Após contratação:
+
+Liberar comunicação.
+
+Registrar histórico.
+
+==================================================
+FASE 11 — VERIFICAÇÃO ANTIGOLPE
+
+Criar níveis.
+
+Nível 1:
+
+- Email
+- Telefone
+
+Nível 2:
+
+- RG
+- CNH
+- Selfie
+
+Nível 3:
+
+- CNPJ
+- Comprovante
+- Aprovação administrativa
+
+Exibir selos.
+
+==================================================
+FASE 12 — CÓDIGO DE SEGURANÇA
+
+Criar sistema de confirmação.
+
+Ao aceitar proposta:
+
+Gerar código único.
+
+Exemplo:
+
+482913
+
+Fluxo:
+
+1. Prestador realiza serviço.
+2. Cliente informa código.
+3. Prestador confirma.
+4. Sistema conclui atendimento.
+
+Sem código:
+
+Pagamento não é liberado.
+
+==================================================
+FASE 13 — SISTEMA DE PLANOS
+
+Todo recurso premium deve depender do plano.
+
+Plano Gratuito:
+
+- até 3 anúncios
+- sem destaque
+- sem oportunidades
+- sem prioridade
+
+Plano Plus:
+
+- mais anúncios
+- oportunidades limitadas
+- prioridade intermediária
+
+Plano Pro:
+
+- anúncios ilimitados
+- oportunidades ilimitadas
+- destaque
+- prioridade máxima
+
+Ao atingir limite:
+
+Nunca gerar erro.
+
+Mostrar:
+
+- mensagem amigável
+- benefícios do próximo plano
+- botão de upgrade
+
+==================================================
+FASE 14 — MONETIZAÇÃO
+
+Implementar múltiplas fontes de receita.
+
+1. Assinaturas mensais.
+
+2. Destaque de anúncios.
+
+3. Anúncios patrocinados.
+
+4. Prioridade em oportunidades.
+
+5. Comissão sobre serviços.
+
+Exemplo:
+
+Serviço:
+R$ 200
+
+Taxa:
+10%
+
+Prestador:
+R$ 180
+
+Plataforma:
+R$ 20
+
+6. Comissão sobre venda de peças.
+
+7. Comissão sobre venda de motos.
+
+8. Venda de leads qualificados.
+
+9. Taxa de intermediação financeira.
+
+Todos os percentuais devem ser configuráveis pelo administrador.
+
+==================================================
+FASE 15 — PAGAMENTO PELA PLATAFORMA
+
+Sempre que possível:
+
+Pagamento realizado dentro da plataforma.
+
+Fluxo:
+
+Cliente paga.
+
+Valor fica retido.
+
+Status:
+
+- aguardando
+- confirmado
+- agendado
+- executado
+- concluído
+
+Após confirmação:
+
+liberar pagamento ao prestador.
+
+Implementar:
+
+- Pix
+- Cartão
+- Stripe já existente
+- saldo interno
+
+==================================================
+FASE 16 — CARTEIRA DIGITAL
+
+Criar wallet interna.
+
+Cada usuário possui:
+
+- saldo disponível
+- saldo pendente
+- extrato
+- histórico
+
+Permitir:
+
+- recebimentos
+- reembolsos
+- retenções
+- saques via Pix
+
+==================================================
+FASE 17 — REEMBOLSOS E DISPUTAS
+
+Criar fluxo completo.
+
+Cliente:
+
+Solicita reembolso.
+
+Prestador:
+
+Responde.
+
+Administrador:
+
+Analisa.
+
+Decisão:
+
+- Aprovar
+- Rejeitar
+- Parcial
+
+Registrar tudo.
+
+==================================================
+FASE 18 — SEGURANÇA E EDUCAÇÃO
+
+Criar Central de Segurança.
+
+Conteúdo:
+
+- Como evitar golpes
+- Nunca pagar fora da plataforma
+- Como verificar usuários
+- Como denunciar anúncios
+- Como funciona o código de segurança
+- Boas práticas
+
+Adicionar alertas em:
+
+- Chat
+- Anúncios
+- Pagamentos
+- Propostas
+
+==================================================
+FASE 19 — SISTEMA DE DENÚNCIAS
+
+Adicionar botão:
+
+Denunciar.
+
+Motivos:
+
+- Golpe
+- Produto falso
+- Documento suspeito
+- Anúncio duplicado
+- Comportamento inadequado
+
+Painel administrativo recebe tudo.
+
+==================================================
+FASE 20 — AVALIAÇÕES E REPUTAÇÃO
+
+Após serviço:
+
+Cliente avalia:
+
+- Atendimento
+- Qualidade
+- Prazo
+
+Prestador avalia cliente.
+
+Calcular reputação pública.
+
+==================================================
+FASE 21 — PERFORMANCE
+
+Implementar apenas melhorias necessárias.
+
+- índices
+- paginação
+- lazy loading
+- cache
+- otimização de consultas
+- eliminação de consultas repetidas
+
+==================================================
+VALIDAÇÃO OBRIGATÓRIA
+
+Testar:
+
+- Login
+- Cadastro
+- Recuperação de senha
+- Upload
+- Documentos
+- Anúncios
+- Edição
+- Busca
+- Matching
+- Propostas
+- Chat
+- Notificações
+- Planos
+- Stripe
+- Pagamentos
+- Reembolsos
+- Wallet
+- Painel administrativo
+- Mobile
+- Desktop
+
+==================================================
+RELATÓRIO FINAL OBRIGATÓRIO
+
+Ao concluir apresentar:
+
+1. Erros encontrados.
+2. Erros corrigidos.
+3. Funcionalidades implementadas.
+4. Arquivos alterados.
+5. Estruturas de banco alteradas.
+6. Melhorias de performance.
+7. Testes executados.
+8. Resultado dos testes.
+9. Pendências identificadas.
+
+Não considerar a tarefa concluída sem esse relatório completo.

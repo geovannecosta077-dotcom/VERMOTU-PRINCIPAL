@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useListItems, useSmartSearch, type Item } from "@workspace/api-client-react";
 import { useSession, getAnonSessionId } from "@/lib/session";
-import { Search } from "lucide-react";
+import { Search, Zap } from "lucide-react";
+import { Link } from "wouter";
 
 interface Props {
   type: "moto" | "peca" | "servico";
@@ -105,12 +106,36 @@ export function Listings({ type, title, subtitle }: Props) {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            Nenhum resultado encontrado. Tente outra busca.
+          <div className="text-center py-20">
+            <p className="text-muted-foreground mb-6">Nenhum resultado encontrado. Tente outra busca.</p>
+            <Link href={`/oportunidades`}>
+              <div className="inline-flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 px-6 py-4 hover:bg-primary/10 transition-colors cursor-pointer">
+                <Zap className="w-5 h-5 text-primary" />
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Não encontrou o que procura?</p>
+                  <p className="text-xs text-muted-foreground">Use a Busca Inteligente — fornecedores enviam propostas para você</p>
+                </div>
+              </div>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {items.map((item) => <ItemCard key={item.id} item={item} />)}
+          </div>
+        )}
+
+        {/* Always show smart-search CTA at bottom */}
+        {!loading && items.length > 0 && (
+          <div className="mt-12 border-t border-border/40 pt-8 text-center">
+            <Link href="/oportunidades">
+              <div className="inline-flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 hover:bg-primary/10 transition-colors cursor-pointer">
+                <Zap className="w-5 h-5 text-primary" />
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Não encontrou exatamente o que queria?</p>
+                  <p className="text-xs text-muted-foreground">Descreva e receba propostas de fornecedores verificados</p>
+                </div>
+              </div>
+            </Link>
           </div>
         )}
       </section>

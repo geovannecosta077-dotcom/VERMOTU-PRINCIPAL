@@ -23,6 +23,7 @@ import { Termos } from "@/pages/termos";
 import { Loja } from "@/pages/loja";
 import { Blog } from "@/pages/blog";
 import { BlogPost } from "@/pages/blog-post";
+import { Oportunidades } from "@/pages/oportunidades";
 import { useSession } from "@/lib/session";
 import { useEffect } from "react";
 import { setExtraHeadersGetter } from "@workspace/api-client-react";
@@ -77,6 +78,7 @@ function Router() {
         <Route path="/termos" component={Termos} />
         <Route path="/blog" component={Blog} />
         <Route path="/blog/:slug" component={BlogPost} />
+        <Route path="/oportunidades" component={Oportunidades} />
         <Route component={NotFound} />
       </Switch>
     </>
