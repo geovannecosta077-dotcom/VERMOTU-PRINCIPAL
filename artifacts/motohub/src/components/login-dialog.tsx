@@ -117,7 +117,7 @@ export function LoginDialog({
       setCurrentUserId(user.id);
       handleClose(false);
       onLoggedIn?.(user.id);
-      toast.success(`Bem-vindo ao MotoHub, ${user.name.split(" ")[0]}!`);
+      toast.success(`Bem-vindo à Vermotu, ${user.name.split(" ")[0]}!`);
     } catch (err) {
       toast.error(extractError(err));
     }
@@ -186,7 +186,7 @@ export function LoginDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-primary">Acessar o MotoHub</DialogTitle>
+          <DialogTitle className="text-2xl text-primary">Acessar a Vermotu</DialogTitle>
           <DialogDescription>
             {tab === "setpw"
               ? "Defina uma senha para acessar sua conta existente."

@@ -44,7 +44,7 @@ export function Blog() {
           <div className="container max-w-5xl mx-auto text-center space-y-4">
             <div className="flex items-center justify-center gap-2 text-primary">
               <Rss className="w-5 h-5" />
-              <span className="text-sm font-semibold uppercase tracking-widest">Blog MotoHub</span>
+              <span className="text-sm font-semibold uppercase tracking-widest">Blog Vermotu</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black">
               Segurança, dicas &amp; novidades

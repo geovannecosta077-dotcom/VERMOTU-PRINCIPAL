@@ -1,0 +1,312 @@
+Segue uma versão mais profissional e objetiva, pensada para agentes como Replit Agent, Manus AI ou Cursor. Ela reduz ambiguidades e exige implementação completa, não apenas alterações superficiais.
+
+
+---
+
+5. PADRONIZAÇÃO DA MARCA VERMOTU (OBRIGATÓRIO)
+
+Realize uma auditoria completa em todo o projeto para eliminar 100% das referências à marca antiga MotoHub.
+
+Substitua todas as ocorrências por Vermotu, preservando o funcionamento do sistema.
+
+A varredura deve incluir, no mínimo:
+
+Front-end.
+
+Back-end.
+
+Componentes React.
+
+Layouts.
+
+Modais.
+
+Menus.
+
+Cabeçalhos.
+
+Rodapés.
+
+Dashboard.
+
+Painel Administrativo.
+
+Mensagens do sistema.
+
+Toasts.
+
+E-mails automáticos.
+
+Templates.
+
+SEO.
+
+Meta Tags.
+
+Open Graph.
+
+Manifest.
+
+PWA.
+
+Sitemap.
+
+Robots.
+
+Ícones.
+
+Logos.
+
+Assets.
+
+Variáveis.
+
+Constantes.
+
+Banco de dados (quando aplicável).
+
+APIs.
+
+Rotas.
+
+Documentação.
+
+Comentários relevantes.
+
+
+Após a substituição:
+
+Execute uma busca global em todo o projeto.
+
+Confirme que não existe nenhuma ocorrência restante de "MotoHub".
+
+Gere um relatório com os arquivos alterados e a quantidade de ocorrências corrigidas.
+
+
+
+---
+
+6. PAINEL ADMINISTRATIVO MOBILE FIRST (OBRIGATÓRIO)
+
+O Painel Administrativo deve oferecer 100% das funcionalidades em dispositivos móveis, sem depender de um computador.
+
+O painel deve funcionar perfeitamente em:
+
+Android.
+
+iPhone.
+
+Tablets.
+
+Notebook.
+
+Desktop.
+
+
+Adote um design Mobile First, inspirado na experiência de plataformas como Shopify, Stripe e Mercado Livre, sem copiar seus layouts.
+
+O administrador deve conseguir, pelo celular:
+
+Aprovar anúncios.
+
+Editar anúncios.
+
+Excluir anúncios.
+
+Gerenciar usuários.
+
+Gerenciar assinaturas.
+
+Gerenciar pagamentos.
+
+Moderar denúncias.
+
+Moderar avaliações.
+
+Gerenciar categorias.
+
+Visualizar métricas e gráficos.
+
+Configurar o sistema.
+
+Receber notificações.
+
+Acessar logs.
+
+Gerenciar banners.
+
+Gerenciar planos.
+
+Publicar comunicados.
+
+
+Requisitos obrigatórios:
+
+Menus responsivos.
+
+Tabelas adaptáveis.
+
+Cards no lugar de tabelas quando necessário.
+
+Botões acessíveis ao toque.
+
+Excelente desempenho.
+
+Interface limpa e profissional.
+
+Nenhuma funcionalidade oculta ou indisponível no mobile.
+
+
+
+---
+
+7. REFINAMENTO VISUAL (OBRIGATÓRIO)
+
+Quero remover qualquer aparência de site gerado por IA.
+
+Refine toda a interface para atingir padrão profissional.
+
+Remover
+
+Emojis desnecessários.
+
+Ícones inconsistentes.
+
+Textos genéricos.
+
+Espaçamentos irregulares.
+
+Componentes duplicados.
+
+Elementos que pareçam automáticos ou improvisados.
+
+
+Padronizar
+
+Tipografia.
+
+Ícones (Lucide ou Heroicons).
+
+Cores.
+
+Sombras.
+
+Bordas.
+
+Espaçamentos.
+
+Botões.
+
+Campos de formulário.
+
+Cards.
+
+Menus.
+
+Animações suaves.
+
+
+A identidade visual deve transmitir a imagem de uma empresa consolidada.
+
+
+---
+
+8. VALIDAÇÃO TÉCNICA COMPLETA (OBRIGATÓRIO)
+
+Antes de considerar qualquer tarefa concluída, execute obrigatoriamente:
+
+Compilação completa do projeto.
+
+Build de produção.
+
+Execução da aplicação.
+
+Testes das funcionalidades alteradas.
+
+Testes em Desktop.
+
+Testes em Mobile.
+
+Testes de Responsividade.
+
+Testes de Login.
+
+Testes de Cadastro.
+
+Testes do Painel Administrativo.
+
+Testes do Stripe.
+
+Testes de Publicação de Anúncios.
+
+Testes do Motor de Matching Inteligente.
+
+Testes das APIs.
+
+Testes do Banco de Dados.
+
+Verificação do Console.
+
+Verificação de Logs.
+
+Verificação de Performance.
+
+
+Se qualquer erro for encontrado, continue corrigindo até que todos os testes sejam aprovados.
+
+
+---
+
+9. CRITÉRIO DE ENTREGA (OBRIGATÓRIO)
+
+É proibido marcar a tarefa como concluída se qualquer item deste prompt estiver incompleto.
+
+A resposta "Concluído" somente poderá ser fornecida quando:
+
+Todas as implementações estiverem finalizadas.
+
+Todos os testes forem aprovados.
+
+Não existirem erros de compilação.
+
+Não existirem erros de TypeScript.
+
+Não existirem erros no Console.
+
+Não existirem erros nas APIs.
+
+Não existirem erros no Banco de Dados.
+
+Não existirem erros de autenticação.
+
+Não existirem referências à marca MotoHub.
+
+O Painel Administrativo estiver totalmente funcional em dispositivos móveis.
+
+A integração com Stripe estiver funcionando corretamente.
+
+O sistema estiver pronto para uso em produção.
+
+
+Se algum requisito não puder ser concluído, não finalize a tarefa.
+
+Apresente obrigatoriamente:
+
+O requisito pendente.
+
+O arquivo ou módulo envolvido.
+
+A causa técnica.
+
+O impacto no sistema.
+
+O que já foi implementado.
+
+O que falta implementar.
+
+A solução recomendada.
+
+Os próximos passos.
+
+
+Objetivo final: entregar um Vermotu com qualidade de produto comercial, aparência premium, identidade visual consistente, painel administrativo completo para desktop e mobile, integrações funcionando, código limpo, sem referências antigas à marca e pronto para produção, evitando qualquer aspecto que transmita a sensação de um projeto gerado automaticamente por IA.

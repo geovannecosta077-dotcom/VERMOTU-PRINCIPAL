@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useSession, useCart, imageUrl } from "@/lib/session";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, HardHat, ChevronRight, Zap } from "lucide-react";
+import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, ChevronRight, Zap, Newspaper, Megaphone, Info, HeadphonesIcon, LayoutDashboard } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -325,16 +325,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {/* Navegar */}
                   <div className="px-3 pt-3 pb-1">
                     <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Navegar</p>
-                    {[
-                      { href: "/motos", emoji: "🏍", label: "Motos" },
-                      { href: "/pecas", emoji: "🛒", label: "Peças e acessórios" },
-                      { href: "/oficinas", emoji: "🔧", label: "Oficinas" },
-                      { href: "/blog", emoji: "📰", label: "Blog" },
-                      { href: "/carrinho", emoji: "🛒", label: cartCount > 0 ? `Carrinho (${cartCount})` : "Carrinho" },
-                    ].map(({ href, emoji, label }) => (
+                    {([
+                      { href: "/motos", icon: Bike, label: "Motos" },
+                      { href: "/pecas", icon: CircleDot, label: "Peças e acessórios" },
+                      { href: "/oficinas", icon: Wrench, label: "Oficinas" },
+                      { href: "/blog", icon: Newspaper, label: "Blog" },
+                      { href: "/carrinho", icon: ShoppingCart, label: cartCount > 0 ? `Carrinho (${cartCount})` : "Carrinho" },
+                    ] as const).map(({ href, icon: Icon, label }) => (
                       <Link key={href} href={href}
                         className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
-                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                          <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </span>
                         <span className="text-sm font-medium">{label}</span>
                       </Link>
                     ))}
@@ -347,20 +349,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Minha conta</p>
                     {currentUser ? (
                       <>
-                        {[
-                          { href: "/conta", emoji: "👤", label: "Minha conta" },
-                          { href: "/pedidos", emoji: "📦", label: "Meus pedidos" },
-                          { href: "/chat", emoji: "💬", label: "Mensagens" },
-                        ].map(({ href, emoji, label }) => (
+                        {([
+                          { href: "/conta", icon: User, label: "Minha conta" },
+                          { href: "/pedidos", icon: Package, label: "Meus pedidos" },
+                          { href: "/chat", icon: MessageCircle, label: "Mensagens" },
+                        ] as const).map(({ href, icon: Icon, label }) => (
                           <Link key={href} href={href}
                             className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
-                            <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                            <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                              <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </span>
                             <span className="text-sm font-medium">{label}</span>
                           </Link>
                         ))}
                         <button onClick={handleAnunciar}
                           className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-primary/10 transition-colors group">
-                          <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center text-base shrink-0">📢</span>
+                          <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                            <Megaphone className="w-4 h-4 text-primary" />
+                          </span>
                           <span className="text-sm font-semibold text-primary">Anunciar</span>
                         </button>
                       </>
@@ -377,13 +383,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
                   {/* Institucional */}
                   <div className="px-3 pb-3">
-                    {[
-                      { href: "/sobre", emoji: "ℹ️", label: "Sobre nós" },
-                      { href: "/contato", emoji: "📞", label: "Contato" },
-                    ].map(({ href, emoji, label }) => (
+                    {([
+                      { href: "/sobre", icon: Info, label: "Sobre nós" },
+                      { href: "/contato", icon: HeadphonesIcon, label: "Contato" },
+                    ] as const).map(({ href, icon: Icon, label }) => (
                       <Link key={href} href={href}
                         className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
-                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                          <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </span>
                         <span className="text-sm font-medium">{label}</span>
                       </Link>
                     ))}
@@ -391,8 +399,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {/* Tema */}
                     <button onClick={toggleTheme}
                       className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
-                      <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">
-                        {theme === "dark" ? "☀️" : "🌙"}
+                      <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                        {theme === "dark"
+                          ? <Sun className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          : <Moon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />}
                       </span>
                       <span className="text-sm font-medium">{theme === "dark" ? "Tema Claro" : "Tema Escuro"}</span>
                     </button>
@@ -401,7 +411,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {(adminUnlocked || currentUser?.isAdmin) && (
                       <Link href="/admin"
                         className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
-                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">⚙️</span>
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                          <LayoutDashboard className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </span>
                         <span className="text-sm font-medium">Admin</span>
                       </Link>
                     )}

@@ -49,6 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -60,7 +61,7 @@ import {
   TrendingUp, Trash2, CheckCircle2, XCircle, Ban, Shield, Plus, PlusCircle,
   LogOut, Search, Star, CalendarCheck, Activity, ChevronRight,
   BadgeCheck, Crown, AlertTriangle, Eye, EyeOff, Settings, Flag,
-  Clock, FileText, CheckCheck, X, RefreshCw, CreditCard, Image, ArrowUp, ArrowDown,
+  Clock, FileText, CheckCheck, X, RefreshCw, CreditCard, Image, ArrowUp, ArrowDown, Menu,
 } from "lucide-react";
 
 const PIE_COLORS = ["hsl(var(--primary))", "#f59e0b", "#10b981", "#6366f1", "#ef4444"];
@@ -441,7 +442,7 @@ export function Admin() {
               <Shield className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="font-bold text-sm leading-none">MotoHub</div>
+              <div className="font-bold text-sm leading-none">Vermotu</div>
               <div className="text-xs text-muted-foreground">Admin Panel</div>
             </div>
           </div>

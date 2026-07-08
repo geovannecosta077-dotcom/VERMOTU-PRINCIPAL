@@ -24,7 +24,7 @@ export function Listings({ type, title, subtitle }: Props) {
   const currentUserId = useSession((s) => s.currentUserId);
 
   useEffect(() => {
-    document.title = `${title} — MotoHub`;
+    document.title = `${title} — Vermotu`;
   }, [title]);
 
   useEffect(() => setQ(initialQ), [initialQ]);
