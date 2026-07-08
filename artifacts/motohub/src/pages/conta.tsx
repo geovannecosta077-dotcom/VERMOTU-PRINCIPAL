@@ -43,12 +43,12 @@ export function Conta() {
   });
   const { data: allItems } = useListItems({});
 
-  // Separate query for own items — includes pending/sold (not just active)
+  // Dedicated query for seller's own items (server-side filter by sellerId)
   const { data: myItems } = useQuery<Array<{ id: number; type: string; title: string; price: number; status: string; sellerId: number; premium: boolean; image: string | null; createdAt: string; location: string; category: string; brand: string | null; condition: string; ratingAvg: number | null; ratingCount: number | null; stock: number }>>({
     queryKey: ["my-items", currentUserId],
     enabled: !!currentUserId,
     queryFn: async () => {
-      const res = await fetch(`/api/items?sellerId=${currentUserId}&showAll=true`);
+      const res = await fetch(`/api/items?sellerId=${currentUserId}`);
       if (!res.ok) return [];
       return res.json();
     },

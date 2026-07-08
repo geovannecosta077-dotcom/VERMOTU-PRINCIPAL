@@ -19,13 +19,8 @@ router.get("/items", async (req, res): Promise<void> => {
     return;
   }
   const filters = [];
-  // Default: show only active items publicly.
-  // Exception: when a specific sellerId is provided together with showAll=true,
-  // the seller may view their own listings in all statuses (pending, sold, active).
-  const showAllForOwner = req.query.showAll === "true" && !!q.data.sellerId;
-  if (!showAllForOwner) {
-    filters.push(eq(itemsTable.status, "active"));
-  }
+  // Public listing: always returns active items only.
+  filters.push(eq(itemsTable.status, "active"));
   if (q.data.type) filters.push(eq(itemsTable.type, q.data.type));
   if (q.data.brand) filters.push(eq(itemsTable.brand, q.data.brand));
   if (q.data.category) filters.push(eq(itemsTable.category, q.data.category));
