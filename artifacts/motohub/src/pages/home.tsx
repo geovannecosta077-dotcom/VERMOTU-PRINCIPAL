@@ -264,44 +264,89 @@ function HeroBannerCarousel() {
   }
 
   return (
-    <section className="relative min-h-[640px] flex items-center overflow-hidden bg-black">
+    <section className="relative min-h-[600px] md:min-h-[700px] flex items-center overflow-hidden bg-black">
       <div className="absolute inset-0 bg-gradient-to-br from-black via-black/85 to-red-950/40 z-10" />
       <img src="/images/hero.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />
       <div
-        className="absolute inset-0 z-10 opacity-[0.07]"
+        className="absolute inset-0 z-10 opacity-[0.05]"
         style={{
           backgroundImage: "linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
+          backgroundSize: "50px 50px",
         }}
       />
-      <div className="container relative z-20 py-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-3xl">
-          <Badge className="mb-5 bg-primary/15 border border-primary/40 text-primary hover:bg-primary/20 px-3 py-1">
-            <Bike className="w-3.5 h-3.5 mr-1.5" /> #1 marketplace de motos do Brasil
-          </Badge>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white leading-[0.95]">
+      {/* Glow accent */}
+      <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl z-10 pointer-events-none" />
+      <div className="container relative z-20 py-16 md:py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: "easeOut" }}
+          className="max-w-3xl"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Badge className="mb-5 bg-primary/15 border border-primary/40 text-primary hover:bg-primary/20 px-3 py-1.5 text-xs">
+              <Bike className="w-3.5 h-3.5 mr-1.5" /> #1 marketplace de motos do Brasil
+            </Badge>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-5 text-white leading-[0.93]"
+          >
             Tudo para sua moto<br />
-            <span className="bg-gradient-to-r from-primary via-red-500 to-red-600 bg-clip-text text-transparent">em um só lugar.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl">
-            Compre peças, venda sua moto, encontre oficinas perto de você. Pix, cartão e WhatsApp integrados. Entrega rápida e segurança total.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/30" asChild>
+            <span className="bg-gradient-to-r from-primary via-red-500 to-red-400 bg-clip-text text-transparent">em um só lugar.</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.28 }}
+            className="text-base md:text-xl text-gray-300 mb-8 max-w-xl leading-relaxed"
+          >
+            Compre peças, venda sua moto, encontre oficinas perto de você. PIX, cartão e WhatsApp integrados.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.38 }}
+            className="flex flex-col sm:flex-row gap-3"
+          >
+            <Button size="lg" className="text-base px-7 h-13 shadow-xl shadow-primary/30 font-semibold" asChild>
               <Link href="/pecas"><ShoppingBag className="w-4 h-4 mr-2" /> Comprar peças</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white" asChild>
+            <Button size="lg" variant="outline" className="text-base px-7 h-13 bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white font-semibold" asChild>
               <Link href="/anunciar"><Store className="w-4 h-4 mr-2" /> Vender peças</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white" asChild>
-              <Link href="/oficinas"><Wrench className="w-4 h-4 mr-2" /> Encontrar oficinas</Link>
+            <Button size="lg" variant="outline" className="text-base px-7 h-13 bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white font-semibold" asChild>
+              <Link href="/oficinas"><Wrench className="w-4 h-4 mr-2" /> Oficinas</Link>
             </Button>
-          </div>
-          <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-400">
-            <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-primary" /> Pagamento protegido</span>
-            <span className="flex items-center gap-2"><Truck className="w-4 h-4 text-primary" /> Entrega rápida no RJ</span>
-            <span className="flex items-center gap-2"><HeadphonesIcon className="w-4 h-4 text-primary" /> Suporte 7 dias</span>
-          </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.55 }}
+            className="flex flex-wrap gap-5 mt-10 text-sm text-gray-400"
+          >
+            {[
+              { icon: ShieldCheck, text: "Pagamento protegido" },
+              { icon: Truck, text: "Entrega rápida no RJ" },
+              { icon: HeadphonesIcon, text: "Suporte 7 dias" },
+            ].map(({ icon: Icon, text }, i) => (
+              <motion.span
+                key={text}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 + i * 0.1 }}
+                className="flex items-center gap-2"
+              >
+                <Icon className="w-4 h-4 text-primary shrink-0" /> {text}
+              </motion.span>
+            ))}
+          </motion.div>
         </motion.div>
       </div>
     </section>

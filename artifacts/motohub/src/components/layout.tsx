@@ -111,6 +111,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleAnunciar = () => {
+    if (!currentUserId) {
+      setLoginOpen(true);
+      return;
+    }
+    if (currentUser?.plan === "free") {
+      setLocation("/planos");
+      return;
+    }
+    setLocation("/anunciar");
+  };
+
   const SearchBar = ({ mobile = false }: { mobile?: boolean }) => (
     <div ref={mobile ? undefined : searchRef} className="relative w-full">
       <form onSubmit={handleSearch}>
@@ -196,10 +208,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center gap-2 md:gap-3">
+        <div className="container flex h-14 md:h-16 items-center gap-2 md:gap-3">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo-vermotu.png" alt="Vermotu" className="h-10 w-auto object-contain" />
+            <img src="/logo-vermotu.png" alt="Vermotu" className="h-10 md:h-14 w-auto object-contain" />
           </Link>
 
           {/* Search bar — right next to logo */}
@@ -239,7 +251,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </Link>
 
             <Button
-              onClick={() => requireLogin("/anunciar")}
+              onClick={handleAnunciar}
               className="hidden md:inline-flex gap-2"
             >
               <PlusCircle className="w-4 h-4" /> Anunciar
@@ -265,9 +277,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/conta?tab=loja"><Store className="w-4 h-4 mr-2" /> Painel vendedor</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/planos">Planos premium</Link>
                   </DropdownMenuItem>
                   {(adminUnlocked || currentUser?.isAdmin) && (
                     <>
@@ -297,47 +306,116 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[80vw] sm:w-[350px]">
-                <div className="flex flex-col gap-6 py-6">
-                  <Link href="/" className="font-black text-xl">Ver<span className="text-primary">motu</span></Link>
-                  <div ref={searchRef}>
-                    <SearchBar mobile />
-                  </div>
-                  <nav className="flex flex-col gap-3">
-                    <Link href="/motos" className="text-base font-medium">Motos</Link>
-                    <Link href="/pecas" className="text-base font-medium">Peças e acessórios</Link>
-                    <Link href="/oficinas" className="text-base font-medium">Oficinas</Link>
-                    <Link href="/blog" className="text-base font-medium">Blog</Link>
-                    <Link href="/carrinho" className="text-base font-medium">Carrinho ({cartCount})</Link>
-                    <Link href="/planos" className="text-base font-medium">Planos</Link>
-                    <Link href="/sobre" className="text-base font-medium">Sobre nós</Link>
-                    <Link href="/contato" className="text-base font-medium">Contato</Link>
-                    {adminUnlocked && <Link href="/admin" className="text-base font-medium">Admin</Link>}
-                    <button
-                      onClick={toggleTheme}
-                      className="text-base font-medium text-left flex items-center gap-2"
-                    >
-                      {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                      {theme === "dark" ? "Modo claro" : "Modo escuro"}
-                    </button>
-                  </nav>
-                  <hr className="border-border" />
-                  {currentUser ? (
-                    <div className="flex flex-col gap-3">
-                      <Link href="/conta" className="text-base font-medium">Minha conta</Link>
-                      <Link href="/pedidos" className="text-base font-medium">Meus pedidos</Link>
-                      <Link href="/chat" className="text-base font-medium">Mensagens</Link>
-                      <Link href="/anunciar" className="text-base font-medium text-primary">Anunciar</Link>
-                      <Button variant="destructive" onClick={handleLogout} className="justify-start mt-2">
-                        <LogOut className="w-4 h-4 mr-2" /> Sair
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button onClick={() => setLoginOpen(true)} className="w-full">
-                      Entrar / Cadastrar
-                    </Button>
-                  )}
+              <SheetContent side="left" className="w-[85vw] sm:w-[360px] p-0 flex flex-col">
+                {/* Brand header */}
+                <div className="px-5 pt-7 pb-5 bg-gradient-to-br from-red-950/30 to-transparent border-b border-border/60 shrink-0">
+                  <Link href="/" className="flex items-center gap-3">
+                    <img src="/logo-vermotu.png" alt="Vermotu" className="h-12 w-auto object-contain" />
+                  </Link>
+                  <p className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">Marketplace de motos do Brasil</p>
                 </div>
+
+                {/* Search */}
+                <div className="px-4 py-3 border-b border-border/60 shrink-0" ref={searchRef}>
+                  <SearchBar mobile />
+                </div>
+
+                {/* Scrollable nav */}
+                <div className="flex-1 overflow-y-auto">
+                  {/* Navegar */}
+                  <div className="px-3 pt-3 pb-1">
+                    <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Navegar</p>
+                    {[
+                      { href: "/motos", emoji: "🏍", label: "Motos" },
+                      { href: "/pecas", emoji: "🛒", label: "Peças e acessórios" },
+                      { href: "/oficinas", emoji: "🔧", label: "Oficinas" },
+                      { href: "/blog", emoji: "📰", label: "Blog" },
+                      { href: "/carrinho", emoji: "🛒", label: cartCount > 0 ? `Carrinho (${cartCount})` : "Carrinho" },
+                    ].map(({ href, emoji, label }) => (
+                      <Link key={href} href={href}
+                        className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                        <span className="text-sm font-medium">{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="mx-4 my-2 h-px bg-border" />
+
+                  {/* Conta */}
+                  <div className="px-3 pb-1">
+                    <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Minha conta</p>
+                    {currentUser ? (
+                      <>
+                        {[
+                          { href: "/conta", emoji: "👤", label: "Minha conta" },
+                          { href: "/pedidos", emoji: "📦", label: "Meus pedidos" },
+                          { href: "/chat", emoji: "💬", label: "Mensagens" },
+                        ].map(({ href, emoji, label }) => (
+                          <Link key={href} href={href}
+                            className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                            <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                            <span className="text-sm font-medium">{label}</span>
+                          </Link>
+                        ))}
+                        <button onClick={handleAnunciar}
+                          className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-primary/10 transition-colors group">
+                          <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center text-base shrink-0">📢</span>
+                          <span className="text-sm font-semibold text-primary">Anunciar</span>
+                        </button>
+                      </>
+                    ) : (
+                      <div className="px-2 py-2">
+                        <Button onClick={() => setLoginOpen(true)} className="w-full">
+                          Entrar / Cadastrar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mx-4 my-2 h-px bg-border" />
+
+                  {/* Institucional */}
+                  <div className="px-3 pb-3">
+                    {[
+                      { href: "/sobre", emoji: "ℹ️", label: "Sobre nós" },
+                      { href: "/contato", emoji: "📞", label: "Contato" },
+                    ].map(({ href, emoji, label }) => (
+                      <Link key={href} href={href}
+                        className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">{emoji}</span>
+                        <span className="text-sm font-medium">{label}</span>
+                      </Link>
+                    ))}
+
+                    {/* Tema */}
+                    <button onClick={toggleTheme}
+                      className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                      <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">
+                        {theme === "dark" ? "☀️" : "🌙"}
+                      </span>
+                      <span className="text-sm font-medium">{theme === "dark" ? "Tema Claro" : "Tema Escuro"}</span>
+                    </button>
+
+                    {/* Admin */}
+                    {(adminUnlocked || currentUser?.isAdmin) && (
+                      <Link href="/admin"
+                        className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                        <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0 group-hover:bg-primary/10 transition-colors">⚙️</span>
+                        <span className="text-sm font-medium">Admin</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer: Sair / login */}
+                {currentUser && (
+                  <div className="p-4 border-t border-border bg-muted/20 shrink-0">
+                    <Button variant="destructive" onClick={handleLogout} className="w-full gap-2">
+                      <LogOut className="w-4 h-4" /> Sair da conta
+                    </Button>
+                  </div>
+                )}
               </SheetContent>
             </Sheet>
           </div>
@@ -352,10 +430,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Brand */}
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-red-700 flex items-center justify-center">
-                  <span className="text-white font-black text-sm">V</span>
-                </div>
-                <span className="font-black text-2xl">Ver<span className="text-primary">motu</span></span>
+                <img src="/logo-vermotu.png" alt="Vermotu" className="h-10 w-auto object-contain" />
               </div>
               <p className="text-muted-foreground text-sm max-w-sm leading-relaxed mb-5">
                 O maior marketplace de motos, peças, acessórios e serviços do Brasil. Tudo para sua moto em um só lugar.
@@ -379,7 +454,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   className="w-9 h-9 rounded-lg border border-border bg-card hover:border-primary hover:text-primary flex items-center justify-center transition-colors" aria-label="YouTube">
                   <Youtube className="w-4 h-4" />
                 </a>
-                <a href="https://wa.me/5521999999999" target="_blank" rel="noopener noreferrer"
+                <a href="https://wa.me/5521992963028" target="_blank" rel="noopener noreferrer"
                   className="w-9 h-9 rounded-lg border border-border bg-card hover:border-emerald-500 hover:text-emerald-500 flex items-center justify-center transition-colors" aria-label="WhatsApp">
                   <MessageCircle className="w-4 h-4" />
                 </a>
@@ -426,7 +501,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </a>
                 </li>
                 <li>
-                  <a href="https://wa.me/5521999999999" target="_blank" rel="noopener noreferrer"
+                  <a href="https://wa.me/5521992963028" target="_blank" rel="noopener noreferrer"
                     className="hover:text-emerald-500 transition-colors flex items-center gap-1.5">
                     <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Suporte
                   </a>
