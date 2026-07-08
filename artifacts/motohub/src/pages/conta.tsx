@@ -24,7 +24,7 @@ import {
   getListOrdersQueryKey,
   getListIncomingServiceRequestsQueryKey,
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Trash2, CheckCircle2, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck, Zap, MapPin, Clock, Send } from "lucide-react";
 import { formatPhone, formatRelative } from "@/lib/session";
 import { toast } from "sonner";
@@ -42,6 +42,18 @@ export function Conta() {
     query: { enabled: !!currentUserId, queryKey: getGetUserQueryKey(currentUserId ?? 0) },
   });
   const { data: allItems } = useListItems({});
+
+  // Separate query for own items — includes pending/sold (not just active)
+  const { data: myItems } = useQuery<Array<{ id: number; type: string; title: string; price: number; status: string; sellerId: number; premium: boolean; image: string | null; createdAt: string; location: string; category: string; brand: string | null; condition: string; ratingAvg: number | null; ratingCount: number | null; stock: number }>>({
+    queryKey: ["my-items", currentUserId],
+    enabled: !!currentUserId,
+    queryFn: async () => {
+      const res = await fetch(`/api/items?sellerId=${currentUserId}&showAll=true`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
   const { data: favorites } = useListFavorites(
     { userId: currentUserId ?? 0 },
     { query: { enabled: !!currentUserId, queryKey: getListFavoritesQueryKey({ userId: currentUserId ?? 0 }) } },
@@ -53,7 +65,6 @@ export function Conta() {
 
   const isCompany = !!user && (user.accountType === "empresa" || !!user.storeName);
 
-  const myItems = (allItems ?? []).filter((i) => i.sellerId === currentUserId);
   const favItems = (allItems ?? []).filter((i) => (favorites ?? []).includes(i.id));
 
   const updateItem = useUpdateItem();
@@ -131,11 +142,11 @@ export function Conta() {
           </TabsList>
 
           <TabsContent value="anuncios">
-            {myItems.length === 0 ? (
+            {(myItems ?? []).length === 0 ? (
               <Empty title="Você ainda não tem anúncios" cta={<Button asChild><Link href="/anunciar">Criar primeiro anúncio</Link></Button>} />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myItems.map((i) => (
+                {(myItems ?? []).map((i) => (
                   <Card key={i.id}>
                     <div className="aspect-[4/3] overflow-hidden rounded-t-xl">
                       <img src={imageUrl(i.image)} alt={i.title} className="w-full h-full object-cover" />

@@ -175,4 +175,12 @@ router.post("/reports", async (req, res): Promise<void> => {
   res.status(201).json(row);
 });
 
+router.get("/admin/items", async (_req, res): Promise<void> => {
+  const rows = await db
+    .select()
+    .from(itemsTable)
+    .orderBy(desc(itemsTable.premium), desc(itemsTable.createdAt));
+  res.json(rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })));
+});
+
 export default router;

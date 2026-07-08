@@ -19,22 +19,11 @@ router.get("/items", async (req, res): Promise<void> => {
     return;
   }
   const filters = [];
-  // Only show active items publicly; pass ?status=all|pending to see everything (admin only)
-  const rawStatus = typeof req.query.status === "string" ? req.query.status : null;
-  const isNonPublicRequest = rawStatus === "all" || rawStatus === "pending";
-  if (isNonPublicRequest) {
-    // Require adminId query param and verify admin status in DB
-    const adminId = typeof req.query.adminId === "string" ? parseInt(req.query.adminId, 10) : NaN;
-    if (!adminId || isNaN(adminId)) {
-      res.status(403).json({ error: "Acesso restrito a administradores." });
-      return;
-    }
-    const [adminUser] = await db.select({ isAdmin: usersTable.isAdmin }).from(usersTable).where(eq(usersTable.id, adminId));
-    if (!adminUser?.isAdmin) {
-      res.status(403).json({ error: "Acesso restrito a administradores." });
-      return;
-    }
-  } else {
+  // Default: show only active items publicly.
+  // Exception: when a specific sellerId is provided together with showAll=true,
+  // the seller may view their own listings in all statuses (pending, sold, active).
+  const showAllForOwner = req.query.showAll === "true" && !!q.data.sellerId;
+  if (!showAllForOwner) {
     filters.push(eq(itemsTable.status, "active"));
   }
   if (q.data.type) filters.push(eq(itemsTable.type, q.data.type));

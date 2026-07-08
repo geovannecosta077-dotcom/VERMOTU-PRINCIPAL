@@ -108,7 +108,7 @@ export function Admin() {
     queryKey: ["admin-items-all"],
     enabled,
     queryFn: async () => {
-      const res = await fetch(`/api/items?status=all&adminId=${currentUserId}`);
+      const res = await fetch("/api/admin/items");
       if (!res.ok) throw new Error("Failed to fetch items");
       return res.json();
     },
