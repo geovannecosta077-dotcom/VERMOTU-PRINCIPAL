@@ -209,12 +209,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 md:h-16 items-center gap-2 md:gap-3">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo-vermotu.png" alt="Vermotu" className="h-10 md:h-14 w-auto object-contain" />
+          {/* Logo — maior no mobile */}
+          <Link href="/" className="flex items-center gap-2 shrink-0" onClick={handleSecretClick}>
+            <img src="/logo-vermotu.png" alt="Vermotu" className="h-12 md:h-14 w-auto object-contain" />
           </Link>
 
-          {/* Search bar — right next to logo */}
+          {/* Search bar — somente sm+ (mobile tem linha própria abaixo) */}
           <div className="hidden sm:flex flex-1 max-w-2xl">
             <SearchBar />
           </div>
@@ -306,7 +306,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] sm:w-[360px] p-0 flex flex-col">
+              <SheetContent side="right" className="w-[85vw] sm:w-[360px] p-0 flex flex-col">
                 {/* Brand header */}
                 <div className="px-5 pt-7 pb-5 bg-gradient-to-br from-red-950/30 to-transparent border-b border-border/60 shrink-0">
                   <Link href="/" className="flex items-center gap-3">
@@ -407,14 +407,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       <span className="text-sm font-medium">{theme === "dark" ? "Tema Claro" : "Tema Escuro"}</span>
                     </button>
 
-                    {/* Admin */}
-                    {(adminUnlocked || currentUser?.isAdmin) && (
+                    {/* Admin — só para usuários com is_admin no banco */}
+                    {currentUser?.isAdmin && (
                       <Link href="/admin"
-                        className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+                        className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-accent transition-colors group opacity-60 hover:opacity-100">
                         <span className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
                           <LayoutDashboard className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </span>
-                        <span className="text-sm font-medium">Admin</span>
+                        <span className="text-sm font-medium text-muted-foreground">Admin</span>
                       </Link>
                     )}
                   </div>
@@ -431,6 +431,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
           </div>
+        </div>
+        {/* Barra de pesquisa mobile — linha dedicada abaixo dos ícones */}
+        <div className="sm:hidden px-3 pb-2.5" ref={searchRef}>
+          <SearchBar mobile />
         </div>
       </header>
 

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useUpload } from "@workspace/object-storage-web";
 import { useLocation } from "wouter";
 import { useSession, formatBRL, formatDateBR, imageUrl } from "@/lib/session";
 import {
@@ -137,6 +138,11 @@ export function Admin() {
   const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", category: "Segurança", content: "", coverImageUrl: "", seoTitle: "", seoDescription: "", published: false });
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [blogView, setBlogView] = useState<"list" | "form">("list");
+  const coverFileRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, isUploading: isCoverUploading } = useUpload({
+    onSuccess: (r) => { setBlogForm((f) => ({ ...f, coverImageUrl: r.objectPath })); toast.success("Imagem enviada!"); },
+    onError: () => toast.error("Falha no upload da imagem."),
+  });
   const [emailForm, setEmailForm] = useState({ subject: "", body: "", targetFilter: "all" });
   const BANNER_BLANK = { title: "", subtitle: "", ctaText: "", ctaUrl: "/", imageUrl: "", bgColor: "#dc2626", order: 0, active: true, durationSecs: 6, startsAt: "", endsAt: "" };
   const [bannerForm, setBannerForm] = useState(BANNER_BLANK);
@@ -1375,11 +1381,38 @@ export function Admin() {
                         </select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>URL da imagem de capa <span className="text-destructive">*</span></Label>
-                        <Input value={blogForm.coverImageUrl} onChange={(e) => setBlogForm((f) => ({ ...f, coverImageUrl: e.target.value }))} placeholder="https://exemplo.com/imagem.jpg (obrigatório)" />
+                        <Label>Imagem de capa <span className="text-destructive">*</span></Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={blogForm.coverImageUrl}
+                            onChange={(e) => setBlogForm((f) => ({ ...f, coverImageUrl: e.target.value }))}
+                            placeholder="Cole uma URL ou clique em Fazer upload"
+                            className="flex-1"
+                          />
+                          <input
+                            ref={coverFileRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) uploadFile(file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isCoverUploading}
+                            onClick={() => coverFileRef.current?.click()}
+                          >
+                            {isCoverUploading ? <><RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />Enviando...</> : <><Image className="w-3.5 h-3.5 mr-1.5" />Upload</>}
+                          </Button>
+                        </div>
                         {blogForm.coverImageUrl && (
                           <div className="mt-2 h-36 rounded-lg overflow-hidden border border-border">
-                            <img src={blogForm.coverImageUrl} alt="Preview da capa" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                            <img src={imageUrl(blogForm.coverImageUrl)} alt="Preview da capa" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                           </div>
                         )}
                       </div>
