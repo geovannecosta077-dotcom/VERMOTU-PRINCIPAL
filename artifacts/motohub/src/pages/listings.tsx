@@ -108,7 +108,7 @@ export function Listings({ type, title, subtitle }: Props) {
         ) : items.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-muted-foreground mb-6">Nenhum resultado encontrado. Tente outra busca.</p>
-            <Link href={`/oportunidades`}>
+            <Link href="/busca">
               <div className="inline-flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 px-6 py-4 hover:bg-primary/10 transition-colors cursor-pointer">
                 <Zap className="w-5 h-5 text-primary" />
                 <div className="text-left">
@@ -127,7 +127,7 @@ export function Listings({ type, title, subtitle }: Props) {
         {/* Always show smart-search CTA at bottom */}
         {!loading && items.length > 0 && (
           <div className="mt-12 border-t border-border/40 pt-8 text-center">
-            <Link href="/oportunidades">
+            <Link href="/busca">
               <div className="inline-flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 hover:bg-primary/10 transition-colors cursor-pointer">
                 <Zap className="w-5 h-5 text-primary" />
                 <div className="text-left">

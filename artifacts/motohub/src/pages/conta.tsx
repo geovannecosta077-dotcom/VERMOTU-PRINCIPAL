@@ -359,6 +359,48 @@ export function Conta() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Verificação de conta */}
+            {user && !user.accountVerified && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <ShieldCheck className="w-5 h-5 text-primary" /> Verificação de Identidade
+                  </CardTitle>
+                  <CardDescription>
+                    Conta verificada recebe o selo de confiança e aparece em destaque nas buscas.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    {[
+                      { done: !!user.cpf, label: "CPF cadastrado" },
+                      { done: !!user.phone, label: "Telefone cadastrado" },
+                      { done: !!user.city, label: "Cidade cadastrada" },
+                    ].map(({ done, label }) => (
+                      <div key={label} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${done ? "bg-emerald-500" : "bg-muted"}`}>
+                          {done && <span className="text-white text-[10px] font-bold">✓</span>}
+                        </div>
+                        <span className={done ? "text-foreground" : ""}>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {user.cpf && user.phone ? (
+                    <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600 dark:text-emerald-400">
+                      Seu perfil está completo! Nossa equipe vai analisar e ativar o selo em até 24h.
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Complete seu CPF e telefone para solicitar o selo de verificação.</p>
+                  )}
+                  <Button variant="outline" asChild className="gap-2">
+                    <Link href="/contato">
+                      <ShieldCheck className="w-4 h-4" /> Solicitar verificação
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </section>

@@ -3,12 +3,12 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useSession, useCart, imageUrl } from "@/lib/session";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, ChevronRight, Zap, Newspaper, Megaphone, Info, HeadphonesIcon, LayoutDashboard, CreditCard, Lock } from "lucide-react";
+import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, ChevronRight, Zap, Newspaper, Megaphone, Info, HeadphonesIcon, LayoutDashboard, CreditCard, Lock, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useGetUser, getGetUserQueryKey, useListItems, getListItemsQueryKey } from "@workspace/api-client-react";
+import { useGetUser, getGetUserQueryKey, useListItems, getListItemsQueryKey, useListConversations, getListConversationsQueryKey } from "@workspace/api-client-react";
 import { LoginDialog } from "@/components/login-dialog";
 
 export { LoginDialog };
@@ -30,6 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
+  const mobileBarRef = useRef<HTMLDivElement>(null);
   const secretClickCount = useRef(0);
   const secretTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,9 +55,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchOpen(false);
-      }
+      const inDesktop = searchRef.current?.contains(e.target as Node);
+      const inMobile = mobileBarRef.current?.contains(e.target as Node);
+      if (!inDesktop && !inMobile) setSearchOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -79,6 +80,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { data: currentUser } = useGetUser(currentUserId ?? 0, {
     query: { enabled: !!currentUserId, queryKey: getGetUserQueryKey(currentUserId ?? 0) },
   });
+
+  const { data: conversations } = useListConversations(
+    { userId: currentUserId ?? 0 },
+    { query: { enabled: !!currentUserId, refetchInterval: 15_000, queryKey: getListConversationsQueryKey({ userId: currentUserId ?? 0 }) } },
+  );
+  const unreadConvCount = currentUserId ? (conversations?.length ?? 0) : 0;
 
   const handleLogout = () => {
     setCurrentUserId(null);
@@ -120,7 +127,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const SearchBar = ({ mobile = false }: { mobile?: boolean }) => (
-    <div ref={mobile ? undefined : searchRef} className="relative w-full">
+    <div ref={mobile ? mobileBarRef : searchRef} className="relative w-full">
       <form onSubmit={handleSearch}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -235,6 +242,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
+            {currentUserId && (
+              <Link href="/chat">
+                <Button variant="ghost" size="icon" className="relative hidden sm:flex" aria-label="Mensagens">
+                  <Bell className="w-5 h-5" />
+                  {unreadConvCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 flex items-center justify-center text-[9px] bg-primary">
+                      {unreadConvCount > 9 ? "9+" : unreadConvCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            )}
             <Link href="/carrinho">
               <Button variant="ghost" size="icon" className="relative" aria-label="Carrinho">
                 <ShoppingCart className="w-5 h-5" />
@@ -311,9 +330,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <p className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">Marketplace de motos do Brasil</p>
                 </div>
 
-                {/* Search */}
-                <div className="px-4 py-3 border-b border-border/60 shrink-0" ref={searchRef}>
-                  <SearchBar mobile />
+                {/* Search — link to search page (avoids shared-state dropdown conflict on mobile) */}
+                <div className="px-4 py-3 border-b border-border/60 shrink-0">
+                  <Link href="/motos">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/60 bg-muted/40 text-muted-foreground text-sm hover:border-primary/40 transition-colors">
+                      <Search className="w-4 h-4 shrink-0" />
+                      <span>Buscar motos, peças, oficinas...</span>
+                    </div>
+                  </Link>
                 </div>
 
                 {/* Scrollable nav */}
@@ -322,10 +346,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <div className="px-3 pt-3 pb-1">
                     <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Navegar</p>
                     {([
+                      { href: "/busca", icon: Zap, label: "Busca Inteligente" },
                       { href: "/motos", icon: Bike, label: "Motos" },
                       { href: "/pecas", icon: CircleDot, label: "Peças e acessórios" },
                       { href: "/oficinas", icon: Wrench, label: "Oficinas" },
                       { href: "/blog", icon: Newspaper, label: "Blog" },
+                      { href: "/seguranca", icon: Shield, label: "Central de Segurança" },
                       { href: "/carrinho", icon: ShoppingCart, label: cartCount > 0 ? `Carrinho (${cartCount})` : "Carrinho" },
                     ] as const).map(({ href, icon: Icon, label }) => (
                       <Link key={href} href={href}
@@ -430,9 +456,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Barra de pesquisa mobile — FORA do header para evitar conflito com backdrop-blur */}
+      {/* Barra de pesquisa mobile — FORA do header; usa mobileBarRef separado do desktop */}
       <div className="sm:hidden sticky top-14 z-40 bg-background border-b border-border/40 px-3 py-2">
-        <SearchBar mobile />
+        <SearchBar mobile={true} />
       </div>
 
       <main className="flex-1 flex flex-col">{children}</main>
@@ -503,6 +529,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h3 className="font-semibold mb-4 text-sm">Central de Ajuda</h3>
               <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/seguranca" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" /> Central de Segurança
+                  </Link>
+                </li>
                 <li>
                   <Link href="/contato" className="hover:text-primary transition-colors flex items-center gap-1.5">
                     <HelpCircle className="w-3.5 h-3.5" /> FAQ
