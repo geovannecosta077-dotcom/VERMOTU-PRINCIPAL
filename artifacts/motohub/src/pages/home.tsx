@@ -332,7 +332,7 @@ function HeroBannerCarousel() {
             className="flex flex-wrap gap-5 mt-10 text-sm text-gray-400"
           >
             {[
-              { icon: ShieldCheck, text: "Pagamento protegido" },
+              { icon: ShieldCheck, text: "PIX, cartão e boleto" },
               { icon: Truck, text: "Entrega rápida no RJ" },
               { icon: HeadphonesIcon, text: "Suporte 7 dias" },
             ].map(({ icon: Icon, text }, i) => (

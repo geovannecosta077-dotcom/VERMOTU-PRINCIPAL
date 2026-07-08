@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useSession, useCart, imageUrl } from "@/lib/session";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, ChevronRight, Zap, Newspaper, Megaphone, Info, HeadphonesIcon, LayoutDashboard } from "lucide-react";
+import { Search, Menu, User, LogOut, PlusCircle, Settings, ShoppingCart, Package, Store, Wrench, Instagram, Facebook, Youtube, MessageCircle, HelpCircle, Shield, FileText, Phone, Sun, Moon, BookOpen, X, Bike, CircleDot, ChevronRight, Zap, Newspaper, Megaphone, Info, HeadphonesIcon, LayoutDashboard, CreditCard, QrCode, Banknote, Lock } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -114,10 +114,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const handleAnunciar = () => {
     if (!currentUserId) {
       setLoginOpen(true);
-      return;
-    }
-    if (currentUser?.plan === "free") {
-      setLocation("/planos");
       return;
     }
     setLocation("/anunciar");
@@ -452,11 +448,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-muted-foreground text-sm max-w-sm leading-relaxed mb-5">
                 O maior marketplace de motos, peças, acessórios e serviços do Brasil. Tudo para sua moto em um só lugar.
               </p>
-              <div className="flex gap-2 mb-5">
-                <Badge variant="outline" className="border-primary/30 text-primary text-xs">PIX</Badge>
-                <Badge variant="outline" className="text-xs">Cartão</Badge>
-                <Badge variant="outline" className="text-xs">Boleto</Badge>
-                <Badge variant="outline" className="text-xs">WhatsApp</Badge>
+              <div className="mb-5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Formas de pagamento</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 border border-primary/40 text-primary text-xs px-2.5 py-1 rounded-full font-medium">
+                    <QrCode className="w-3 h-3" /> PIX
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 border border-border text-xs px-2.5 py-1 rounded-full font-medium">
+                    <CreditCard className="w-3 h-3" /> Cartão de crédito
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 border border-border text-xs px-2.5 py-1 rounded-full font-medium">
+                    <Banknote className="w-3 h-3" /> Boleto
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Pagamentos processados com segurança pelo Stripe
+                </p>
               </div>
               <div className="flex gap-2">
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
