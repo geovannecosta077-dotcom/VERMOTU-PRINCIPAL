@@ -126,7 +126,7 @@ export function Anunciar() {
     onError: () => { setUploadingIdx(null); toast.error("Falha no upload da foto"); },
   });
 
-  useEffect(() => { document.title = "Anunciar — MotoHub"; }, []);
+  useEffect(() => { document.title = "Anunciar — Vermotu"; }, []);
   useEffect(() => { if (!currentUserId) setLoginOpen(true); }, [currentUserId, setLoginOpen]);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>, replaceIdx?: number) => {

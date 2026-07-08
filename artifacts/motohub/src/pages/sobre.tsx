@@ -3,12 +3,12 @@ import { Layout } from "@/components/layout";
 import { Bike, ShieldCheck, Users, Rocket, Heart, Trophy } from "lucide-react";
 
 export function Sobre() {
-  useEffect(() => { document.title = "Sobre nós — MotoHub"; }, []);
+  useEffect(() => { document.title = "Sobre nós — Vermotu"; }, []);
   return (
     <Layout>
       <section className="bg-gradient-to-br from-red-950/40 via-black to-background border-b border-border">
         <div className="container py-20">
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight">Sobre o <span className="text-primary">MotoHub</span></h1>
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight">Sobre a <span className="text-primary">Vermotu</span></h1>
           <p className="text-lg text-muted-foreground mt-4 max-w-2xl">
             Nascemos no Rio de Janeiro com uma missão clara: tornar a vida do motociclista brasileiro mais fácil, segura e conectada.
           </p>

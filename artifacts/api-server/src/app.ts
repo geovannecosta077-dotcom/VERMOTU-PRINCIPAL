@@ -15,12 +15,22 @@ app.use(
   }),
 );
 
-// CORS — allow Replit preview domains + localhost
-const allowedOriginPattern = /^https?:\/\/(localhost(:\d+)?|.*\.replit\.dev|.*\.replit\.app|.*\.repl\.co)$/;
+// CORS — allow Replit preview domains + production domains + localhost
+const replitDomains = (process.env.REPLIT_DOMAINS ?? "")
+  .split(",")
+  .map((d) => d.trim())
+  .filter(Boolean)
+  .map((d) => `https://${d}`);
+
+const allowedOriginPattern =
+  /^https?:\/\/(localhost(:\d+)?|.*\.replit\.dev|.*\.replit\.app|.*\.repl\.co)$/;
+
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin || allowedOriginPattern.test(origin)) return cb(null, true);
+      if (!origin) return cb(null, true);
+      if (allowedOriginPattern.test(origin)) return cb(null, true);
+      if (replitDomains.includes(origin)) return cb(null, true);
       cb(new Error("Not allowed by CORS"));
     },
     credentials: true,

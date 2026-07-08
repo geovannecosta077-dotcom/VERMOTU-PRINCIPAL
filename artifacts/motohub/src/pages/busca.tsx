@@ -233,7 +233,7 @@ export function Busca() {
   const [activeRequestId, setActiveRequestId] = useState<number | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => { document.title = "Busca Inteligente — MotoHub"; }, []);
+  useEffect(() => { document.title = "Busca Inteligente — Vermotu"; }, []);
 
   const { data: user } = useGetUser(currentUserId ?? 0, {
     query: { enabled: !!currentUserId, queryKey: getGetUserQueryKey(currentUserId ?? 0) },

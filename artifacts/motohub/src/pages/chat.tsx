@@ -26,7 +26,7 @@ export function Chat() {
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { document.title = "Mensagens — MotoHub"; }, []);
+  useEffect(() => { document.title = "Mensagens — Vermotu"; }, []);
   useEffect(() => { if (!currentUserId) setLoginOpen(true); }, [currentUserId, setLoginOpen]);
   useEffect(() => { if (params?.id) setActiveId(Number(params.id)); }, [params?.id]);
 

@@ -118,7 +118,7 @@ const CATEGORY_CARDS = [
 const steps = [
   { n: "01", title: "Encontre", text: "Busque motos, peças e oficinas perto de você com filtros inteligentes." },
   { n: "02", title: "Negocie", text: "Fale direto com o vendedor pelo chat ou WhatsApp, sem intermediários." },
-  { n: "03", title: "Pague seguro", text: "Pix, cartão ou boleto com proteção MotoHub e cashback patrocinado." },
+  { n: "03", title: "Pague seguro", text: "Pix, cartão ou boleto com proteção Vermotu e cashback patrocinado." },
   { n: "04", title: "Receba e avalie", text: "Acompanhe o pedido em tempo real e avalie sua experiência." },
 ];
 
@@ -310,7 +310,7 @@ function HeroBannerCarousel() {
 
 export function Home() {
   useEffect(() => {
-    document.title = "MotoHub — Tudo para sua moto em um só lugar";
+    document.title = "Vermotu — Tudo para sua moto em um só lugar";
   }, []);
 
   const { data: motos, isLoading: motosLoading } = useListItems({ type: "moto" });
@@ -455,7 +455,7 @@ export function Home() {
           <div className="flex items-end justify-between mb-8">
             <div>
               <Badge variant="outline" className="mb-2 border-primary/30 text-primary gap-1.5">
-                <Newspaper className="w-3 h-3" /> PitStop MotoHub
+                <Newspaper className="w-3 h-3" /> PitStop Vermotu
               </Badge>
               <h2 className="text-3xl md:text-4xl font-black tracking-tight">Conteúdo exclusivo para motociclistas</h2>
               <p className="text-muted-foreground mt-2">Dicas, análises, segurança e as últimas novidades do mundo moto.</p>
@@ -468,20 +468,38 @@ export function Home() {
           {latestPosts.length === 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
-                { cat: "Manutenção", title: "5 sinais de que sua moto precisa de revisão urgente", emoji: "🔧" },
-                { cat: "Segurança", title: "Equipamentos obrigatórios: o que a lei exige em 2026", emoji: "🪖" },
-                { cat: "Análises", title: "Honda CG vs Yamaha Factor: qual escolher?", emoji: "⚡" },
+                {
+                  cat: "Manutenção", title: "5 sinais de que sua moto precisa de revisão urgente",
+                  img: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&q=80",
+                },
+                {
+                  cat: "Segurança", title: "Equipamentos obrigatórios: o que a lei exige em 2026",
+                  img: "https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=600&q=80",
+                },
+                {
+                  cat: "Análises", title: "Honda CG vs Yamaha Factor: qual escolher?",
+                  img: "https://images.unsplash.com/photo-1547549082-6bc09f2049ae?w=600&q=80",
+                },
               ].map((p) => (
                 <Link key={p.title} href="/blog">
                   <motion.div whileHover={{ y: -4 }} className="group rounded-2xl border border-border bg-background overflow-hidden cursor-pointer hover:border-primary/40 transition-colors">
-                    <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-red-950/30 flex items-center justify-center text-5xl">
-                      {p.emoji}
+                    <div className="aspect-[16/9] bg-muted overflow-hidden">
+                      <img
+                        src={p.img}
+                        alt={p.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          const t = e.currentTarget.parentElement!;
+                          t.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-red-950/30"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\' class=\'text-primary/40\'><path d=\'M4 19.5A2.5 2.5 0 0 1 6.5 17H20\'/><path d=\'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\'/></svg></div>';
+                        }}
+                      />
                     </div>
                     <div className="p-5">
                       <Badge variant="outline" className="mb-3 text-xs border-primary/30 text-primary">{p.cat}</Badge>
                       <h3 className="font-bold text-base group-hover:text-primary transition-colors leading-snug">{p.title}</h3>
                       <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                        <BookOpen className="w-3 h-3" /> Leia no blog MotoHub
+                        <BookOpen className="w-3 h-3" /> Leia no blog Vermotu
                       </p>
                     </div>
                   </motion.div>
@@ -506,7 +524,7 @@ export function Home() {
                       <h3 className="font-bold text-base group-hover:text-primary transition-colors leading-snug line-clamp-2">{post.title}</h3>
                       {post.excerpt && <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>}
                       <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                        <BookOpen className="w-3 h-3" /> {post.authorName || "Equipe MotoHub"}
+                        <BookOpen className="w-3 h-3" /> {post.authorName || "Equipe Vermotu"}
                       </p>
                     </div>
                   </motion.div>
@@ -547,7 +565,7 @@ export function Home() {
         <div className="container py-16">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl md:text-4xl font-black tracking-tight">Como funciona</h2>
-            <p className="text-muted-foreground mt-3">Comprar e vender no MotoHub é rápido, fácil e seguro.</p>
+            <p className="text-muted-foreground mt-3">Comprar e vender na Vermotu é rápido, fácil e seguro.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {steps.map((s, i) => (
@@ -581,7 +599,7 @@ export function Home() {
             <Badge className="mb-5 bg-primary/20 text-primary border border-primary/40"><Tag className="w-3 h-3 mr-1" /> Anuncie agora</Badge>
             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
               Tem moto, peça ou oficina? <br className="hidden md:block" />
-              <span className="text-primary">Venda mais com o MotoHub.</span>
+              <span className="text-primary">Venda mais com a Vermotu.</span>
             </h2>
             <p className="text-gray-300 max-w-xl mx-auto mb-8">
               Crie sua loja em 2 minutos, receba pedidos via Pix e fale com clientes pelo WhatsApp. Plano grátis para começar.

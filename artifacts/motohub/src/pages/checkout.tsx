@@ -33,7 +33,7 @@ export function Checkout() {
   });
 
   useEffect(() => {
-    document.title = "Checkout — MotoHub";
+    document.title = "Checkout — Vermotu";
     if (!currentUserId) setLoginOpen(true);
     if (user) setAddress((a) => a || `${user.city || "Rio de Janeiro"}, RJ`);
   }, [currentUserId, user]);
@@ -133,7 +133,7 @@ export function Checkout() {
               </div>
               {method === "pix" && (
                 <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/30 text-sm">
-                  <strong>Pix MotoHub</strong> — após confirmar, exibimos o QR Code. Pagamento aprovado na hora.
+                  <strong>Pix Vermotu</strong> — após confirmar, exibimos o QR Code. Pagamento aprovado na hora.
                 </div>
               )}
             </div>

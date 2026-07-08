@@ -8,7 +8,7 @@ import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export function Contato() {
-  useEffect(() => { document.title = "Contato — MotoHub"; }, []);
+  useEffect(() => { document.title = "Contato — Vermotu"; }, []);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -44,7 +44,7 @@ export function Contato() {
 
           <div className="space-y-3">
             {[
-              { icon: Mail, t: "E-mail", d: "contato@motohub.com.br" },
+              { icon: Mail, t: "E-mail", d: "contato@vermotu.com.br" },
               { icon: MapPin, t: "Endereço", d: "Rio de Janeiro — RJ" },
               { icon: MessageCircle, t: "Suporte", d: "Use o chat dentro de cada anúncio para falar diretamente com o vendedor." },
             ].map((c) => (

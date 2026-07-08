@@ -35,7 +35,7 @@ export function Conta() {
   const setLoginOpen = useSession((s) => s.setLoginOpen);
   const queryClient = useQueryClient();
 
-  useEffect(() => { document.title = "Minha conta — MotoHub"; }, []);
+  useEffect(() => { document.title = "Minha conta — Vermotu"; }, []);
   useEffect(() => { if (!currentUserId) setLoginOpen(true); }, [currentUserId, setLoginOpen]);
 
   const { data: user } = useGetUser(currentUserId ?? 0, {

@@ -12,7 +12,7 @@ export function Cart() {
   const subtotal = cartSubtotal(lines);
 
   useEffect(() => {
-    document.title = "Carrinho — MotoHub";
+    document.title = "Carrinho — Vermotu";
   }, []);
 
   return (

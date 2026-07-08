@@ -99,7 +99,7 @@ export function Planos() {
     onError: () => toast.error("Falha no upload do comprovante. Tente novamente."),
   });
 
-  useEffect(() => { document.title = "Planos — MotoHub"; }, []);
+  useEffect(() => { document.title = "Planos — Vermotu"; }, []);
 
   const activeSub = (subscriptions ?? []).find((s) => ["proof_submitted", "in_review", "approved"].includes(s.status));
   const pendingSub = (subscriptions ?? []).find((s) => ["awaiting_payment", "proof_submitted", "in_review"].includes(s.status));

@@ -92,7 +92,7 @@ export function Admin() {
   const [newCoupon, setNewCoupon] = useState({ code: "", type: "percent" as "percent" | "fixed", value: "", minOrder: "" });
   const queryClient = useQueryClient();
 
-  useEffect(() => { document.title = "Admin — MotoHub"; }, []);
+  useEffect(() => { document.title = "Admin — Vermotu"; }, []);
 
   const { data: currentUserData } = useGetUser(currentUserId ?? 0, {
     query: { enabled: !!currentUserId, queryKey: getGetUserQueryKey(currentUserId ?? 0) },
@@ -360,7 +360,7 @@ export function Admin() {
               <Shield className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold">Área Administrativa</h1>
-            <p className="text-sm text-muted-foreground">Acesso exclusivo para administradores e funcionários MotoHub</p>
+            <p className="text-sm text-muted-foreground">Acesso exclusivo para administradores e funcionários Vermotu</p>
           </div>
           <form onSubmit={tryAdminLogin} className="space-y-4">
             <div className="space-y-2">
@@ -1050,7 +1050,7 @@ export function Admin() {
             <div className="space-y-6 max-w-2xl">
               <div>
                 <h1 className="text-2xl font-bold">Configurações</h1>
-                <p className="text-sm text-muted-foreground">Configurações gerais da plataforma MotoHub</p>
+                <p className="text-sm text-muted-foreground">Configurações gerais da plataforma Vermotu</p>
               </div>
 
               <Card>
@@ -1355,7 +1355,7 @@ export function Admin() {
                             await updateBlogPost.mutateAsync({ id: editingPostId, data: { ...blogForm, coverImageUrl: blogForm.coverImageUrl || null } });
                             toast.success("Artigo atualizado!");
                           } else {
-                            await createBlogPost.mutateAsync({ data: { ...blogForm, authorId: currentUserId ?? 1, authorName: "Admin MotoHub", coverImageUrl: blogForm.coverImageUrl || null } });
+                            await createBlogPost.mutateAsync({ data: { ...blogForm, authorId: currentUserId ?? 1, authorName: "Admin Vermotu", coverImageUrl: blogForm.coverImageUrl || null } });
                             toast.success("Artigo criado!");
                           }
                           setBlogView("list");
@@ -1429,7 +1429,7 @@ export function Admin() {
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
                     <Label>Assunto</Label>
-                    <Input value={emailForm.subject} onChange={(e) => setEmailForm((f) => ({ ...f, subject: e.target.value }))} placeholder="Novidades do MotoHub — Junho 2026" />
+                    <Input value={emailForm.subject} onChange={(e) => setEmailForm((f) => ({ ...f, subject: e.target.value }))} placeholder="Novidades do Vermotu — Junho 2026" />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Destinatários</Label>
@@ -1446,7 +1446,7 @@ export function Admin() {
                       value={emailForm.body}
                       onChange={(e) => setEmailForm((f) => ({ ...f, body: e.target.value }))}
                       className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm resize-y"
-                      placeholder="Olá! Temos novidades incríveis para você no MotoHub..."
+                      placeholder="Olá! Temos novidades incríveis para você no Vermotu..."
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2">

@@ -134,7 +134,7 @@ export function Blog() {
                       <Eye className="w-3.5 h-3.5" />
                       {featured.views.toLocaleString("pt-BR")} views
                     </span>
-                    <span>{featured.authorName || "MotoHub"}</span>
+                    <span>{featured.authorName || "Vermotu"}</span>
                     {featured.publishedAt && <span>{formatDate(featured.publishedAt)}</span>}
                   </div>
                   <div className="flex items-center gap-1 text-primary font-semibold text-sm mt-2">

@@ -22,7 +22,7 @@ export function Pedidos() {
   const search = useSearch();
   const justOrderId = new URLSearchParams(search).get("just");
 
-  useEffect(() => { document.title = "Meus pedidos — MotoHub"; }, []);
+  useEffect(() => { document.title = "Meus pedidos — Vermotu"; }, []);
   useEffect(() => { if (!currentUserId) setLoginOpen(true); }, [currentUserId, setLoginOpen]);
 
   const { data: orders } = useListOrders(

@@ -200,10 +200,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-red-700 flex items-center justify-center">
-              <span className="text-white font-black text-sm">M</span>
+              <span className="text-white font-black text-sm">V</span>
             </div>
             <span className="font-black text-xl tracking-tight hidden sm:block">
-              Moto<span className="text-primary">Hub</span>
+              Ver<span className="text-primary">motu</span>
             </span>
           </Link>
 
@@ -304,7 +304,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </SheetTrigger>
               <SheetContent side="right" className="w-[80vw] sm:w-[350px]">
                 <div className="flex flex-col gap-6 py-6">
-                  <Link href="/" className="font-black text-xl">Moto<span className="text-primary">Hub</span></Link>
+                  <Link href="/" className="font-black text-xl">Ver<span className="text-primary">motu</span></Link>
                   <div ref={searchRef}>
                     <SearchBar mobile />
                   </div>
@@ -358,9 +358,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-red-700 flex items-center justify-center">
-                  <span className="text-white font-black text-sm">M</span>
+                  <span className="text-white font-black text-sm">V</span>
                 </div>
-                <span className="font-black text-2xl">Moto<span className="text-primary">Hub</span></span>
+                <span className="font-black text-2xl">Ver<span className="text-primary">motu</span></span>
               </div>
               <p className="text-muted-foreground text-sm max-w-sm leading-relaxed mb-5">
                 O maior marketplace de motos, peças, acessórios e serviços do Brasil. Tudo para sua moto em um só lugar.
@@ -426,8 +426,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                 </li>
                 <li>
-                  <a href="mailto:suporte@motohub.com.br" className="hover:text-primary transition-colors">
-                    suporte@motohub.com.br
+                  <a href="mailto:suporte@vermotu.com.br" className="hover:text-primary transition-colors">
+                    suporte@vermotu.com.br
                   </a>
                 </li>
                 <li>
@@ -461,7 +461,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="border-t border-border/40 mt-10 pt-6 flex flex-col md:flex-row gap-3 justify-between text-xs text-muted-foreground">
             <span>
               <span onClick={handleSecretClick} className="cursor-default select-none">&copy;</span>
-              {" "}{new Date().getFullYear()} MotoHub Marketplace LTDA — CNPJ 00.000.000/0001-00 — Rio de Janeiro, RJ.
+              {" "}{new Date().getFullYear()} Vermotu Marketplace LTDA — Rio de Janeiro, RJ.
             </span>
             <div className="flex flex-wrap items-center gap-4">
               <Link href="/sobre" className="hover:text-primary transition-colors">Privacidade</Link>

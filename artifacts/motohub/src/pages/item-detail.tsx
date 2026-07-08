@@ -77,7 +77,7 @@ export function ItemDetail() {
     });
 
   useEffect(() => {
-    if (item) document.title = `${item.title} — MotoHub`;
+    if (item) document.title = `${item.title} — Vermotu`;
   }, [item]);
 
   useEffect(() => {
@@ -191,7 +191,7 @@ export function ItemDetail() {
   };
 
   const wa = seller?.phone
-    ? whatsappLink(seller.phone, `Olá! Tenho interesse no seu anúncio "${item.title}" (R$ ${item.price.toFixed(2)}) no MotoHub.`)
+    ? whatsappLink(seller.phone, `Olá! Tenho interesse no seu anúncio "${item.title}" (R$ ${item.price.toFixed(2)}) no Vermotu.`)
     : null;
 
   const sectionLabel = item.type === "moto" ? "Motos" : item.type === "peca" ? "Peças" : "Serviços";

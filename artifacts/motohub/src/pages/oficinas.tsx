@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Wrench, Clock, ShieldCheck } from "lucide-react";
 
 export function Oficinas() {
-  useEffect(() => { document.title = "Oficinas — MotoHub"; }, []);
+  useEffect(() => { document.title = "Oficinas — Vermotu"; }, []);
   const { data, isLoading } = useListItems({ type: "servico" });
 
   return (
