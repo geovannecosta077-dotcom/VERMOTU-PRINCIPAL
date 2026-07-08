@@ -1,0 +1,189 @@
+You are a senior software engineer responsible for finishing Vermotu, a professional marketplace for motorcycles, parts, services, and repair shops. Before making any changes, perform a complete audit of the entire project.
+
+DO NOT only make visual improvements. Analyze everything:
+
+- Frontend and backend structure
+- Database
+- Routes
+- Components
+- Mobile responsiveness
+- User flows
+- Authentication system
+- Search system
+- Listings
+- User profiles
+- Repair shop module
+- Monetization structure
+- Admin panel
+- Performance
+- Console errors
+- Hidden bugs
+
+The goal is to transform Vermotu into a professional startup-level product, comparable to large marketplaces such as OLX, Mercado Livre, Webmotors, and modern automotive platforms.
+
+CRITICAL PRIORITIES:
+
+1. REMOVE THE "AI-GENERATED WEBSITE" LOOK
+
+- Remove excessive emojis
+- Remove generic AI-generated texts
+- Improve spacing and alignment
+- Improve typography
+- Create professional visual hierarchy
+- Make the product look like it was built by an experienced development team
+
+2. HEADER AND NAVIGATION
+
+- Remove any exposed admin button from the top navigation.
+- Keep the header clean and professional.
+- Admin area must only be accessible through a protected route and footer link.
+- Add a professional search bar next to the logo.
+- Improve desktop and mobile navigation.
+
+3. INTELLIGENT SEARCH SYSTEM (VERY IMPORTANT)
+
+Create a real functional marketplace search.
+
+Examples:
+
+User searches:
+"XRE 300 2011 black"
+"Honda XRE engine"
+"motorcycle repair shop near me"
+
+The system should understand:
+
+- Intent
+- Category
+- Brand
+- Motorcycle model
+- Year
+- Location
+- Parts
+- Services
+
+Create professional filters:
+
+- Brand
+- Model
+- Year
+- Mileage
+- Price range
+- Location
+- Category
+- Motorcycle parts
+- Services
+- Repair shops
+
+Do not leave a fake search box. The search must actually work.
+
+4. USER REGISTRATION AND ACCOUNTS
+
+Create a complete user system:
+
+- Buyer account
+- Seller account
+- Repair shop account
+- Dealership account
+
+Professional profile:
+
+- Profile photo
+- Ratings and reviews
+- Published listings
+- Favorites
+- Messages/chat
+- Activity history
+
+5. MARKETPLACE LISTINGS
+
+Every listing must look professional:
+
+- Multiple photos
+- Price
+- Location
+- Description
+- Motorcycle specifications
+- Contact button
+- Favorite button
+- Share button
+- Fraud prevention features
+
+6. REPAIR SHOP MODULE
+
+Create a complete repair shop system:
+
+- Shop registration
+- Services offered
+- Map location
+- Reviews
+- Photos
+- WhatsApp/chat contact
+- Quote requests
+
+7. DESIGN SYSTEM
+
+Follow Vermotu branding:
+
+- Premium automotive style
+- Matte black
+- White
+- Dark red accents
+- Tesla/Apple startup feeling
+- Clean modern interface
+
+Make light mode and dark mode fully functional.
+
+8. ADMIN DASHBOARD
+
+Create a complete but protected admin panel:
+
+- Users management
+- Listings moderation
+- Reports
+- Subscription plans
+- Payments
+- Repair shops
+- Platform analytics
+
+9. MONETIZATION STRUCTURE
+
+Prepare the platform for:
+
+- Premium listings
+- Featured ads
+- Store plans
+- Repair shop subscriptions
+- Future Mercado Pago/Stripe integration
+
+10. FINAL QUALITY TESTING
+
+Before delivery:
+
+Test everything:
+
+- All buttons
+- All links
+- Registration flow
+- Login
+- Search
+- Filters
+- Mobile version
+- User interactions
+
+Fix every error found.
+
+Do not deliver a prototype or fake demo.
+
+Deliver a production-ready application.
+
+If you find poor code, duplicated code, or temporary solutions, refactor them.
+
+The final result must look like a real startup product ready for users, investors, and public launch.
+
+Do not give long explanations. After completing the work, report only:
+
+1. What was fixed
+2. What was created
+3. What tests were completed
+4. What remains before production launch

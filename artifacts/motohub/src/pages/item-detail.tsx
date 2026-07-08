@@ -228,7 +228,7 @@ export function ItemDetail() {
                     />
                     {item.premium && (
                       <div className="absolute top-3 left-3">
-                        <Badge className="shadow-lg">★ Premium</Badge>
+                        <Badge className="shadow-lg bg-primary text-primary-foreground text-xs px-2.5 py-1">Destaque</Badge>
                       </div>
                     )}
                     <div className="absolute top-3 right-3">

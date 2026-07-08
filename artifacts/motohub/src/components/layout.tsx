@@ -213,7 +213,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 md:h-16 items-center gap-2 md:gap-3">
           {/* Logo — maior no mobile */}
-          <Link href="/" className="flex items-center gap-2 shrink-0" onClick={handleSecretClick}>
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <img src="/logo-vermotu.png" alt="Vermotu" className="h-12 md:h-14 w-auto object-contain" />
           </Link>
 
@@ -586,9 +586,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Link href="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
               <Link href="/termos" className="hover:text-primary transition-colors">Termos</Link>
               <Link href="/contato" className="hover:text-primary transition-colors">FAQ</Link>
-              <Link href="/admin" className="hover:text-primary transition-colors flex items-center gap-1">
-                <Settings className="w-3 h-3" /> Admin
-              </Link>
+              {(adminUnlocked || currentUser?.isAdmin) && (
+                <Link href="/admin" className="hover:text-primary transition-colors flex items-center gap-1">
+                  <Settings className="w-3 h-3" /> Admin
+                </Link>
+              )}
               <span className="flex items-center gap-1"><Wrench className="w-3 h-3" /> Feito por motociclistas.</span>
             </div>
           </div>
