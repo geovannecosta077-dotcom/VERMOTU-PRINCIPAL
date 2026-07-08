@@ -118,7 +118,7 @@ const CATEGORY_CARDS = [
 const steps = [
   { n: "01", title: "Encontre", text: "Busque motos, peças e oficinas perto de você com filtros inteligentes." },
   { n: "02", title: "Negocie", text: "Fale direto com o vendedor pelo chat ou WhatsApp, sem intermediários." },
-  { n: "03", title: "Pague seguro", text: "Pix, cartão ou boleto com proteção Vermotu e cashback patrocinado." },
+  { n: "03", title: "Pague seguro", text: "Cartão de crédito em até 12x com proteção Vermotu e checkout seguro." },
   { n: "04", title: "Receba e avalie", text: "Acompanhe o pedido em tempo real e avalie sua experiência." },
 ];
 
@@ -307,7 +307,7 @@ function HeroBannerCarousel() {
             transition={{ duration: 0.6, delay: 0.28 }}
             className="text-base md:text-xl text-gray-300 mb-8 max-w-xl leading-relaxed"
           >
-            Compre peças, venda sua moto, encontre oficinas perto de você. PIX, cartão e WhatsApp integrados.
+            Compre, venda e encontre motos e peças perto de você. Pagamento seguro com cartão de crédito.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -316,13 +316,13 @@ function HeroBannerCarousel() {
             className="flex flex-col sm:flex-row gap-3"
           >
             <Button size="lg" className="text-base px-7 h-13 shadow-xl shadow-primary/30 font-semibold" asChild>
-              <Link href="/pecas"><ShoppingBag className="w-4 h-4 mr-2" /> Comprar peças</Link>
+              <Link href="/motos"><Bike className="w-4 h-4 mr-2" /> Encontre sua moto</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base px-7 h-13 bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white font-semibold" asChild>
-              <Link href="/anunciar"><Store className="w-4 h-4 mr-2" /> Vender peças</Link>
+              <Link href="/anunciar"><Store className="w-4 h-4 mr-2" /> Anuncie sua moto</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base px-7 h-13 bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white font-semibold" asChild>
-              <Link href="/oficinas"><Wrench className="w-4 h-4 mr-2" /> Oficinas</Link>
+              <Link href="/pecas"><ShoppingBag className="w-4 h-4 mr-2" /> Explorar peças</Link>
             </Button>
           </motion.div>
           <motion.div
@@ -332,7 +332,7 @@ function HeroBannerCarousel() {
             className="flex flex-wrap gap-5 mt-10 text-sm text-gray-400"
           >
             {[
-              { icon: ShieldCheck, text: "PIX, cartão e boleto" },
+              { icon: ShieldCheck, text: "Pagamento seguro por cartão" },
               { icon: Truck, text: "Entrega rápida no RJ" },
               { icon: HeadphonesIcon, text: "Suporte 7 dias" },
             ].map(({ icon: Icon, text }, i) => (
@@ -647,7 +647,7 @@ export function Home() {
               <span className="text-primary">Venda mais com a Vermotu.</span>
             </h2>
             <p className="text-gray-300 max-w-xl mx-auto mb-8">
-              Crie sua loja em 2 minutos, receba pedidos via Pix e fale com clientes pelo WhatsApp. Plano grátis para começar.
+              Crie sua loja em 2 minutos, receba pedidos com segurança e fale com clientes pelo WhatsApp. Plano grátis para começar.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/40" asChild>
@@ -666,7 +666,7 @@ export function Home() {
         <div className="container py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { icon: ShieldCheck, label: "Pagamento protegido", desc: "Pix, cartão ou boleto" },
+              { icon: ShieldCheck, label: "Pagamento protegido", desc: "Cartão de crédito via Stripe" },
               { icon: Truck, label: "Entrega rápida", desc: "Todo o Rio de Janeiro" },
               { icon: Star, label: "Vendedores verificados", desc: "Perfis com avaliações" },
               { icon: HeadphonesIcon, label: "Suporte 7 dias", desc: "Sempre disponível" },

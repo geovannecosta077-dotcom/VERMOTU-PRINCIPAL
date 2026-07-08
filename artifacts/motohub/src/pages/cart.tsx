@@ -83,7 +83,7 @@ export function Cart() {
                 Finalizar compra
               </Button>
               <p className="text-xs text-muted-foreground text-center mt-3 flex items-center gap-1 justify-center">
-                <ShieldCheck className="w-3 h-3" /> Pagamento seguro · Pix · Cartão · Boleto
+                <ShieldCheck className="w-3 h-3" /> Pagamento seguro · Cartão de crédito via Stripe
               </p>
             </div>
           </div>

@@ -1225,7 +1225,7 @@ export function Admin() {
             <div className="space-y-6">
               <div>
                 <h1 className="text-2xl font-bold">Pagamentos</h1>
-                <p className="text-muted-foreground text-sm">Gerencie assinaturas e comprovantes de pagamento PIX</p>
+                <p className="text-muted-foreground text-sm">Gerencie assinaturas e pagamentos via Stripe</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -1278,7 +1278,7 @@ export function Admin() {
                                   variant="outline"
                                   className={`text-xs ${sub.provider === "stripe" ? "border-indigo-500/30 text-indigo-400" : "border-emerald-500/30 text-emerald-400"}`}
                                 >
-                                  {sub.provider === "stripe" ? "Cartão (Stripe)" : "PIX"}
+                                  {"Cartão (Stripe)"}
                                 </Badge>
                                 <Badge className={`text-xs ${st.className}`}>{st.label}</Badge>
                                 <span className="text-sm font-bold">

@@ -25,7 +25,8 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
 
   try {
     const { name, size, contentType } = parsed.data;
-    const { uploadURL, objectPath } = await objectStorageService.getObjectEntityUploadURL();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
 
     res.json(
       RequestUploadUrlResponse.parse({
@@ -43,7 +44,7 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
 /**
  * GET /storage/public-objects/*
  *
- * Serve public assets from the S3 bucket's "public/" prefix.
+ * Serve public assets from PUBLIC_OBJECT_SEARCH_PATHS.
  * These are unconditionally public — no authentication or ACL checks.
  */
 router.get("/storage/public-objects/*filePath", async (req: Request, res: Response) => {
@@ -57,7 +58,6 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
     }
 
     const response = await objectStorageService.downloadObject(file);
-
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
 
@@ -76,8 +76,7 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
 /**
  * GET /storage/objects/*
  *
- * Serve uploaded objects from the S3 bucket (proxied through the API server).
- * Access control can be enabled by checking ACL policy (see commented block below).
+ * Serve uploaded objects from storage (proxied through the API server).
  */
 router.get("/storage/objects/*path", async (req: Request, res: Response) => {
   try {
@@ -86,16 +85,7 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
     const objectPath = `/objects/${wildcardPath}`;
     const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
 
-    // --- Protected route example (enable when adding auth) ---
-    // const canAccess = await objectStorageService.canAccessObjectEntity({
-    //   userId: req.headers["x-user-id"] as string | undefined,
-    //   objectFile,
-    //   requestedPermission: "read",
-    // });
-    // if (!canAccess) { res.status(403).json({ error: "Forbidden" }); return; }
-
     const response = await objectStorageService.downloadObject(objectFile);
-
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
 

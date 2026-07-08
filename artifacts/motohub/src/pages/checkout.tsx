@@ -10,17 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { useGetUser, useValidateCoupon, useCreateOrder, getGetUserQueryKey } from "@workspace/api-client-react";
 import type { Coupon } from "@workspace/api-client-react";
 import { toast } from "sonner";
-import { CreditCard, FileText, Tag, ChevronLeft, CheckCircle2, ShieldCheck } from "lucide-react";
-import { SiPix } from "react-icons/si";
+import { CreditCard, Tag, ChevronLeft, CheckCircle2, ShieldCheck } from "lucide-react";
 
-type Method = "pix" | "card" | "boleto";
+type Method = "card";
 
 export function Checkout() {
   const [, setLocation] = useLocation();
   const currentUserId = useSession((s) => s.currentUserId);
   const { lines, clear } = useCart();
   const subtotal = cartSubtotal(lines);
-  const [method, setMethod] = useState<Method>("pix");
+  const [method, setMethod] = useState<Method>("card");
   const [address, setAddress] = useState("");
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
@@ -113,29 +112,13 @@ export function Checkout() {
             {/* Pagamento */}
             <div className="rounded-xl border border-border bg-card p-6">
               <h2 className="font-bold mb-4">2. Forma de pagamento</h2>
-              <div className="grid grid-cols-3 gap-3">
-                {([
-                  { id: "pix" as Method, icon: SiPix, label: "Pix", note: "Aprovação imediata" },
-                  { id: "card" as Method, icon: CreditCard, label: "Cartão", note: "Em até 12x" },
-                  { id: "boleto" as Method, icon: FileText, label: "Boleto", note: "Compensa em 1-2 dias" },
-                ]).map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setMethod(m.id)}
-                    className={`rounded-lg border p-4 text-left transition-colors ${method === m.id ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"}`}
-                  >
-                    <m.icon className="w-6 h-6 mb-2 text-primary" />
-                    <div className="font-semibold">{m.label}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{m.note}</div>
-                  </button>
-                ))}
-              </div>
-              {method === "pix" && (
-                <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/30 text-sm">
-                  <strong>Pix Vermotu</strong> — após confirmar, exibimos o QR Code. Pagamento aprovado na hora.
+              <div className="flex items-center gap-4 p-4 rounded-lg border border-primary bg-primary/5">
+                <CreditCard className="w-6 h-6 text-primary shrink-0" />
+                <div>
+                  <div className="font-semibold">Cartão de crédito</div>
+                  <div className="text-xs text-muted-foreground">Em até 12x · processado com segurança pelo Stripe</div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Cupom */}

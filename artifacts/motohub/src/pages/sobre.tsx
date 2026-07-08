@@ -47,7 +47,7 @@ export function Sobre() {
           <div className="grid md:grid-cols-3 gap-5">
             {[
               { icon: ShieldCheck, t: "Confiança", d: "Vendedores e oficinas verificados, pagamento seguro e suporte 7 dias por semana." },
-              { icon: Rocket, t: "Velocidade", d: "Negociação direta, entregas rápidas e checkout em 1 clique com Pix." },
+              { icon: Rocket, t: "Velocidade", d: "Negociação direta, entregas rápidas e checkout em 1 clique." },
               { icon: Heart, t: "Comunidade", d: "Feito por motociclistas, para motociclistas. Sua paixão é a nossa." },
             ].map((v) => (
               <div key={v.t} className="rounded-xl border border-border bg-background p-6">
