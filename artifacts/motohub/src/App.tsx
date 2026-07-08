@@ -18,6 +18,8 @@ import { Pedidos } from "@/pages/pedidos";
 import { Oficinas } from "@/pages/oficinas";
 import { Sobre } from "@/pages/sobre";
 import { Contato } from "@/pages/contato";
+import { Privacidade } from "@/pages/privacidade";
+import { Termos } from "@/pages/termos";
 import { Loja } from "@/pages/loja";
 import { Blog } from "@/pages/blog";
 import { BlogPost } from "@/pages/blog-post";
@@ -62,6 +64,8 @@ function Router() {
         <Route path="/planos" component={Planos} />
         <Route path="/sobre" component={Sobre} />
         <Route path="/contato" component={Contato} />
+        <Route path="/privacidade" component={Privacidade} />
+        <Route path="/termos" component={Termos} />
         <Route path="/blog" component={Blog} />
         <Route path="/blog/:slug" component={BlogPost} />
         <Route component={NotFound} />

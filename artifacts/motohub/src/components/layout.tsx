@@ -199,12 +199,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container flex h-14 items-center gap-2 md:gap-3">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-red-700 flex items-center justify-center">
-              <span className="text-white font-black text-sm">V</span>
-            </div>
-            <span className="font-black text-xl tracking-tight hidden sm:block">
-              Ver<span className="text-primary">motu</span>
-            </span>
+            <img src="/logo-vermotu.png" alt="Vermotu" className="h-10 w-auto object-contain" />
           </Link>
 
           {/* Search bar — right next to logo */}
@@ -444,12 +439,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <ul className="space-y-2.5 text-sm text-muted-foreground">
                 <li><Link href="/sobre" className="hover:text-primary transition-colors">Sobre nós</Link></li>
                 <li>
-                  <Link href="/sobre" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                  <Link href="/privacidade" className="hover:text-primary transition-colors flex items-center gap-1.5">
                     <Shield className="w-3.5 h-3.5" /> Política de Privacidade
                   </Link>
                 </li>
                 <li>
-                  <Link href="/sobre" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                  <Link href="/termos" className="hover:text-primary transition-colors flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5" /> Termos de Uso
                   </Link>
                 </li>
@@ -464,8 +459,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {" "}{new Date().getFullYear()} Vermotu Marketplace LTDA — Rio de Janeiro, RJ.
             </span>
             <div className="flex flex-wrap items-center gap-4">
-              <Link href="/sobre" className="hover:text-primary transition-colors">Privacidade</Link>
-              <Link href="/sobre" className="hover:text-primary transition-colors">Termos</Link>
+              <Link href="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
+              <Link href="/termos" className="hover:text-primary transition-colors">Termos</Link>
               <Link href="/contato" className="hover:text-primary transition-colors">FAQ</Link>
               <Link href="/admin" className="hover:text-primary transition-colors flex items-center gap-1">
                 <Settings className="w-3 h-3" /> Admin

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 export function Contato() {
@@ -44,17 +44,52 @@ export function Contato() {
 
           <div className="space-y-3">
             {[
-              { icon: Mail, t: "E-mail", d: "contato@vermotu.com.br" },
-              { icon: MapPin, t: "Endereço", d: "Rio de Janeiro — RJ" },
-              { icon: MessageCircle, t: "Suporte", d: "Use o chat dentro de cada anúncio para falar diretamente com o vendedor." },
+              {
+                icon: Phone,
+                t: "WhatsApp — Suporte Oficial",
+                d: "+55 21 99296-3028",
+                href: "https://wa.me/5521992963028",
+                label: "Chamar no WhatsApp",
+              },
+              {
+                icon: Mail,
+                t: "E-mail",
+                d: "contato@vermotu.com.br",
+                href: "mailto:contato@vermotu.com.br",
+                label: null,
+              },
+              {
+                icon: MapPin,
+                t: "Endereço",
+                d: "Rio de Janeiro — RJ, Brasil",
+                href: null,
+                label: null,
+              },
+              {
+                icon: MessageCircle,
+                t: "Suporte entre usuários",
+                d: "Use o chat dentro de cada anúncio para falar diretamente com o vendedor.",
+                href: null,
+                label: null,
+              },
             ].map((c) => (
               <div key={c.t} className="rounded-xl border border-border bg-card p-5 flex gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
                   <c.icon className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="font-semibold">{c.t}</div>
                   <div className="text-sm text-muted-foreground">{c.d}</div>
+                  {c.href && c.label && (
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block mt-2 text-xs font-semibold text-primary hover:underline"
+                    >
+                      {c.label} →
+                    </a>
+                  )}
                 </div>
               </div>
             ))}

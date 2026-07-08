@@ -19,6 +19,11 @@ router.get("/items", async (req, res): Promise<void> => {
     return;
   }
   const filters = [];
+  // Only show active items publicly; pass ?status=all to see everything (admin only)
+  const rawStatus = typeof req.query.status === "string" ? req.query.status : null;
+  if (rawStatus !== "all") {
+    filters.push(eq(itemsTable.status, rawStatus === "pending" ? "pending" : "active"));
+  }
   if (q.data.type) filters.push(eq(itemsTable.type, q.data.type));
   if (q.data.brand) filters.push(eq(itemsTable.brand, q.data.brand));
   if (q.data.category) filters.push(eq(itemsTable.category, q.data.category));
@@ -84,6 +89,7 @@ router.post("/items", async (req, res): Promise<void> => {
       sellerId: data.sellerId,
       premium: data.premium ?? false,
       stock: data.stock ?? 1,
+      status: "pending",
     })
     .returning();
   res.status(201).json(serialize(row!));

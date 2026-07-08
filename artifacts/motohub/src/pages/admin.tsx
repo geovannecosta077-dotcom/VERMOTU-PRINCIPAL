@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { useSession, formatBRL, formatDateBR, imageUrl } from "@/lib/session";
 import {
   useGetAdminStats,
-  useListItems,
   useListUsers,
   useUpdateItem,
   useDeleteItem,
@@ -30,7 +29,6 @@ import {
   useAdminUpdateBanner,
   useAdminDeleteBanner,
   useSignIn,
-  getListItemsQueryKey,
   getGetAdminStatsQueryKey,
   getListUsersQueryKey,
   getListCouponsQueryKey,
@@ -42,6 +40,7 @@ import {
   getAdminListEmailCampaignsQueryKey,
   getAdminListBannersQueryKey,
 } from "@workspace/api-client-react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,7 +104,15 @@ export function Admin() {
 
   const enabled = adminUnlocked;
   const { data: stats } = useGetAdminStats({ query: { enabled, queryKey: getGetAdminStatsQueryKey() } });
-  const { data: items } = useListItems({}, { query: { enabled, queryKey: getListItemsQueryKey({}) } });
+  const { data: items, refetch: refetchItems } = useQuery<{ id: number; type: string; title: string; price: number; status: string; sellerId: number; premium: boolean; image: string; createdAt: string; location: string; category: string; brand: string | null; condition: string; ratingAvg: number; ratingCount: number; stock: number }[]>({
+    queryKey: ["admin-items-all"],
+    enabled,
+    queryFn: async () => {
+      const res = await fetch("/api/items?status=all");
+      if (!res.ok) throw new Error("Failed to fetch items");
+      return res.json();
+    },
+  });
   const { data: users } = useListUsers({ query: { enabled, queryKey: getListUsersQueryKey() } });
   const { data: coupons } = useListCoupons({ query: { enabled, queryKey: getListCouponsQueryKey() } });
   const { data: adminLogs } = useListAdminLogs({ query: { enabled, queryKey: getListAdminLogsQueryKey() } });
@@ -223,7 +230,7 @@ export function Admin() {
   const setItemStatus = (id: number, status: "active" | "pending") =>
     updateItem.mutate({ id, data: { status } }, {
       onSuccess: (item) => {
-        queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+        refetchItems();
         toast.success(status === "active" ? "Anúncio aprovado" : "Anúncio suspenso");
         logAction(status === "active" ? "Aprovar anúncio" : "Suspender anúncio", `Item #${id} — ${item.title}`);
       },
@@ -232,7 +239,7 @@ export function Admin() {
   const featureItem = (id: number, premium: boolean) =>
     updateItem.mutate({ id, data: { premium } }, {
       onSuccess: (item) => {
-        queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+        refetchItems();
         toast.success(premium ? "Anúncio destacado" : "Destaque removido");
         logAction(premium ? "Destacar anúncio" : "Remover destaque", `Item #${id} — ${item.title}`);
       },
@@ -242,7 +249,7 @@ export function Admin() {
     const item = items?.find((i) => i.id === id);
     deleteItem.mutate({ id }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListItemsQueryKey() });
+        refetchItems();
         toast.success("Anúncio removido");
         logAction("Remover anúncio", `Item #${id} — ${item?.title ?? ""}`);
       },
