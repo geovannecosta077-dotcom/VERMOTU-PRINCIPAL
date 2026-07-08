@@ -6,7 +6,7 @@ import { ItemCard } from "@/components/item-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Store, MapPin, ShieldCheck, Phone, Crown, Star, Instagram, Facebook, Globe, ExternalLink } from "lucide-react";
+import { Store, MapPin, ShieldCheck, Phone, Crown, Star, Instagram, Facebook, ExternalLink, Clock } from "lucide-react";
 
 function MapEmbed({ city }: { city: string }) {
   const query = encodeURIComponent(`${city}, Brasil`);
@@ -187,11 +187,38 @@ export function Loja() {
                   className="w-8 h-8 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors" aria-label="Facebook">
                   <Facebook className="w-3.5 h-3.5" />
                 </a>
-                <a href="#"
-                  className="w-8 h-8 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors" aria-label="Website">
-                  <Globe className="w-3.5 h-3.5" />
-                </a>
               </div>
+            )}
+          </div>
+
+          {/* Business hours */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" /> Horário de atendimento
+            </h3>
+            {seller.accountType === "empresa" ? (
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Seg – Sex</span>
+                  <span className="font-medium">8h – 18h</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sábado</span>
+                  <span className="font-medium">8h – 13h</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Domingo</span>
+                  <span className="text-muted-foreground">Fechado</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {wppHref ? (
+                  <a href={wppHref} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors">
+                    Consultar disponibilidade via WhatsApp
+                  </a>
+                ) : "Consultar disponibilidade"}
+              </p>
             )}
           </div>
 
