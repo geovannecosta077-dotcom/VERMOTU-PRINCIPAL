@@ -1,0 +1,174 @@
+Perform a complete professional redesign and completion of Vermotu. Stop delivering partial implementations. The goal is to finish the product as a premium startup marketplace, not a simple AI-generated demo.
+
+The current quality is below the expected standard. Audit the entire platform and fix everything necessary before moving to new features.
+
+1. INTELLIGENT SEARCH SYSTEM — REBUILD COMPLETELY
+
+The search experience must feel like a professional automotive marketplace.
+
+Do not allow users to continue to the next step without selecting the required information.
+
+Create a cascading search flow:
+
+Example:
+
+Step 1:
+Select category:
+
+- Motorcycle
+- Parts
+- Services
+- Repair shops
+
+Step 2:
+Select brand:
+
+- Honda
+- Yamaha
+- BMW
+- Kawasaki
+- Other brands
+
+Step 3:
+Select model:
+The model list must dynamically update according to the selected brand.
+
+Step 4:
+Select year:
+Only show valid years.
+
+Step 5:
+Additional filters:
+
+- Price
+- Mileage
+- Location
+- Condition
+- Seller type
+
+The interface must clearly show progress and selected options.
+
+Example:
+Brand → Model → Year → Version → Filters → Results
+
+Do not show a messy list of hundreds of options.
+
+Use professional UI patterns:
+
+- Dropdown cascade
+- Search inside selectors
+- Recent searches
+- Recommended searches
+- Clear selected filters
+- Visual chips/tags for active filters
+
+The user should always know where they are in the search process.
+
+2. PREMIUM USER REGISTRATION SYSTEM
+
+The current registration is too simple. Rebuild it completely.
+
+Create a professional onboarding experience.
+
+Account types:
+
+- Buyer
+- Private seller
+- Motorcycle shop
+- Repair shop
+- Dealership
+
+Registration should include:
+
+Personal information:
+
+- Full name
+- Email
+- Phone
+- Password
+- Profile photo
+
+Seller verification:
+
+- Location
+- Documents/status verification
+- Seller profile
+- Business information (when applicable)
+
+Professional profiles:
+
+- Avatar
+- Cover image
+- Ratings
+- Reviews
+- Published ads
+- Followers
+- Contact options
+- Verification badge
+
+Make registration feel like a real marketplace platform.
+
+3. PROFESSIONAL PRODUCT QUALITY
+
+Stop building feature by feature with unfinished sections.
+
+Before adding anything new:
+
+- Review existing code
+- Fix broken components
+- Improve UX
+- Test every button
+- Remove placeholders
+- Remove fake content
+- Remove unnecessary emojis
+- Remove AI-looking texts
+
+Every page must look production-ready.
+
+4. DESIGN STANDARD
+
+Vermotu must look like a billion-dollar automotive startup.
+
+Reference quality level:
+
+- Webmotors
+- Mercado Livre
+- OLX
+- Tesla-style simplicity
+
+Requirements:
+
+- Premium dark automotive theme
+- Clean spacing
+- Professional typography
+- Smooth animations
+- Excellent mobile experience
+- Light/dark mode
+
+5. FINAL DELIVERY REQUIREMENT
+
+Do not deliver another incomplete update.
+
+First audit the whole application.
+
+Then implement all necessary improvements.
+
+Only consider the task complete when:
+
+✓ Search works professionally
+✓ Cascading selection works
+✓ No user can skip required steps
+✓ Registration is robust
+✓ Pages are polished
+✓ Mobile works perfectly
+✓ Buttons work
+✓ No visible errors remain
+
+After finishing, provide only:
+
+1. Complete list of fixes made
+2. Features completed
+3. Tests performed
+4. Remaining production requirements
+
+The objective is a real startup-quality marketplace, not a prototype.
