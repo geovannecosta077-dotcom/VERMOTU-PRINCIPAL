@@ -34,16 +34,15 @@ function needsPassword(err: unknown): boolean {
   return obj?.data?.needsPassword === true;
 }
 
+// 8+ chars with mix (letters + numbers) = forte; 8+ without mix = média; <8 = fraca
 function passwordStrength(pw: string): { level: 0 | 1 | 2 | 3; label: string; color: string } {
   if (!pw) return { level: 0, label: "", color: "" };
   const hasLetter = /[a-zA-Z]/.test(pw);
   const hasNumber = /\d/.test(pw);
-  const hasSpecial = /[^a-zA-Z0-9]/.test(pw);
   const long = pw.length >= 8;
   if (!long) return { level: 1, label: "Fraca", color: "bg-red-500" };
-  if (long && (hasLetter && hasNumber) && hasSpecial) return { level: 3, label: "Forte", color: "bg-emerald-500" };
-  if (long && (hasLetter || hasNumber)) return { level: 2, label: "Média", color: "bg-amber-500" };
-  return { level: 1, label: "Fraca", color: "bg-red-500" };
+  if (long && hasLetter && hasNumber) return { level: 3, label: "Forte", color: "bg-emerald-500" };
+  return { level: 2, label: "Média", color: "bg-amber-500" };
 }
 
 // ─── Account types ────────────────────────────────────────────────────────────
@@ -57,6 +56,8 @@ const ACCOUNT_TYPES: {
   icon: typeof ShoppingBag;
   apiType: "pessoa" | "empresa";
   isCompany: boolean;
+  storePlaceholder: string;
+  storeLabel: string;
   toast: (name: string) => string;
 }[] = [
   {
@@ -66,6 +67,8 @@ const ACCOUNT_TYPES: {
     icon: ShoppingBag,
     apiType: "pessoa",
     isCompany: false,
+    storeLabel: "",
+    storePlaceholder: "",
     toast: (n) => `Bem-vindo, ${n}! Explore as melhores motos do Brasil.`,
   },
   {
@@ -75,6 +78,8 @@ const ACCOUNT_TYPES: {
     icon: Tag,
     apiType: "pessoa",
     isCompany: false,
+    storeLabel: "",
+    storePlaceholder: "",
     toast: (n) => `Bem-vindo, ${n}! Seu perfil de vendedor está pronto.`,
   },
   {
@@ -84,6 +89,8 @@ const ACCOUNT_TYPES: {
     icon: Store,
     apiType: "empresa",
     isCompany: true,
+    storeLabel: "Nome da loja",
+    storePlaceholder: "MotoShop Centro",
     toast: (n) => `Bem-vindo, ${n}! Sua loja foi criada com sucesso.`,
   },
   {
@@ -93,6 +100,8 @@ const ACCOUNT_TYPES: {
     icon: Wrench,
     apiType: "empresa",
     isCompany: true,
+    storeLabel: "Nome da oficina",
+    storePlaceholder: "Moto Fix RJ",
     toast: (n) => `Bem-vindo, ${n}! Sua oficina está cadastrada na Vermotu.`,
   },
   {
@@ -102,6 +111,8 @@ const ACCOUNT_TYPES: {
     icon: Building2,
     apiType: "empresa",
     isCompany: true,
+    storeLabel: "Nome da concessionária",
+    storePlaceholder: "Moto Honda SP",
     toast: (n) => `Bem-vindo, ${n}! Sua concessionária foi cadastrada.`,
   },
 ];
@@ -148,36 +159,41 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
   ] as const;
 
   return (
-    <div className="flex items-center gap-0 w-full mb-5">
-      {steps.map((s, i) => (
-        <div key={s.n} className="flex items-center flex-1 min-w-0">
-          <div className="flex flex-col items-center shrink-0">
-            <div
-              className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all",
-                s.n < step
-                  ? "bg-primary border-primary text-white"
-                  : s.n === step
-                    ? "border-primary text-primary bg-primary/10"
-                    : "border-border text-muted-foreground",
-              )}
-            >
-              {s.n < step ? <Check className="w-3.5 h-3.5" /> : s.n}
+    <div className="mb-5">
+      <p className="text-xs font-semibold text-primary mb-3 text-center tracking-wide uppercase">
+        Passo {step} de 3
+      </p>
+      <div className="flex items-center w-full">
+        {steps.map((s, i) => (
+          <div key={s.n} className="flex items-center flex-1 min-w-0">
+            <div className="flex flex-col items-center shrink-0">
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all",
+                  s.n < step
+                    ? "bg-primary border-primary text-white"
+                    : s.n === step
+                      ? "border-primary text-primary bg-primary/10"
+                      : "border-border text-muted-foreground",
+                )}
+              >
+                {s.n < step ? <Check className="w-3.5 h-3.5" /> : s.n}
+              </div>
+              <span
+                className={cn(
+                  "text-[10px] mt-1 font-medium whitespace-nowrap",
+                  s.n === step ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                {s.label}
+              </span>
             </div>
-            <span
-              className={cn(
-                "text-[10px] mt-1 font-medium whitespace-nowrap",
-                s.n === step ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              {s.label}
-            </span>
+            {i < steps.length - 1 && (
+              <div className={cn("h-px flex-1 mx-1 mb-4 transition-colors", s.n < step ? "bg-primary" : "bg-border")} />
+            )}
           </div>
-          {i < steps.length - 1 && (
-            <div className={cn("h-px flex-1 mx-1 mb-4 transition-colors", s.n < step ? "bg-primary" : "bg-border")} />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -215,7 +231,8 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
     password.length >= 6 &&
     (!selectedType?.isCompany || storeName.trim().length >= 2);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!selectedType) return;
     if (!acceptedTerms) { toast.error("Você precisa aceitar os Termos de Uso e a Política de Privacidade."); return; }
     try {
@@ -239,11 +256,16 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
 
   // ── Step 1: Account type selection ─────────────────────────────────────────
   if (step === 1) {
+    const handleStep1Submit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (profileType) setStep(2);
+    };
+
     return (
-      <div>
+      <form onSubmit={handleStep1Submit} className="flex flex-col gap-0">
         <StepIndicator step={1} />
         <p className="text-sm text-muted-foreground mb-3">Escolha o tipo de conta para personalizar sua experiência:</p>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-2 mb-4">
           {ACCOUNT_TYPES.map((t) => {
             const Icon = t.icon;
             const selected = profileType === t.id;
@@ -263,7 +285,7 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
                   "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                   selected ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
                 )}>
-                  <Icon className="w-4.5 h-4.5" />
+                  <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={cn("font-semibold text-sm", selected ? "text-primary" : "text-foreground")}>
@@ -276,21 +298,25 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
             );
           })}
         </div>
-        <Button
-          className="w-full mt-4"
-          disabled={!profileType}
-          onClick={() => setStep(2)}
-        >
-          Próximo
-        </Button>
-      </div>
+        {/* Sticky footer button */}
+        <div className="sticky bottom-0 bg-background pt-2 pb-1">
+          <Button type="submit" className="w-full" disabled={!profileType}>
+            Próximo
+          </Button>
+        </div>
+      </form>
     );
   }
 
   // ── Step 2: Personal data ───────────────────────────────────────────────────
   if (step === 2) {
+    const handleStep2Submit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (step2Valid) setStep(3);
+    };
+
     return (
-      <div>
+      <form onSubmit={handleStep2Submit} className="flex flex-col gap-0">
         <StepIndicator step={2} />
         <button
           type="button"
@@ -301,24 +327,21 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
           {selectedType?.label}
         </button>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mb-4">
           {/* Business name — only for companies */}
           {selectedType?.isCompany && (
             <div className="space-y-1.5">
-              <Label htmlFor="su-storename">
-                {selectedType.id === "oficina" ? "Nome da oficina" : selectedType.id === "concessionaria" ? "Nome da concessionária" : "Nome da loja"}
-              </Label>
+              <Label htmlFor="su-storename">{selectedType.storeLabel}</Label>
               <Input
                 id="su-storename"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
-                placeholder={selectedType.id === "oficina" ? "Moto Fix RJ" : selectedType.id === "concessionaria" ? "Moto Honda RJ" : "MotoShop Centro"}
+                placeholder={selectedType.storePlaceholder}
                 autoComplete="organization"
               />
             </div>
           )}
 
-          {/* Full name */}
           <div className="space-y-1.5">
             <Label htmlFor="su-name">Nome completo</Label>
             <Input
@@ -330,7 +353,6 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
             />
           </div>
 
-          {/* E-mail */}
           <div className="space-y-1.5">
             <Label htmlFor="su-email">E-mail</Label>
             <Input
@@ -343,7 +365,6 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
             />
           </div>
 
-          {/* Phone */}
           <div className="space-y-1.5">
             <Label htmlFor="su-phone">Telefone (WhatsApp)</Label>
             <Input
@@ -357,7 +378,6 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
             <p className="text-xs text-muted-foreground">Usado para negociações via WhatsApp.</p>
           </div>
 
-          {/* Password + strength */}
           <div className="space-y-1.5">
             <Label htmlFor="su-pass">Senha</Label>
             <PasswordInput
@@ -386,27 +406,26 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
                   "text-emerald-500": strength.level === 3,
                 })}>
                   Senha {strength.label.toLowerCase()}
-                  {strength.level < 3 && " — use letras, números e símbolos para torná-la mais forte"}
+                  {strength.level < 3 && " — combine letras e números para uma senha mais forte"}
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        <Button
-          className="w-full mt-4"
-          disabled={!step2Valid}
-          onClick={() => setStep(3)}
-        >
-          Próximo
-        </Button>
-      </div>
+        {/* Sticky footer button */}
+        <div className="sticky bottom-0 bg-background pt-2 pb-1">
+          <Button type="submit" className="w-full" disabled={!step2Valid}>
+            Próximo
+          </Button>
+        </div>
+      </form>
     );
   }
 
   // ── Step 3: Review + Terms + Submit ────────────────────────────────────────
   return (
-    <div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-0">
       <StepIndicator step={3} />
       <button
         type="button"
@@ -428,7 +447,7 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
         </div>
         {selectedType?.isCompany && storeName && (
           <div className="flex justify-between gap-2">
-            <span className="text-muted-foreground">Empresa</span>
+            <span className="text-muted-foreground">{selectedType.storeLabel}</span>
             <span className="font-medium text-right truncate">{storeName}</span>
           </div>
         )}
@@ -468,14 +487,17 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
         </span>
       </label>
 
-      <Button
-        className="w-full"
-        disabled={!acceptedTerms || upsert.isPending}
-        onClick={handleSubmit}
-      >
-        {upsert.isPending ? "Criando conta..." : "Criar conta grátis"}
-      </Button>
-    </div>
+      {/* Sticky footer button */}
+      <div className="sticky bottom-0 bg-background pt-2 pb-1">
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!acceptedTerms || upsert.isPending}
+        >
+          {upsert.isPending ? "Criando conta..." : "Criar conta grátis"}
+        </Button>
+      </div>
+    </form>
   );
 }
 
