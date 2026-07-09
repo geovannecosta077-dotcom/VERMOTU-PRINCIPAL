@@ -21,7 +21,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   awaiting_payment: { label: "Aguardando pagamento", color: "bg-amber-500/15 text-amber-500" },
   proof_submitted: { label: "Comprovante enviado — em análise", color: "bg-blue-500/15 text-blue-500" },
   in_review: { label: "Em análise", color: "bg-purple-500/15 text-purple-500" },
-  approved: { label: "Aprovado ✓", color: "bg-emerald-500/15 text-emerald-500" },
+  approved: { label: "Aprovado", color: "bg-emerald-500/15 text-emerald-500" },
   rejected: { label: "Rejeitado", color: "bg-red-500/15 text-red-500" },
   expired: { label: "Expirado", color: "bg-gray-500/15 text-gray-500" },
 };

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Package, ChevronRight, CheckCircle2, Clock, Truck, XCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STATUS: Record<string, { label: string; color: string; icon: any }> = {
   pending: { label: "Aguardando pagamento", color: "bg-yellow-500/15 text-yellow-500 border-yellow-500/30", icon: Clock },
@@ -25,7 +26,7 @@ export function Pedidos() {
   useEffect(() => { document.title = "Meus pedidos — Vermotu"; }, []);
   useEffect(() => { if (!currentUserId) setLoginOpen(true); }, [currentUserId, setLoginOpen]);
 
-  const { data: orders } = useListOrders(
+  const { data: orders, isLoading } = useListOrders(
     { buyerId: currentUserId ?? 0 },
     { query: { enabled: !!currentUserId, queryKey: getListOrdersQueryKey({ buyerId: currentUserId ?? 0 }) } },
   );
@@ -36,6 +37,35 @@ export function Pedidos() {
         <div className="container py-20 text-center">
           <p className="text-muted-foreground mb-4">Entre para ver seus pedidos.</p>
           <Button onClick={() => setLoginOpen(true)}>Entrar</Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container py-10">
+          <Skeleton className="h-9 w-48 mb-2" />
+          <Skeleton className="h-5 w-64 mb-8" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className="p-4 flex items-center justify-between border-b border-border">
+                  <div className="space-y-1.5"><Skeleton className="h-4 w-40" /><Skeleton className="h-6 w-24" /></div>
+                  <Skeleton className="h-6 w-32 rounded-full" />
+                </div>
+                <div className="p-4 space-y-3">
+                  {[1, 2].map((j) => (
+                    <div key={j} className="flex gap-3 items-center">
+                      <Skeleton className="w-14 h-14 rounded shrink-0" />
+                      <div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/3" /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </Layout>
     );

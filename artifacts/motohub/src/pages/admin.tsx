@@ -1198,11 +1198,11 @@ export function Admin() {
               <Card>
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> Segurança</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <SettingRow label="Proteção brute force" description="Conta bloqueada após 5 tentativas incorretas de login" value="Ativo ✓" highlight />
+                  <SettingRow label="Proteção brute force" description="Conta bloqueada após 5 tentativas incorretas de login" value="Ativo" highlight />
                   <SettingRow label="Bloqueio temporário" description="Duração do bloqueio por excesso de tentativas" value="15 minutos" />
                   <SettingRow label="Hash de senhas" description="Algoritmo utilizado para armazenamento seguro" value="bcrypt (cost 10)" highlight />
-                  <SettingRow label="Validação de entrada" description="Todos os dados são validados com Zod antes de processar" value="Ativo ✓" highlight />
-                  <SettingRow label="Sanitização SQL" description="Queries parametrizadas via Drizzle ORM" value="Protegido ✓" highlight />
+                  <SettingRow label="Validação de entrada" description="Todos os dados são validados com Zod antes de processar" value="Ativo" highlight />
+                  <SettingRow label="Sanitização SQL" description="Queries parametrizadas via Drizzle ORM" value="Protegido" highlight />
                 </CardContent>
               </Card>
 
@@ -1572,7 +1572,7 @@ export function Admin() {
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2">
-                    <p className="text-xs text-muted-foreground">⚠️ O envio fica registrado nos logs. Certifique-se do conteúdo antes de confirmar.</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-3 h-3 shrink-0" /> O envio fica registrado nos logs. Certifique-se do conteúdo antes de confirmar.</p>
                     <Button onClick={async () => {
                       if (!emailForm.subject.trim() || !emailForm.body.trim()) { toast.error("Preencha assunto e corpo do e-mail."); return; }
                       try {

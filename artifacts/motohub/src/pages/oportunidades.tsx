@@ -17,7 +17,7 @@ import {
   CreateServiceRequestUrgency,
 } from "@workspace/api-client-react";
 import { toast } from "sonner";
-import { Zap, MapPin, Clock, CheckCircle2, ChevronRight, AlertTriangle, Bike, Wrench, Package, Search, Send } from "lucide-react";
+import { Zap, MapPin, Clock, CheckCircle2, ChevronRight, AlertTriangle, Bike, Wrench, Package, Search, Send, CalendarDays, Timer } from "lucide-react";
 import { ESTADOS, CIDADES_POR_ESTADO } from "@/lib/localidades";
 
 const CATEGORIES = [
@@ -292,8 +292,8 @@ export function Oportunidades() {
                                 <p className="text-sm mt-1 text-muted-foreground">{p.message}</p>
                                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
                                   {p.price && <span className="text-primary font-semibold">{formatBRL(p.price)}</span>}
-                                  {p.timeframe && <span>⏱ {p.timeframe}</span>}
-                                  {p.availability && <span>📅 {p.availability}</span>}
+                                  {p.timeframe && <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> {p.timeframe}</span>}
+                                  {p.availability && <span className="flex items-center gap-1"><CalendarDays className="w-3 h-3" /> {p.availability}</span>}
                                 </div>
                               </div>
                               <Button

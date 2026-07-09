@@ -25,7 +25,7 @@ import {
   getListIncomingServiceRequestsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2, CheckCircle2, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck, Zap, MapPin, Clock, Send } from "lucide-react";
+import { Trash2, CheckCircle2, Check, Heart, Calendar, MessageCircle, Crown, Package, TrendingUp, DollarSign, ShieldCheck, Phone, BadgeCheck, Zap, MapPin, Clock, Send } from "lucide-react";
 import { formatPhone, formatRelative } from "@/lib/session";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -380,7 +380,7 @@ export function Conta() {
                     ].map(({ done, label }) => (
                       <div key={label} className="flex items-center gap-2">
                         <div className={`w-4 h-4 rounded-full flex items-center justify-center ${done ? "bg-emerald-500" : "bg-muted"}`}>
-                          {done && <span className="text-white text-[10px] font-bold">✓</span>}
+                          {done && <Check className="w-2.5 h-2.5 text-white" />}
                         </div>
                         <span className={done ? "text-foreground" : ""}>{label}</span>
                       </div>

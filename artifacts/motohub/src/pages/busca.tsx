@@ -18,6 +18,7 @@ import {
   getGetServiceRequestQueryKey,
   getGetUserQueryKey,
 } from "@workspace/api-client-react";
+import { Phone } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Zap, Loader2, MapPin, Clock, CheckCircle2, MessageCircle,
@@ -407,7 +408,7 @@ function ProposalsView({ requestId, onBack }: { requestId: number; onBack: () =>
                   <p className="text-sm text-muted-foreground mb-3">{p.message}</p>
                   {accepted ? (
                     <div className="space-y-2">
-                      {p.contactPhone && <p className="text-sm font-medium">📞 {formatPhone(p.contactPhone)}</p>}
+                      {p.contactPhone && <p className="text-sm font-medium flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-primary" /> {formatPhone(p.contactPhone)}</p>}
                       <Button asChild size="sm" className="w-full gap-2">
                         <Link href="/chat"><MessageCircle className="w-4 h-4" /> Abrir chat</Link>
                       </Button>
