@@ -204,7 +204,7 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const steps = [
     { n: 1, label: "Perfil" },
     { n: 2, label: "Dados" },
-    { n: 3, label: "Local" },
+    { n: 3, label: "Localização" },
     { n: 4, label: "Preferências" },
     { n: 5, label: "Confirmar" },
   ] as const;
@@ -317,21 +317,28 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
 
       // Enriquecimento best-effort via contratos existentes (não bloqueia o cadastro)
       const docDigits = cpfCnpj.replace(/\D/g, "");
+      const wantsCnpj = selectedType.isCompany && docDigits.length === 14;
+      const wantsCpf = !selectedType.isCompany && docDigits.length === 11;
+      let citySaved = false;
+      let docSaved = false;
       try {
         const patch: Record<string, string> = {};
         if (cityStr) patch.city = cityStr;
-        if (selectedType.isCompany && docDigits.length === 14) patch.cnpj = docDigits;
+        if (wantsCnpj) patch.cnpj = docDigits;
         if (Object.keys(patch).length > 0) {
           await updateUser.mutateAsync({ id: user.id, data: patch });
+          citySaved = !!cityStr;
+          docSaved = wantsCnpj;
         }
-      } catch { /* perfil pode ser completado depois em /conta */ }
+      } catch { /* fica pendente abaixo; perfil pode ser completado depois em /conta */ }
       try {
-        if (!selectedType.isCompany && docDigits.length === 11) {
+        if (wantsCpf) {
           await setUserCpf.mutateAsync({ id: user.id, data: { cpf: docDigits } });
+          docSaved = true;
         }
-      } catch { /* CPF inválido ou já em uso — pode ser ajustado em /conta */ }
+      } catch { /* CPF inválido ou já em uso — fica pendente abaixo */ }
 
-      // Preferências e campos sem suporte no backend ficam pendentes no dispositivo
+      // Campos sem suporte no backend (ou cujo salvamento falhou) ficam pendentes no dispositivo
       const pending: Record<string, unknown> = {};
       if (prefBrands.length) pending.brands = prefBrands;
       if (prefCategories.length) pending.categories = prefCategories;
@@ -340,6 +347,15 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
       if (raio) pending.raioBusca = raio;
       if (bairroCep.trim()) pending.bairroCep = bairroCep.trim();
       if (birthDate) pending.birthDate = birthDate;
+      if (!citySaved && (uf || cidade)) {
+        if (uf) pending.uf = uf;
+        if (cidade) pending.cidade = cidade;
+        if (cityStr) pending.localidade = cityStr;
+      }
+      if (!docSaved && docDigits) {
+        pending.documento = docDigits;
+        pending.documentoTipo = selectedType.isCompany ? "cnpj" : "cpf";
+      }
       if (Object.keys(pending).length > 0) {
         try {
           localStorage.setItem(`vermotu:perfil-pendente:${user.id}`, JSON.stringify(pending));
