@@ -501,6 +501,21 @@ function MyRequestsList({ onSelect }: { onSelect: (id: number) => void }) {
                     {request.model && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.model}</Badge>}
                     {request.partType && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.partType}</Badge>}
                     {request.serviceType && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.serviceType}</Badge>}
+                    {(request.yearFrom || request.yearTo) && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        {request.yearFrom && request.yearTo
+                          ? `${request.yearFrom}–${request.yearTo}`
+                          : request.yearFrom
+                            ? `A partir de ${request.yearFrom}`
+                            : `Até ${request.yearTo}`}
+                      </Badge>
+                    )}
+                    {request.priceRange && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.priceRange}</Badge>}
+                    {request.kmMax && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.kmMax}</Badge>}
+                    {request.motoCategory && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.motoCategory}</Badge>}
+                    {request.transmission && <Badge variant="outline" className="text-[10px] px-1.5 py-0">Câmbio {request.transmission}</Badge>}
+                    {request.condition && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.condition}</Badge>}
+                    {request.searchRadius && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.searchRadius}</Badge>}
                     {request.urgency === "urgente" && <Badge className="bg-orange-500 text-[10px] px-1.5 py-0">Urgente</Badge>}
                     {request.city && (
                       <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
@@ -682,6 +697,14 @@ export function Busca() {
           model: wizard.model || undefined,
           partType: wizard.partType || undefined,
           serviceType: wizard.serviceType || undefined,
+          priceRange: wizard.priceRange ? priceRangeLabel(wizard.priceRange) : undefined,
+          kmMax: wizard.kmMax && wizard.kmMax !== "Qualquer" ? wizard.kmMax : undefined,
+          yearFrom: wizard.yearFrom || wizard.year || undefined,
+          yearTo: wizard.yearTo || undefined,
+          condition: wizard.condition && !["Ambos", "Qualquer"].includes(wizard.condition) ? wizard.condition : undefined,
+          transmission: wizard.transmission && wizard.transmission !== "Qualquer" ? wizard.transmission : undefined,
+          motoCategory: wizard.motoCategory || undefined,
+          searchRadius: wizard.searchRadius || undefined,
           urgency: wizard.urgency === "emergencia" || wizard.urgency === "urgente" ? "urgente" : "normal",
           city: wizardCity(wizard) || undefined,
         },

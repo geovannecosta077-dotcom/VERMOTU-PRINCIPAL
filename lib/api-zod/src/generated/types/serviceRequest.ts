@@ -24,6 +24,22 @@ export interface ServiceRequest {
   partType?: string | null;
   /** @nullable */
   serviceType?: string | null;
+  /** @nullable */
+  priceRange?: string | null;
+  /** @nullable */
+  kmMax?: string | null;
+  /** @nullable */
+  yearFrom?: string | null;
+  /** @nullable */
+  yearTo?: string | null;
+  /** @nullable */
+  condition?: string | null;
+  /** @nullable */
+  transmission?: string | null;
+  /** @nullable */
+  motoCategory?: string | null;
+  /** @nullable */
+  searchRadius?: string | null;
   urgency: ServiceRequestUrgency;
   city: string;
   /** @nullable */

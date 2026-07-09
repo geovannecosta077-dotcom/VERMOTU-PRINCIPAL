@@ -2110,6 +2110,14 @@ components:
         model: { type: ["string", "null"] }
         partType: { type: ["string", "null"] }
         serviceType: { type: ["string", "null"] }
+        priceRange: { type: ["string", "null"] }
+        kmMax: { type: ["string", "null"] }
+        yearFrom: { type: ["string", "null"] }
+        yearTo: { type: ["string", "null"] }
+        condition: { type: ["string", "null"] }
+        transmission: { type: ["string", "null"] }
+        motoCategory: { type: ["string", "null"] }
+        searchRadius: { type: ["string", "null"] }
         urgency: { type: string, enum: [normal, urgente] }
         city: { type: string }
         lat: { type: ["number", "null"] }
@@ -2157,6 +2165,14 @@ components:
         model: { type: ["string", "null"] }
         partType: { type: ["string", "null"] }
         serviceType: { type: ["string", "null"] }
+        priceRange: { type: ["string", "null"] }
+        kmMax: { type: ["string", "null"] }
+        yearFrom: { type: ["string", "null"] }
+        yearTo: { type: ["string", "null"] }
+        condition: { type: ["string", "null"] }
+        transmission: { type: ["string", "null"] }
+        motoCategory: { type: ["string", "null"] }
+        searchRadius: { type: ["string", "null"] }
         urgency: { type: string, enum: [normal, urgente] }
         city: { type: ["string", "null"] }
         lat: { type: ["number", "null"] }
