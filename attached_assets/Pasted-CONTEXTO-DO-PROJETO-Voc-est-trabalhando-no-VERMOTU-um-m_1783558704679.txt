@@ -1,0 +1,172 @@
+CONTEXTO DO PROJETO
+
+Você está trabalhando no VERMOTU, um marketplace premium de motocicletas para o
+mercado brasileiro (lançamento inicial focado no Rio de Janeiro). A plataforma
+conecta compradores, vendedores particulares, concessionárias, lojas de peças
+e oficinas. O fluxo central do produto é:
+
+  Usuário pesquisa uma moto → envia interesse/pedido → recebe propostas →
+  conversa via chat → fecha negócio.
+
+Stack atual (NÃO alterar sem necessidade comprovada):
+- Monorepo pnpm
+- Frontend: Vite + React 19 (artifacts/motohub)
+- Backend: Express 5 (artifacts/api-server)
+- ORM: Drizzle
+- Banco: PostgreSQL via Supabase (projeto us-east-2, Postgres 17)
+- Identidade visual: estética automotiva premium, paleta preto/grafite/vermelho,
+  logo Vermotu já definida
+
+REGRA MAIS IMPORTANTE DO PROJETO INTEIRO:
+Este NÃO é um pedido de reconstrução. Você deve MELHORAR o que já existe.
+- NÃO refaça o design do zero.
+- NÃO troque a stack.
+- NÃO remova a identidade visual (preto/grafite/vermelho, logo, tom automotivo).
+- NÃO quebre nenhuma funcionalidade que já está operacional hoje.
+- Toda mudança precisa ser incremental e testável isoladamente.
+- Antes de qualquer refatoração estrutural, rode a aplicação e documente o que
+  já funciona, para garantir que continua funcionando depois.
+
+DIAGNÓSTICO — PROBLEMAS IDENTIFICADOS
+
+O projeto foi construído em etapas com ferramentas de IA, o que gerou:
+1. Inconsistência visual entre páginas (espaçamento, tipografia, componentes
+   que não seguem um design system único).
+2. Telas com acabamento "de protótipo": falta de microinterações, estados de
+   loading, estados vazios (empty states) e feedback visual em ações.
+3. Funcionalidades entregues parcialmente (ex.: sistema de negociação
+   Requests → Offers → Chat pode existir no backend mas não estar
+   totalmente refletido/comunicado na interface).
+4. Busca e filtros ainda não estão no nível de marketplaces de referência
+   (OLX, Webmotors, iCarros, Mercado Livre).
+5. Cadastro/onboarding é genérico — não diferencia corretamente comprador,
+   vendedor particular, loja de peças, concessionária e oficina, que têm
+   necessidades de dados e fluxos diferentes.
+6. Riscos técnicos de lançamento: Express 5 incompatível nativamente com
+   modelo serverless da Vercel; dependência de storage local (sidecar
+   Replit) ainda não migrada 100% para Supabase Storage; schema do banco
+   Supabase está vazio, aguardando migrações Drizzle; dependências internas
+   do monorepo pnpm entre frontend e backend podem quebrar build fora do
+   Replit.
+
+LISTA DE MELHORIAS OBRIGATÓRIAS, EM ORDEM DE PRIORIDADE
+
+PRIORIDADE 1 — Bloqueadores de lançamento (resolver primeiro, sem exceção)
+1.1. Auditar e corrigir a compatibilidade do backend Express 5 com o
+     ambiente de deploy alvo (Vercel serverless ou hospedagem separada da
+     API). Documentar a decisão tomada e o motivo.
+1.2. Rodar todas as migrações Drizzle no Supabase e validar que o schema em
+     produção reflete 100% o schema local, incluindo as 4 tabelas do
+     sistema de negociação (Requests, Offers, Chat, e a tabela auxiliar
+     relacionada).
+1.3. Migrar completamente o armazenamento de arquivos/imagens do sidecar
+     local do Replit para Supabase Storage. Nenhuma funcionalidade pode
+     depender de disco local do Replit após esta etapa.
+1.4. Resolver as dependências internas do monorepo pnpm entre
+     artifacts/motohub e artifacts/api-server para garantir build limpo em
+     ambiente externo ao Replit (Vercel).
+1.5. Testar o fluxo completo de autenticação/sessão em produção (não
+     apenas localmente).
+
+PRIORIDADE 2 — Consistência de produto (design system)
+2.1. Criar (ou consolidar, se já existir parcialmente) um design system
+     único: tokens de cor (preto/grafite/vermelho já definidos), escala
+     tipográfica (Barlow Condensed ou a fonte já em uso), espaçamentos
+     padronizados, componentes de botão/card/input reutilizáveis.
+2.2. Aplicar esse design system em TODAS as páginas existentes, sem alterar
+     a estrutura de navegação ou remover funcionalidades. O objetivo é
+     consistência visual, não redesign.
+2.3. Adicionar estados de loading (skeleton screens), estados vazios
+     (empty states com ilustração/CTA) e feedback de erro inline em todos
+     os formulários.
+2.4. Adicionar microinterações: transições suaves entre páginas, hover/
+     active states em todos os elementos clicáveis, feedback visual ao
+     enviar proposta/mensagem.
+
+PRIORIDADE 3 — Busca inteligente
+3.1. Implementar filtros progressivos (marca → modelo → ano → cilindrada →
+     preço → km) com contagem de resultados em tempo real por filtro.
+3.2. Implementar autocomplete/typeahead na busca principal.
+3.3. Persistir filtros ativos na URL (compartilhável e recuperável ao
+     voltar da página de detalhes).
+3.4. Implementar ordenação (relevância, menor/maior preço, mais recente,
+     mais próximo).
+3.5. Tratar o estado de "nenhum resultado" sugerindo a remoção de um
+     filtro específico, nunca uma tela em branco.
+
+PRIORIDADE 4 — Cadastro e onboarding por perfil
+4.1. Separar claramente o fluxo de cadastro por tipo de usuário: comprador,
+     vendedor particular, loja de peças, concessionária, oficina — cada um
+     com campos e validações próprias (ex.: CNPJ para loja/concessionária,
+     documento de veículo para vendedor particular).
+4.2. Permitir que o comprador explore e envie uma manifestação de interesse
+     com fricção mínima, deixando o cadastro completo para o momento de
+     enviar proposta ou negociar.
+4.3. Para concessionárias, prever um painel com suporte a múltiplos
+     usuários e publicação de anúncios em lote (mesmo que a versão inicial
+     seja simplificada).
+
+PRIORIDADE 5 — Marketplace e confiança
+5.1. Padronizar os cards de anúncio: preço em destaque, selo de
+     confiança/verificação, localização, km e ano sempre na mesma posição
+     visual em todos os cards.
+5.2. Melhorar a página de detalhes do anúncio: galeria de imagens com
+     zoom/thumbnails, ficha técnica estruturada (não texto livre), CTA de
+     proposta fixo (sticky) no mobile.
+5.3. Tornar visível o estado da negociação para o usuário em cada etapa do
+     funil (proposta enviada, aguardando resposta, em negociação, fechado).
+5.4. Adicionar sinais de confiança: tempo de conta, número de anúncios
+     ativos, indicação de verificação — sem isso, a conversão em compras de
+     alto valor tende a ser baixa.
+
+REGRAS PARA NÃO QUEBRAR FUNCIONALIDADES EXISTENTES
+
+- Antes de iniciar qualquer alteração, rode a aplicação localmente e liste
+  todas as rotas/páginas/funcionalidades atualmente operacionais.
+- Trabalhe por branch/commit isolado por funcionalidade, nunca em um único
+  commit gigante.
+- Toda alteração em componente compartilhado (ex.: Button, Card, Input)
+  precisa ser validada em TODAS as páginas que o utilizam antes de ser
+  considerada concluída.
+- Nenhuma alteração de schema no Drizzle pode ser aplicada em produção sem
+  antes rodar em ambiente de teste/staging.
+- Se uma funcionalidade parecer incompleta ou quebrada durante a auditoria,
+  reporte antes de alterar — não assuma que pode ser removida.
+
+TESTES OBRIGATÓRIOS ANTES DE CONSIDERAR QUALQUER ETAPA CONCLUÍDA
+
+1. Teste manual do fluxo completo: busca → visualização de anúncio → envio
+   de proposta/interesse → resposta via chat → fechamento simulado.
+2. Teste de responsividade em pelo menos 3 larguras: 375px (mobile), 768px
+   (tablet), 1280px (desktop) — priorizando mobile, já que é o uso
+   predominante do público-alvo.
+3. Teste de cadastro completo para cada um dos 5 perfis (comprador,
+   vendedor particular, loja, concessionária, oficina).
+4. Teste de build de produção completo (não apenas dev server) para
+   garantir que o monorepo compila sem erros de dependência.
+5. Teste de upload e exibição de imagem via Supabase Storage, incluindo
+   comportamento em conexão lenta (loading state correto).
+6. Teste de busca com filtros combinados (ex.: marca + faixa de preço +
+   raio de distância simultaneamente).
+7. Verificação de console sem erros/warnings críticos em nenhuma página
+   principal.
+
+CRITÉRIOS PARA CONSIDERAR O PROJETO PRONTO PARA LANÇAMENTO
+
+- Todos os itens de Prioridade 1 (bloqueadores técnicos) resolvidos e
+  validados em ambiente de produção real (não apenas Replit).
+- Design consistente em 100% das páginas principais (home, busca,
+  detalhes do anúncio, cadastro, chat, painel do vendedor).
+- Fluxo completo de negociação (Requests → Offers → Chat) funcional e
+  visualmente comunicado ao usuário do início ao fim.
+- Cadastro funcional e diferenciado para os 5 perfis de usuário.
+- Busca com filtros, ordenação e busca geolocalizada funcionando sem bugs.
+- Nenhum erro crítico de console em nenhuma página principal.
+- Aplicação responsiva e utilizável em tela de 375px sem quebras de layout.
+- Build de produção completo (frontend + backend) rodando sem erros fora
+  do ambiente Replit.
+
+Ao concluir cada prioridade, apresente um resumo do que foi alterado, o que
+foi testado, e quaisquer decisões técnicas tomadas (especialmente sobre a
+estratégia de deploy do backend Express 5), antes de avançar para a
+próxima prioridade.

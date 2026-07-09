@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useCreateServiceRequest,
   useListMyServiceRequests,
@@ -22,10 +23,11 @@ import {
   Zap, Loader2, MapPin, Clock, CheckCircle2, MessageCircle,
   Sparkles, Wrench, Bike, Package, ShieldCheck, Truck, Landmark,
   Store, ChevronRight, ChevronLeft, AlertCircle, ShoppingCart,
-  Search, Settings,
+  Search, Settings, CalendarClock, Flame,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ESTADOS, CIDADES_POR_ESTADO, formatLocalidade } from "@/lib/localidades";
 
 // ─── Category definitions ─────────────────────────────────────────────────────
 
@@ -61,11 +63,45 @@ const SERVICE_TYPES = [
 ];
 
 const URGENCY_OPTIONS = [
-  { id: "normal",      label: "Normal",      sublabel: "Sem pressa",          color: "border-border" },
-  { id: "hoje",        label: "Hoje",        sublabel: "Preciso resolver hoje",color: "border-amber-500" },
-  { id: "urgente",     label: "Urgente",     sublabel: "O mais rápido possível",color: "border-orange-500" },
-  { id: "emergencia",  label: "Emergência",  sublabel: "Moto parada agora",    color: "border-red-500 text-red-500" },
+  { id: "normal",      label: "Normal",      sublabel: "Sem pressa",            icon: Clock,         color: "border-border",     iconColor: "text-muted-foreground" },
+  { id: "hoje",        label: "Hoje",        sublabel: "Preciso resolver hoje", icon: CalendarClock, color: "border-amber-500",  iconColor: "text-amber-500" },
+  { id: "urgente",     label: "Urgente",     sublabel: "O mais rápido possível",icon: Zap,           color: "border-orange-500", iconColor: "text-orange-500" },
+  { id: "emergencia",  label: "Emergência",  sublabel: "Moto parada agora",     icon: Flame,         color: "border-red-500 text-red-500", iconColor: "text-red-500" },
 ] as const;
+
+const PRICE_RANGES = [
+  { id: "ate_10k",   label: "Até R$ 10 mil" },
+  { id: "10k_30k",   label: "R$ 10 – 30 mil" },
+  { id: "30k_70k",   label: "R$ 30 – 70 mil" },
+  { id: "acima_70k", label: "Acima de R$ 70 mil" },
+];
+
+const KM_OPTIONS = ["Qualquer", "Até 10 mil km", "Até 30 mil km", "Até 50 mil km", "Até 100 mil km"];
+
+const MOTO_CATEGORIES = ["Naked", "Trail / Adventure", "Custom", "Esportiva", "Scooter", "Elétrica", "Off-road"];
+
+const TRANSMISSION_OPTIONS = ["Qualquer", "Manual", "Automático / Semi"];
+
+const MOTO_CONDITIONS = ["Ambos", "Novo", "Usado"];
+const PART_CONDITIONS = ["Qualquer", "Nova", "Usada"];
+
+const RADIUS_OPTIONS = ["Minha cidade", "Até 50 km", "Meu estado"];
+
+const FIN_VALUES = [
+  { id: "ate_10k",   label: "Até R$ 10 mil" },
+  { id: "10k_30k",   label: "R$ 10 – 30 mil" },
+  { id: "30k_70k",   label: "R$ 30 – 70 mil" },
+  { id: "acima_70k", label: "Acima de R$ 70 mil" },
+];
+
+const FIN_DOWN_PAYMENTS = [
+  { id: "sem_entrada", label: "Sem entrada" },
+  { id: "ate_2k",      label: "Até R$ 2 mil" },
+  { id: "2k_5k",       label: "R$ 2 – 5 mil" },
+  { id: "acima_5k",    label: "Acima de R$ 5 mil" },
+];
+
+const FIN_TERMS = ["12 meses", "24 meses", "36 meses", "48 meses", "60 meses"];
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Bike }> = {
   moto:            { label: "Motos",          icon: Bike },
@@ -79,6 +115,28 @@ const CATEGORY_META: Record<string, { label: string; icon: typeof Bike }> = {
   acessorio:       { label: "Acessórios",     icon: ShoppingCart },
 };
 
+const DESCRIPTION_PLACEHOLDERS: Record<string, string> = {
+  moto: "Ex: Procuro uma moto econômica para trabalhar, com documentação em dia…",
+  sell_moto: "Ex: Minha moto está em ótimo estado, único dono, revisões em dia…",
+  peca: "Ex: Preciso da peça original ou compatível de qualidade, moto ano 2020…",
+  acessorio: "Ex: Procuro capacete fechado tamanho 58, cor preta ou grafite…",
+  oficina: "Ex: Minha moto está com barulho no motor ao acelerar, odômetro em 42 mil km…",
+  servico: "Ex: Descreva o problema, o odômetro atual e desde quando acontece…",
+  financiamento: "Ex: Tenho renda comprovada, primeira moto, prefiro parcelas até R$ 500…",
+  guincho: "Ex: Moto parada na Av. Principal, pneu furado, preciso de reboque até a oficina…",
+};
+
+const DESCRIPTION_HINTS: Record<string, string> = {
+  moto: "Dica: informe o uso pretendido (trabalho, passeio, viagem) para receber ofertas mais certeiras.",
+  sell_moto: "Dica: mencione estado de conservação, revisões e documentação para atrair mais propostas.",
+  peca: "Dica: se souber, informe o código da peça ou envie fotos depois no chat com o vendedor.",
+  acessorio: "Dica: informe tamanho, cor e marca de preferência.",
+  oficina: "Dica: descreva o problema e o odômetro atual. Fotos podem ser enviadas no chat com o profissional.",
+  servico: "Dica: descreva o problema e o odômetro atual. Fotos podem ser enviadas no chat com o profissional.",
+  financiamento: "Dica: informe sua faixa de renda e se já teve financiamento antes.",
+  guincho: "Dica: informe o local exato e o destino desejado para agilizar o atendimento.",
+};
+
 // ─── Wizard state ─────────────────────────────────────────────────────────────
 
 interface WizardState {
@@ -86,10 +144,22 @@ interface WizardState {
   brand: string;
   model: string;
   year: string;
+  yearFrom: string;
+  yearTo: string;
+  priceRange: string;
+  kmMax: string;
+  motoCategory: string;
+  transmission: string;
+  condition: string;
   partType: string;
   serviceType: string;
+  searchRadius: string;
+  finValue: string;
+  finDown: string;
+  finTerm: string;
   urgency: string;
-  city: string;
+  estado: string;
+  cidade: string;
   description: string;
 }
 
@@ -98,12 +168,34 @@ const INITIAL_WIZARD: WizardState = {
   brand: "",
   model: "",
   year: "",
+  yearFrom: "",
+  yearTo: "",
+  priceRange: "",
+  kmMax: "",
+  motoCategory: "",
+  transmission: "",
+  condition: "",
   partType: "",
   serviceType: "",
+  searchRadius: "",
+  finValue: "",
+  finDown: "",
+  finTerm: "",
   urgency: "normal",
-  city: "",
+  estado: "",
+  cidade: "",
   description: "",
 };
+
+function wizardCity(w: WizardState): string {
+  if (w.cidade && w.estado) return formatLocalidade(w.cidade, w.estado);
+  if (w.cidade) return w.cidade;
+  return "";
+}
+
+function priceRangeLabel(id: string): string {
+  return PRICE_RANGES.find((p) => p.id === id)?.label ?? "";
+}
 
 function buildRawQuery(w: WizardState): string {
   const cat = CATEGORIES.find((c) => c.id === w.categoryId);
@@ -112,9 +204,24 @@ function buildRawQuery(w: WizardState): string {
   if (w.brand) parts.push(w.brand);
   if (w.model) parts.push(w.model);
   if (w.year) parts.push(w.year);
+  if (w.yearFrom || w.yearTo) {
+    if (w.yearFrom && w.yearTo) parts.push(`ano ${w.yearFrom} a ${w.yearTo}`);
+    else if (w.yearFrom) parts.push(`ano a partir de ${w.yearFrom}`);
+    else parts.push(`ano até ${w.yearTo}`);
+  }
+  if (w.motoCategory) parts.push(w.motoCategory);
+  if (w.priceRange) parts.push(priceRangeLabel(w.priceRange));
+  if (w.kmMax && w.kmMax !== "Qualquer") parts.push(w.kmMax.toLowerCase());
+  if (w.transmission && w.transmission !== "Qualquer") parts.push(`câmbio ${w.transmission.toLowerCase()}`);
+  if (w.condition && !["Ambos", "Qualquer"].includes(w.condition)) parts.push(w.condition.toLowerCase());
   if (w.partType) parts.push(w.partType);
   if (w.serviceType) parts.push(w.serviceType);
-  if (w.city) parts.push(`em ${w.city}`);
+  if (w.finValue) parts.push(`veículo ${FIN_VALUES.find((f) => f.id === w.finValue)?.label ?? ""}`);
+  if (w.finDown) parts.push(`entrada ${FIN_DOWN_PAYMENTS.find((f) => f.id === w.finDown)?.label?.toLowerCase() ?? ""}`);
+  if (w.finTerm) parts.push(`prazo ${w.finTerm}`);
+  if (w.searchRadius) parts.push(`raio: ${w.searchRadius.toLowerCase()}`);
+  const city = wizardCity(w);
+  if (city) parts.push(`em ${city}`);
   if (w.urgency !== "normal") parts.push(`— ${w.urgency}`);
   if (w.description) parts.push(`(${w.description})`);
   return parts.join(" ");
@@ -140,6 +247,33 @@ function Chip({ label, selected, onClick }: { label: string; selected: boolean; 
     >
       {label}
     </button>
+  );
+}
+
+function OptionCards({ options, value, onChange, columns = 2 }: {
+  options: { id: string; label: string }[];
+  value: string;
+  onChange: (id: string) => void;
+  columns?: number;
+}) {
+  return (
+    <div className={cn("grid gap-2", columns === 2 ? "grid-cols-2" : "grid-cols-1")}>
+      {options.map((opt) => (
+        <button
+          key={opt.id}
+          type="button"
+          onClick={() => onChange(value === opt.id ? "" : opt.id)}
+          className={cn(
+            "p-3 rounded-xl border text-sm font-medium text-center transition-all",
+            value === opt.id
+              ? "border-primary bg-primary/5 ring-1 ring-primary text-primary"
+              : "border-border hover:border-primary/40 hover:bg-accent/40",
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -309,6 +443,13 @@ function ProposalsView({ requestId, onBack }: { requestId: number; onBack: () =>
 
 // ─── My Requests List ─────────────────────────────────────────────────────────
 
+const STATUS_STYLES: Record<string, { label: string; className: string }> = {
+  aberta:        { label: "Aberta",       className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
+  em_andamento:  { label: "Em andamento", className: "bg-blue-500/15 text-blue-600 border-blue-500/30" },
+  concluida:     { label: "Concluída",    className: "bg-muted text-muted-foreground border-border" },
+  cancelada:     { label: "Cancelada",    className: "bg-red-500/10 text-red-600 border-red-500/30" },
+};
+
 function MyRequestsList({ onSelect }: { onSelect: (id: number) => void }) {
   const currentUserId = useSession((s) => s.currentUserId);
   const { data: myRequests, isLoading } = useListMyServiceRequests(
@@ -340,25 +481,41 @@ function MyRequestsList({ onSelect }: { onSelect: (id: number) => void }) {
       {myRequests.map(({ request, proposals }) => {
         const m = CATEGORY_META[request.category];
         const I = m?.icon ?? Sparkles;
+        const status = STATUS_STYLES[request.status] ?? { label: request.status, className: "bg-muted text-muted-foreground border-border" };
         return (
           <Card
             key={request.id}
             className="cursor-pointer hover:border-primary/50 transition-colors"
             onClick={() => onSelect(request.id)}
           >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                <I className="w-4 h-4 text-primary" />
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                  <I className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{request.rawQuery}</p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    {m && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{m.label}</Badge>}
+                    {request.brand && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.brand}</Badge>}
+                    {request.model && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.model}</Badge>}
+                    {request.partType && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.partType}</Badge>}
+                    {request.serviceType && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{request.serviceType}</Badge>}
+                    {request.urgency === "urgente" && <Badge className="bg-orange-500 text-[10px] px-1.5 py-0">Urgente</Badge>}
+                    {request.city && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <MapPin className="w-2.5 h-2.5" /> {request.city}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {formatRelative(request.createdAt)} · {proposals.length} proposta{proposals.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <Badge variant="outline" className={cn("shrink-0", status.className)}>
+                  {status.label}
+                </Badge>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{request.rawQuery}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatRelative(request.createdAt)} · {proposals.length} proposta{proposals.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-              <Badge variant={request.status === "aberta" ? "secondary" : "default"} className="capitalize shrink-0">
-                {request.status === "aberta" ? "Aberta" : request.status === "em_andamento" ? "Em andamento" : request.status}
-              </Badge>
             </CardContent>
           </Card>
         );
@@ -390,7 +547,61 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 type WizardStep = 0 | 1 | 2 | 3 | 4;
 
 function needsDetails(catId: string): boolean {
-  return ["moto", "sell_moto", "peca", "servico", "acessorio"].includes(catId);
+  return ["moto", "sell_moto", "peca", "servico", "acessorio", "oficina", "financiamento"].includes(catId);
+}
+
+// ─── Search summary preview ───────────────────────────────────────────────────
+
+function SearchSummary({ wizard }: { wizard: WizardState }) {
+  const selectedCat = CATEGORIES.find((c) => c.id === wizard.categoryId);
+  if (!wizard.categoryId) return null;
+  const city = wizardCity(wizard);
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-4 space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Resumo da busca</p>
+      <div className="flex flex-wrap gap-1.5">
+        {selectedCat && (
+          <Badge variant="secondary" className="gap-1">
+            {(() => { const I = selectedCat.icon; return <I className="w-3 h-3" />; })()}
+            {selectedCat.label}
+          </Badge>
+        )}
+        {wizard.brand && <Badge variant="outline">{wizard.brand}</Badge>}
+        {wizard.model && <Badge variant="outline">{wizard.model}</Badge>}
+        {wizard.year && <Badge variant="outline">{wizard.year}</Badge>}
+        {(wizard.yearFrom || wizard.yearTo) && (
+          <Badge variant="outline">
+            {wizard.yearFrom && wizard.yearTo
+              ? `${wizard.yearFrom} – ${wizard.yearTo}`
+              : wizard.yearFrom
+                ? `A partir de ${wizard.yearFrom}`
+                : `Até ${wizard.yearTo}`}
+          </Badge>
+        )}
+        {wizard.motoCategory && <Badge variant="outline">{wizard.motoCategory}</Badge>}
+        {wizard.priceRange && <Badge variant="outline">{priceRangeLabel(wizard.priceRange)}</Badge>}
+        {wizard.kmMax && wizard.kmMax !== "Qualquer" && <Badge variant="outline">{wizard.kmMax}</Badge>}
+        {wizard.transmission && wizard.transmission !== "Qualquer" && <Badge variant="outline">Câmbio {wizard.transmission}</Badge>}
+        {wizard.condition && !["Ambos", "Qualquer"].includes(wizard.condition) && <Badge variant="outline">{wizard.condition}</Badge>}
+        {wizard.partType && <Badge variant="outline">{wizard.partType}</Badge>}
+        {wizard.serviceType && <Badge variant="outline">{wizard.serviceType}</Badge>}
+        {wizard.finValue && <Badge variant="outline">Veículo: {FIN_VALUES.find((f) => f.id === wizard.finValue)?.label}</Badge>}
+        {wizard.finDown && <Badge variant="outline">Entrada: {FIN_DOWN_PAYMENTS.find((f) => f.id === wizard.finDown)?.label}</Badge>}
+        {wizard.finTerm && <Badge variant="outline">{wizard.finTerm}</Badge>}
+        {wizard.searchRadius && <Badge variant="outline">{wizard.searchRadius}</Badge>}
+        {city && (
+          <Badge variant="outline" className="gap-1">
+            <MapPin className="w-3 h-3" /> {city}
+          </Badge>
+        )}
+        {wizard.urgency !== "normal" && (
+          <Badge className={wizard.urgency === "emergencia" ? "bg-red-500" : wizard.urgency === "urgente" ? "bg-orange-500" : "bg-amber-500"}>
+            {wizard.urgency}
+          </Badge>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -411,7 +622,21 @@ export function Busca() {
   });
 
   useEffect(() => {
-    if (user?.city && !wizard.city) setWizard((w) => ({ ...w, city: user.city ?? "" }));
+    if (user?.city && !wizard.cidade && !wizard.estado) {
+      // Try "Cidade, UF" format first, then match plain city name
+      const parts = user.city.split(",").map((s) => s.trim());
+      if (parts.length === 2 && ESTADOS.some((e) => e.uf === parts[1].toUpperCase())) {
+        setWizard((w) => ({ ...w, estado: parts[1].toUpperCase(), cidade: parts[0] }));
+        return;
+      }
+      for (const [uf, cidades] of Object.entries(CIDADES_POR_ESTADO)) {
+        const match = cidades.find((c) => c.toLowerCase() === user.city?.toLowerCase());
+        if (match) {
+          setWizard((w) => ({ ...w, estado: uf, cidade: match }));
+          return;
+        }
+      }
+    }
   }, [user?.city]);
 
   const createRequest = useCreateServiceRequest();
@@ -458,7 +683,7 @@ export function Busca() {
           partType: wizard.partType || undefined,
           serviceType: wizard.serviceType || undefined,
           urgency: wizard.urgency === "emergencia" || wizard.urgency === "urgente" ? "urgente" : "normal",
-          city: wizard.city || undefined,
+          city: wizardCity(wizard) || undefined,
         },
       },
       {
@@ -525,7 +750,10 @@ export function Busca() {
   }
 
   // ── Wizard ─────────────────────────────────────────────────────────────────
-  const selectedCat = CATEGORIES.find((c) => c.id === wizard.categoryId);
+  const isMotoCat = wizard.categoryId === "moto" || wizard.categoryId === "sell_moto";
+  const isPartCat = wizard.categoryId === "peca" || wizard.categoryId === "acessorio";
+  const isServiceCat = wizard.categoryId === "servico" || wizard.categoryId === "oficina";
+  const cidadesDoEstado = wizard.estado ? (CIDADES_POR_ESTADO[wizard.estado] ?? []) : [];
 
   return (
     <Layout>
@@ -545,7 +773,7 @@ export function Busca() {
         </div>
         <p className="text-sm text-muted-foreground mb-5">
           {step === 0 && "O que você está procurando?"}
-          {step === 1 && "Detalhes do que você precisa"}
+          {step === 1 && (wizard.categoryId === "financiamento" ? "Detalhes do financiamento" : "Detalhes do que você precisa")}
           {step === 2 && "Qual é a urgência?"}
           {step === 3 && "Onde você está?"}
           {step === 4 && "Alguma observação? (opcional)"}
@@ -563,7 +791,15 @@ export function Busca() {
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => { set("categoryId", cat.id); }}
+                  onClick={() => {
+                    setWizard((w) => (w.categoryId === cat.id ? w : {
+                      ...INITIAL_WIZARD,
+                      categoryId: cat.id,
+                      urgency: w.urgency,
+                      estado: w.estado,
+                      cidade: w.cidade,
+                    }));
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all",
                     selected
@@ -584,7 +820,7 @@ export function Busca() {
         {/* ── Step 1: Details (conditional) ───────────────────────────────── */}
         {step === 1 && needsDetails(wizard.categoryId) && (
           <div className="space-y-5">
-            {(wizard.categoryId === "moto" || wizard.categoryId === "sell_moto") && (
+            {isMotoCat && (
               <>
                 <div>
                   <p className="text-sm font-medium mb-2">Marca</p>
@@ -606,15 +842,64 @@ export function Busca() {
                 )}
                 <div>
                   <p className="text-sm font-medium mb-2">Ano (opcional)</p>
-                  <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                    {YEARS.slice(0, 15).map((y) => (
-                      <Chip key={y} label={y} selected={wizard.year === y} onClick={() => set("year", wizard.year === y ? "" : y)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Select value={wizard.yearFrom} onValueChange={(v) => set("yearFrom", v)}>
+                      <SelectTrigger><SelectValue placeholder="De" /></SelectTrigger>
+                      <SelectContent>
+                        {YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={wizard.yearTo} onValueChange={(v) => set("yearTo", v)}>
+                      <SelectTrigger><SelectValue placeholder="Até" /></SelectTrigger>
+                      <SelectContent>
+                        {YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Faixa de preço (opcional)</p>
+                  <OptionCards
+                    options={PRICE_RANGES}
+                    value={wizard.priceRange}
+                    onChange={(v) => set("priceRange", v)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Km máximo (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {KM_OPTIONS.map((k) => (
+                      <Chip key={k} label={k} selected={wizard.kmMax === k} onClick={() => set("kmMax", wizard.kmMax === k ? "" : k)} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Categoria (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {MOTO_CATEGORIES.map((c) => (
+                      <Chip key={c} label={c} selected={wizard.motoCategory === c} onClick={() => set("motoCategory", wizard.motoCategory === c ? "" : c)} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Câmbio (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {TRANSMISSION_OPTIONS.map((t) => (
+                      <Chip key={t} label={t} selected={wizard.transmission === t} onClick={() => set("transmission", wizard.transmission === t ? "" : t)} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Condição (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {MOTO_CONDITIONS.map((c) => (
+                      <Chip key={c} label={c} selected={wizard.condition === c} onClick={() => set("condition", wizard.condition === c ? "" : c)} />
                     ))}
                   </div>
                 </div>
               </>
             )}
-            {(wizard.categoryId === "peca" || wizard.categoryId === "acessorio") && (
+            {isPartCat && (
               <>
                 <div>
                   <p className="text-sm font-medium mb-2">Tipo de peça</p>
@@ -627,22 +912,85 @@ export function Busca() {
                 <div>
                   <p className="text-sm font-medium mb-2">Marca da moto (opcional)</p>
                   <div className="flex flex-wrap gap-2">
-                    {MOTO_BRANDS.slice(0, 8).map((b) => (
+                    {MOTO_BRANDS.map((b) => (
                       <Chip key={b} label={b} selected={wizard.brand === b} onClick={() => set("brand", wizard.brand === b ? "" : b)} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Modelo da moto (opcional)</p>
+                  <Input
+                    placeholder="Ex: CG 160, Fazer 250, XRE 300..."
+                    value={wizard.model}
+                    onChange={(e) => set("model", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Ano da moto (opcional)</p>
+                  <Select value={wizard.year} onValueChange={(v) => set("year", v)}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o ano" /></SelectTrigger>
+                    <SelectContent>
+                      {YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Condição da peça (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PART_CONDITIONS.map((c) => (
+                      <Chip key={c} label={c} selected={wizard.condition === c} onClick={() => set("condition", wizard.condition === c ? "" : c)} />
                     ))}
                   </div>
                 </div>
               </>
             )}
-            {wizard.categoryId === "servico" && (
-              <div>
-                <p className="text-sm font-medium mb-2">Tipo de serviço</p>
-                <div className="flex flex-wrap gap-2">
-                  {SERVICE_TYPES.map((t) => (
-                    <Chip key={t} label={t} selected={wizard.serviceType === t} onClick={() => set("serviceType", wizard.serviceType === t ? "" : t)} />
-                  ))}
+            {isServiceCat && (
+              <>
+                <div>
+                  <p className="text-sm font-medium mb-2">Tipo de serviço</p>
+                  <div className="flex flex-wrap gap-2">
+                    {SERVICE_TYPES.map((t) => (
+                      <Chip key={t} label={t} selected={wizard.serviceType === t} onClick={() => set("serviceType", wizard.serviceType === t ? "" : t)} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Raio de busca (opcional)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {RADIUS_OPTIONS.map((r) => (
+                      <Chip key={r} label={r} selected={wizard.searchRadius === r} onClick={() => set("searchRadius", wizard.searchRadius === r ? "" : r)} />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+            {wizard.categoryId === "financiamento" && (
+              <>
+                <div>
+                  <p className="text-sm font-medium mb-2">Valor do veículo</p>
+                  <OptionCards
+                    options={FIN_VALUES}
+                    value={wizard.finValue}
+                    onChange={(v) => set("finValue", v)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Entrada disponível</p>
+                  <OptionCards
+                    options={FIN_DOWN_PAYMENTS}
+                    value={wizard.finDown}
+                    onChange={(v) => set("finDown", v)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Prazo desejado</p>
+                  <div className="flex flex-wrap gap-2">
+                    {FIN_TERMS.map((t) => (
+                      <Chip key={t} label={t} selected={wizard.finTerm === t} onClick={() => set("finTerm", wizard.finTerm === t ? "" : t)} />
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -650,41 +998,71 @@ export function Busca() {
         {/* ── Step 2: Urgency ─────────────────────────────────────────────── */}
         {step === 2 && (
           <div className="space-y-3">
-            {URGENCY_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => set("urgency", opt.id)}
-                className={cn(
-                  "w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all",
-                  wizard.urgency === opt.id
-                    ? "border-primary bg-primary/5 ring-1 ring-primary"
-                    : `border-border hover:border-primary/40 ${opt.color}`,
-                )}
-              >
-                <div>
-                  <p className="font-medium">{opt.label}</p>
-                  <p className="text-xs text-muted-foreground">{opt.sublabel}</p>
-                </div>
-                {wizard.urgency === opt.id && <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />}
-              </button>
-            ))}
+            {URGENCY_OPTIONS.map((opt) => {
+              const OptIcon = opt.icon;
+              const selected = wizard.urgency === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => set("urgency", opt.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all",
+                    selected
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : `border-border hover:border-primary/40 ${opt.color}`,
+                  )}
+                >
+                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", selected ? "bg-primary/15" : "bg-muted")}>
+                    <OptIcon className={cn("w-5 h-5", selected ? "text-primary" : opt.iconColor)} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground">{opt.sublabel}</p>
+                  </div>
+                  {selected && <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />}
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* ── Step 3: Location ────────────────────────────────────────────── */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                placeholder="Sua cidade (ex: Rio de Janeiro, São Paulo...)"
-                value={wizard.city}
-                onChange={(e) => set("city", e.target.value)}
-                autoFocus
-              />
+            <div>
+              <p className="text-sm font-medium mb-2">Estado</p>
+              <Select
+                value={wizard.estado}
+                onValueChange={(v) => setWizard((w) => ({ ...w, estado: v, cidade: "" }))}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione o estado" /></SelectTrigger>
+                <SelectContent>
+                  {ESTADOS.map((e) => (
+                    <SelectItem key={e.uf} value={e.uf}>{e.nome} ({e.uf})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            {wizard.estado && (
+              <div>
+                <p className="text-sm font-medium mb-2">Cidade</p>
+                <Select value={wizard.cidade} onValueChange={(v) => set("cidade", v)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione a cidade" /></SelectTrigger>
+                  <SelectContent>
+                    {cidadesDoEstado.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {wizard.cidade && wizard.estado && (
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <MapPin className="w-4 h-4" />
+                {formatLocalidade(wizard.cidade, wizard.estado)}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
               Empresas próximas recebem sua solicitação primeiro.
@@ -696,40 +1074,18 @@ export function Busca() {
         {step === 4 && (
           <div className="space-y-4">
             <Textarea
-              placeholder="Descreva mais detalhes se quiser… (opcional)"
+              placeholder={DESCRIPTION_PLACEHOLDERS[wizard.categoryId] ?? "Descreva mais detalhes se quiser… (opcional)"}
               value={wizard.description}
               onChange={(e) => set("description", e.target.value)}
               className="min-h-28 text-base"
             />
-            {/* Preview */}
-            {wizard.categoryId && (
-              <div className="rounded-xl border border-border bg-card/60 p-4 space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Resumo da busca</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedCat && (
-                    <Badge variant="secondary" className="gap-1">
-                      {(() => { const I = selectedCat.icon; return <I className="w-3 h-3" />; })()}
-                      {selectedCat.label}
-                    </Badge>
-                  )}
-                  {wizard.brand && <Badge variant="outline">{wizard.brand}</Badge>}
-                  {wizard.model && <Badge variant="outline">{wizard.model}</Badge>}
-                  {wizard.year && <Badge variant="outline">{wizard.year}</Badge>}
-                  {wizard.partType && <Badge variant="outline">{wizard.partType}</Badge>}
-                  {wizard.serviceType && <Badge variant="outline">{wizard.serviceType}</Badge>}
-                  {wizard.city && (
-                    <Badge variant="outline" className="gap-1">
-                      <MapPin className="w-3 h-3" /> {wizard.city}
-                    </Badge>
-                  )}
-                  {wizard.urgency !== "normal" && (
-                    <Badge className={wizard.urgency === "emergencia" ? "bg-red-500" : wizard.urgency === "urgente" ? "bg-orange-500" : "bg-amber-500"}>
-                      {wizard.urgency}
-                    </Badge>
-                  )}
-                </div>
-              </div>
+            {DESCRIPTION_HINTS[wizard.categoryId] && (
+              <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary/70" />
+                {DESCRIPTION_HINTS[wizard.categoryId]}
+              </p>
             )}
+            <SearchSummary wizard={wizard} />
           </div>
         )}
 
