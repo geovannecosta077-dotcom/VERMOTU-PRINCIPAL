@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/session";
-import { useUpsertUser, useSignIn } from "@workspace/api-client-react";
+import { useUpsertUser, useSignIn, useUpdateUser, useSetUserCpf } from "@workspace/api-client-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   Eye, EyeOff, ExternalLink, ChevronLeft,
-  ShoppingBag, Tag, Store, Wrench, Building2, Check,
+  ShoppingBag, Tag, Store, Wrench, Building2, Check, MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ESTADOS, CIDADES_POR_ESTADO, formatLocalidade } from "@/lib/localidades";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,6 +24,23 @@ function formatPhoneInput(v: string): string {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function formatCpfInput(v: string): string {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
+function formatCnpjInput(v: string): string {
+  const d = v.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
 }
 
 function extractError(err: unknown): string {
@@ -117,7 +136,37 @@ const ACCOUNT_TYPES: {
   },
 ];
 
+// ─── Preference options (Step 4) ──────────────────────────────────────────────
+
+const BRAND_OPTIONS = ["Honda", "Yamaha", "Kawasaki", "Suzuki", "BMW", "Ducati", "KTM", "Royal Enfield", "Harley-Davidson", "Triumph", "Bajaj", "Outro"];
+const CATEGORY_OPTIONS = ["Naked", "Trail/Adventure", "Custom/Cruiser", "Esportiva", "Scooter/Urban", "Elétrica", "Off-road", "Touring"];
+const PRICE_RANGES = [
+  { id: "ate-10k", label: "Até R$ 10 mil" },
+  { id: "10k-30k", label: "R$ 10–30 mil" },
+  { id: "30k-70k", label: "R$ 30–70 mil" },
+  { id: "70k-mais", label: "Acima de R$ 70 mil" },
+];
+const OBJETIVOS = ["Comprar", "Vender", "Trocar", "Apenas explorar"];
+const RAIOS_BUSCA = ["Minha cidade", "Até 50 km", "Meu estado", "Todo o Brasil"];
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+function Chip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
+        selected
+          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
+          : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 function PasswordInput({ id, value, onChange, placeholder, autoComplete }: {
   id: string;
@@ -151,17 +200,19 @@ function PasswordInput({ id, value, onChange, placeholder, autoComplete }: {
   );
 }
 
-function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
+function StepIndicator({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const steps = [
-    { n: 1, label: "Tipo de conta" },
-    { n: 2, label: "Seus dados" },
-    { n: 3, label: "Confirmar" },
+    { n: 1, label: "Perfil" },
+    { n: 2, label: "Dados" },
+    { n: 3, label: "Local" },
+    { n: 4, label: "Preferências" },
+    { n: 5, label: "Confirmar" },
   ] as const;
 
   return (
     <div className="mb-5">
       <p className="text-xs font-semibold text-primary mb-3 text-center tracking-wide uppercase">
-        Passo {step} de 3
+        Passo {step} de 5
       </p>
       <div className="flex items-center w-full">
         {steps.map((s, i) => (
@@ -202,7 +253,9 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
 
 function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
   const upsert = useUpsertUser();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const updateUser = useUpdateUser();
+  const setUserCpf = useSetUserCpf();
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // Step 1
   const [profileType, setProfileType] = useState<AccountProfileType | "">("");
@@ -212,7 +265,19 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  // Step 3
+  const [birthDate, setBirthDate] = useState("");
+  const [cpfCnpj, setCpfCnpj] = useState("");
+  // Step 3 — Localização
+  const [uf, setUf] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [bairroCep, setBairroCep] = useState("");
+  const [raio, setRaio] = useState("");
+  // Step 4 — Preferências
+  const [prefBrands, setPrefBrands] = useState<string[]>([]);
+  const [prefCategories, setPrefCategories] = useState<string[]>([]);
+  const [prefPriceRange, setPrefPriceRange] = useState("");
+  const [prefObjetivo, setPrefObjetivo] = useState("");
+  // Step 5
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const selectedType = ACCOUNT_TYPES.find((t) => t.id === profileType);
@@ -231,6 +296,8 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
     password.length >= 6 &&
     (!selectedType?.isCompany || storeName.trim().length >= 2);
 
+  const cityStr = uf && cidade ? formatLocalidade(cidade, uf) : "";
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!selectedType) return;
@@ -247,6 +314,38 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
           ...(selectedType.isCompany && storeName.trim() ? { storeName: storeName.trim() } : {}),
         },
       });
+
+      // Enriquecimento best-effort via contratos existentes (não bloqueia o cadastro)
+      const docDigits = cpfCnpj.replace(/\D/g, "");
+      try {
+        const patch: Record<string, string> = {};
+        if (cityStr) patch.city = cityStr;
+        if (selectedType.isCompany && docDigits.length === 14) patch.cnpj = docDigits;
+        if (Object.keys(patch).length > 0) {
+          await updateUser.mutateAsync({ id: user.id, data: patch });
+        }
+      } catch { /* perfil pode ser completado depois em /conta */ }
+      try {
+        if (!selectedType.isCompany && docDigits.length === 11) {
+          await setUserCpf.mutateAsync({ id: user.id, data: { cpf: docDigits } });
+        }
+      } catch { /* CPF inválido ou já em uso — pode ser ajustado em /conta */ }
+
+      // Preferências e campos sem suporte no backend ficam pendentes no dispositivo
+      const pending: Record<string, unknown> = {};
+      if (prefBrands.length) pending.brands = prefBrands;
+      if (prefCategories.length) pending.categories = prefCategories;
+      if (prefPriceRange) pending.priceRange = prefPriceRange;
+      if (prefObjetivo) pending.objetivo = prefObjetivo;
+      if (raio) pending.raioBusca = raio;
+      if (bairroCep.trim()) pending.bairroCep = bairroCep.trim();
+      if (birthDate) pending.birthDate = birthDate;
+      if (Object.keys(pending).length > 0) {
+        try {
+          localStorage.setItem(`vermotu:perfil-pendente:${user.id}`, JSON.stringify(pending));
+        } catch { /* storage indisponível — ignora */ }
+      }
+
       toast.success(selectedType.toast(user.name.split(" ")[0]));
       onSuccess(user.id);
     } catch (err) {
@@ -411,6 +510,32 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
               </div>
             )}
           </div>
+
+          {!selectedType?.isCompany && (
+            <div className="space-y-1.5">
+              <Label htmlFor="su-birth">Data de nascimento <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+              <Input
+                id="su-birth"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+                autoComplete="bday"
+              />
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="su-doc">{selectedType?.isCompany ? "CNPJ" : "CPF"} <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+            <Input
+              id="su-doc"
+              inputMode="numeric"
+              value={cpfCnpj}
+              onChange={(e) => setCpfCnpj(selectedType?.isCompany ? formatCnpjInput(e.target.value) : formatCpfInput(e.target.value))}
+              placeholder={selectedType?.isCompany ? "00.000.000/0000-00" : "000.000.000-00"}
+            />
+            <p className="text-xs text-muted-foreground">Ajuda a dar mais confiança ao seu perfil.</p>
+          </div>
         </div>
 
         {/* Sticky footer button */}
@@ -423,13 +548,189 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
     );
   }
 
-  // ── Step 3: Review + Terms + Submit ────────────────────────────────────────
+  // ── Step 3: Localização ─────────────────────────────────────────────────────
+  if (step === 3) {
+    const handleStep3Submit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (uf && cidade) setStep(4);
+    };
+
+    return (
+      <form onSubmit={handleStep3Submit} className="flex flex-col gap-0">
+        <StepIndicator step={3} />
+        <button
+          type="button"
+          onClick={() => setStep(2)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4 transition-colors"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" /> Voltar
+        </button>
+
+        <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1.5">
+          <MapPin className="w-4 h-4 text-primary shrink-0" />
+          Onde você está? Mostramos anúncios mais perto de você.
+        </p>
+
+        <div className="space-y-3 mb-4">
+          <div className="space-y-1.5">
+            <Label>Estado</Label>
+            <Select value={uf} onValueChange={(v) => { setUf(v); setCidade(""); }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione seu estado" />
+              </SelectTrigger>
+              <SelectContent>
+                {ESTADOS.map((e) => (
+                  <SelectItem key={e.uf} value={e.uf}>{e.nome} ({e.uf})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Cidade</Label>
+            <Select value={cidade} onValueChange={setCidade} disabled={!uf}>
+              <SelectTrigger>
+                <SelectValue placeholder={uf ? "Selecione sua cidade" : "Escolha o estado primeiro"} />
+              </SelectTrigger>
+              <SelectContent>
+                {(CIDADES_POR_ESTADO[uf] ?? []).map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="su-bairro">Bairro ou CEP <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+            <Input
+              id="su-bairro"
+              value={bairroCep}
+              onChange={(e) => setBairroCep(e.target.value)}
+              placeholder="Ex.: Centro ou 20000-000"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Raio de busca preferencial</Label>
+            <div className="flex flex-wrap gap-2">
+              {RAIOS_BUSCA.map((r) => (
+                <Chip key={r} selected={raio === r} onClick={() => setRaio(raio === r ? "" : r)}>{r}</Chip>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky footer buttons */}
+        <div className="sticky bottom-0 bg-background pt-2 pb-1 flex gap-2">
+          <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(4)}>
+            Pular etapa
+          </Button>
+          <Button type="submit" className="flex-1" disabled={!uf || !cidade}>
+            Próximo
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  // ── Step 4: Preferências de moto ────────────────────────────────────────────
+  if (step === 4) {
+    const handleStep4Submit = (e: React.FormEvent) => {
+      e.preventDefault();
+      setStep(5);
+    };
+
+    const toggle = (list: string[], set: (v: string[]) => void, item: string) =>
+      set(list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
+
+    return (
+      <form onSubmit={handleStep4Submit} className="flex flex-col gap-0">
+        <StepIndicator step={4} />
+        <button
+          type="button"
+          onClick={() => setStep(3)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4 transition-colors"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" /> Voltar
+        </button>
+
+        <p className="text-sm text-muted-foreground mb-3">
+          Conte o que você curte — tudo aqui é <strong className="text-foreground">opcional</strong>.
+        </p>
+
+        <div className="space-y-4 mb-4">
+          <div className="space-y-1.5">
+            <Label>Quais marcas você prefere?</Label>
+            <div className="flex flex-wrap gap-2">
+              {BRAND_OPTIONS.map((b) => (
+                <Chip key={b} selected={prefBrands.includes(b)} onClick={() => toggle(prefBrands, setPrefBrands, b)}>{b}</Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Categorias de interesse</Label>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORY_OPTIONS.map((c) => (
+                <Chip key={c} selected={prefCategories.includes(c)} onClick={() => toggle(prefCategories, setPrefCategories, c)}>{c}</Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Faixa de preço de interesse</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {PRICE_RANGES.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPrefPriceRange(prefPriceRange === p.id ? "" : p.id)}
+                  className={cn(
+                    "p-2.5 rounded-xl border text-xs font-medium text-center transition-all",
+                    prefPriceRange === p.id
+                      ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
+                      : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Objetivo principal</Label>
+            <div className="flex flex-wrap gap-2">
+              {OBJETIVOS.map((o) => (
+                <Chip key={o} selected={prefObjetivo === o} onClick={() => setPrefObjetivo(prefObjetivo === o ? "" : o)}>{o}</Chip>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky footer buttons */}
+        <div className="sticky bottom-0 bg-background pt-2 pb-1 flex gap-2">
+          <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(5)}>
+            Pular etapa
+          </Button>
+          <Button type="submit" className="flex-1">
+            Próximo
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  // ── Step 5: Review + Terms + Submit ────────────────────────────────────────
+  const hasPendingPrefs =
+    prefBrands.length > 0 || prefCategories.length > 0 || !!prefPriceRange || !!prefObjetivo || !!raio || !!bairroCep.trim() || !!birthDate;
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-0">
-      <StepIndicator step={3} />
+      <StepIndicator step={5} />
       <button
         type="button"
-        onClick={() => setStep(2)}
+        onClick={() => setStep(4)}
         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4 transition-colors"
       >
         <ChevronLeft className="w-3.5 h-3.5" /> Voltar
@@ -463,7 +764,19 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
           <span className="text-muted-foreground">Telefone</span>
           <span className="font-medium text-right">{phone}</span>
         </div>
+        {cityStr && (
+          <div className="flex justify-between gap-2">
+            <span className="text-muted-foreground">Localização</span>
+            <span className="font-medium text-right truncate">{cityStr}</span>
+          </div>
+        )}
       </div>
+
+      {hasPendingPrefs && (
+        <p className="text-[11px] text-muted-foreground mb-4 -mt-2">
+          Suas preferências ficam salvas e ajudam a personalizar sua experiência. Você pode ajustá-las depois em <strong className="text-foreground">Minha conta</strong>.
+        </p>
+      )}
 
       {/* Terms */}
       <label className="flex items-start gap-2 cursor-pointer select-none group mb-4">
@@ -492,9 +805,9 @@ function SignupWizard({ onSuccess }: { onSuccess: (id: number) => void }) {
         <Button
           type="submit"
           className="w-full"
-          disabled={!acceptedTerms || upsert.isPending}
+          disabled={!acceptedTerms || upsert.isPending || updateUser.isPending || setUserCpf.isPending}
         >
-          {upsert.isPending ? "Criando conta..." : "Criar conta grátis"}
+          {upsert.isPending || updateUser.isPending || setUserCpf.isPending ? "Criando conta..." : "Criar conta grátis"}
         </Button>
       </div>
     </form>
