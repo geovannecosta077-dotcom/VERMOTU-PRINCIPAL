@@ -28,6 +28,7 @@ import { Seguranca } from "@/pages/seguranca";
 import { useSession } from "@/lib/session";
 import { useEffect } from "react";
 import { setExtraHeadersGetter } from "@workspace/api-client-react";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -104,6 +105,7 @@ function App() {
           <ThemedApp />
         </WouterRouter>
         <Toaster />
+        <Analytics />
       </TooltipProvider>
     </QueryClientProvider>
   );
