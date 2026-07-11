@@ -16,7 +16,23 @@ if (!databaseUrl) {
   );
 }
 
-export const pool = new Pool({ connectionString: databaseUrl });
+const usesSupabase =
+  Boolean(process.env.SUPABASE_DATABASE_URL) ||
+  Boolean(process.env.SUPABASE_POSTGRES_URL);
+
+const connectionString = usesSupabase
+  ? (() => {
+      const url = new URL(databaseUrl);
+      url.searchParams.delete("sslmode");
+      url.searchParams.delete("sslrootcert");
+      return url.toString();
+    })()
+  : databaseUrl;
+
+export const pool = new Pool({
+  connectionString,
+  ssl: usesSupabase ? { rejectUnauthorized: false } : undefined,
+});
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
