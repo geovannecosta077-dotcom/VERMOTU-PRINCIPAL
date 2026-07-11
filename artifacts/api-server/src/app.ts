@@ -23,7 +23,7 @@ const replitDomains = (process.env.REPLIT_DOMAINS ?? "")
   .map((d) => `https://${d}`);
 
 const allowedOriginPattern =
-  /^https?:\/\/(localhost(:\d+)?|.*\.replit\.dev|.*\.replit\.app|.*\.repl\.co)$/;
+  /^https?:\/\/(localhost(:\d+)?|.*\.replit\.dev|.*\.replit\.app|.*\.repl\.co|.*\.vercel\.app)$/;
 
 app.use(
   cors({
