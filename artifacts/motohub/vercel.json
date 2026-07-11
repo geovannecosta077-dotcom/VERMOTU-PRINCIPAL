@@ -1,7 +1,7 @@
 {
   "buildCommand": "cd ../.. && pnpm run typecheck:libs && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/motohub run build",
   "outputDirectory": "dist/public",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- artifacts/motohub artifacts/api-server lib package.json pnpm-lock.yaml pnpm-workspace.yaml && exit 0 || exit 1",
+  "ignoreCommand": "cd \"$(git rev-parse --show-toplevel)\" && git diff --quiet HEAD^ HEAD -- artifacts/motohub artifacts/api-server lib package.json pnpm-lock.yaml pnpm-workspace.yaml && exit 0 || exit 1",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api?path=:path*" },
     { "source": "/((?!api(?:/|$)|assets/).*)", "destination": "/index.html" }
