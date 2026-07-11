@@ -90,7 +90,9 @@ function Router() {
 function ThemedApp() {
   const theme = useSession((s) => s.theme);
   return (
-    <div className={theme}>
+    // min-h-screen + bg-background garante que o fundo escuro cobre a tela toda
+    // quando o tema dark está ativo (as CSS vars do .dark cascateiam para os filhos)
+    <div className={`${theme} min-h-screen bg-background text-foreground`}>
       <Router />
     </div>
   );
