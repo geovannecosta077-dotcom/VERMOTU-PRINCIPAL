@@ -22,6 +22,7 @@ const replitDomains = (process.env.REPLIT_DOMAINS ?? "")
   .filter(Boolean)
   .map((d) => `https://${d}`);
 
+// cors config: includes vercel.app and vermotu.com.br
 const allowedOriginPattern =
   /^https?:\/\/(localhost(:\d+)?|.*\.replit\.dev|.*\.replit\.app|.*\.repl\.co|.*\.vercel\.app|.*\.vermotu\.com\.br)$/;
 
