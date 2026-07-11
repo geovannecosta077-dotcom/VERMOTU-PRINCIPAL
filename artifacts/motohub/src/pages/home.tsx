@@ -367,7 +367,7 @@ export function Home() {
   const featuredPecas = (pecas ?? []).slice(0, 4);
   const featuredOficinas = (servicos ?? []).slice(0, 3);
   const promos = [...(pecas ?? []), ...(motos ?? [])].slice(0, 4);
-  const latestPosts = (blogPosts ?? []).slice(0, 3);
+  const latestPosts = (Array.isArray(blogPosts) ? blogPosts : []).slice(0, 3);
 
   const EmptyState = ({ message }: { message: string }) => (
     <div className="col-span-full rounded-xl border border-dashed border-border bg-card/40 p-10 text-center">
