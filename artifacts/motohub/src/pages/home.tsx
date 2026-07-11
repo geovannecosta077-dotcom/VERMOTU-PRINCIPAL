@@ -137,7 +137,7 @@ function HeroBannerCarousel() {
   const [dir, setDir] = useState(1);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const slides = (banners ?? []).filter((b) => b.active);
+  const slides = (Array.isArray(banners) ? banners : []).filter((b) => b.active);
   const hasSlides = slides.length > 0;
 
   const go = useCallback((nextIdx: number, direction: number) => {
