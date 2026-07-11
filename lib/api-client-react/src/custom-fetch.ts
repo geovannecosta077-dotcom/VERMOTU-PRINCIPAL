@@ -302,7 +302,10 @@ function inferResponseType(response: Response): "json" | "text" | "blob" {
   const mediaType = getMediaType(response.headers);
 
   if (isJsonMediaType(mediaType)) return "json";
-  if (isTextMediaType(mediaType) || mediaType == null) return "text";
+  // When no Content-Type is present, default to JSON since REST APIs commonly
+  // omit the header but still return JSON payloads (e.g. Express res.json).
+  if (mediaType == null) return "json";
+  if (isTextMediaType(mediaType)) return "text";
   return "blob";
 }
 
