@@ -2,6 +2,7 @@
   "outputDirectory": "dist",
   "routes": [
     { "handle": "filesystem" },
+    { "src": "^/api(/.*)?$", "status": 404, "headers": { "Content-Type": "application/json" } },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
