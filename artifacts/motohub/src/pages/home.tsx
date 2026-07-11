@@ -363,10 +363,10 @@ export function Home() {
   const { data: servicos } = useListItems({ type: "servico" });
   const { data: blogPosts } = useListBlogPosts({ published: true }, { query: { staleTime: 60_000, queryKey: getListBlogPostsQueryKey({ published: true }) } });
 
-  const featuredMotos = (motos ?? []).slice(0, 4);
-  const featuredPecas = (pecas ?? []).slice(0, 4);
-  const featuredOficinas = (servicos ?? []).slice(0, 3);
-  const promos = [...(pecas ?? []), ...(motos ?? [])].slice(0, 4);
+  const featuredMotos = (Array.isArray(motos) ? motos : []).slice(0, 4);
+  const featuredPecas = (Array.isArray(pecas) ? pecas : []).slice(0, 4);
+  const featuredOficinas = (Array.isArray(servicos) ? servicos : []).slice(0, 3);
+  const promos = [...(Array.isArray(pecas) ? pecas : []), ...(Array.isArray(motos) ? motos : [])].slice(0, 4);
   const latestPosts = (Array.isArray(blogPosts) ? blogPosts : []).slice(0, 3);
 
   const EmptyState = ({ message }: { message: string }) => (
