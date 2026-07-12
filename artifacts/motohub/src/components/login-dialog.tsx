@@ -103,7 +103,9 @@ function formatLockTime(isoStr?: string): string {
   return `${mins} minuto${mins !== 1 ? "s" : ""}`;
 }
 
-const BASE_URL = (typeof window !== "undefined" ? (import.meta.env.BASE_URL ?? "/") : "/").replace(/\/$/, "");
+// API server URL — reads VITE_API_URL (set in Vercel env vars) for cross-origin deployments.
+// Falls back to "" (empty) so calls use relative paths in local dev (API on same host).
+const API_SERVER = ((import.meta.env.VITE_API_URL as string | undefined) ?? "").replace(/\/$/, "");
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -408,7 +410,7 @@ function ForgotPasswordView({
     }
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${API_SERVER}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmed }),
@@ -496,7 +498,7 @@ function ResetSentView({
     if (password !== confirm) { setError("As senhas não coincidem."); return; }
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/reset-password`, {
+      const res = await fetch(`${API_SERVER}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: token.trim(), password }),
@@ -843,7 +845,7 @@ function ResendVerificationView({ onBack }: { onBack: () => void }) {
     if (!trimmed || !trimmed.includes("@")) { setError("Informe um e-mail válido."); return; }
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/resend-verification`, {
+      const res = await fetch(`${API_SERVER}/api/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmed }),
