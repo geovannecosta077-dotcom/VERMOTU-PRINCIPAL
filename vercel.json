@@ -1,10 +1,10 @@
 {
-  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/motohub run build",
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build-serverless && pnpm --filter @workspace/motohub run build",
   "outputDirectory": "artifacts/motohub/dist",
   "framework": null,
   "routes": [
     { "handle": "filesystem" },
-    { "src": "^/api(/.*)?$", "dest": "/api/index" },
+    { "src": "^/api(/.*)?$", "dest": "/api/index.mjs" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
