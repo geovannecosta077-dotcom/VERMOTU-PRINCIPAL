@@ -14,6 +14,7 @@ import emailRouter from "./email";
 import bannersRouter from "./banners";
 import searchRouter from "./search";
 import rankingRouter from "./ranking";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(emailRouter);
 router.use(bannersRouter);
 router.use(searchRouter);
 router.use(rankingRouter);
+router.use(authRouter);
 
 export default router;

@@ -6,3 +6,4 @@
 - [Vermotu matching engine exists](vermotu-matching-engine.md) — "Busca Inteligente" (search parser + ranking + service requests/proposals) is already built; extend, don't rebuild.
 - [Honest empty states](honest-empty-states.md) — don't fabricate data (social links, hours, blog covers); hide the section or require a real field instead of a placeholder.
 - [S3 object storage migration](s3-object-storage.md) — Replit GCS sidecar replaced with AWS SDK v3 S3; ACL stored as object tags; S3ObjectRef replaces GCS File type.
+- [Auth system refactor](auth-system-refactor.md) — Token-based reset via /auth/forgot-password + /auth/reset-password; old insecure set-password removed; view-based dialog with recovery center.

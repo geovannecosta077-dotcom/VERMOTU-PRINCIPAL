@@ -25,6 +25,7 @@ import { Blog } from "@/pages/blog";
 import { BlogPost } from "@/pages/blog-post";
 import { Oportunidades } from "@/pages/oportunidades";
 import { Seguranca } from "@/pages/seguranca";
+import { RecuperarSenha } from "@/pages/recuperar-senha";
 import { useSession } from "@/lib/session";
 import { useEffect } from "react";
 import { setExtraHeadersGetter } from "@workspace/api-client-react";
@@ -81,6 +82,7 @@ function Router() {
         <Route path="/blog/:slug" component={BlogPost} />
         <Route path="/oportunidades" component={Oportunidades} />
         <Route path="/seguranca" component={Seguranca} />
+        <Route path="/recuperar-senha" component={RecuperarSenha} />
         <Route component={NotFound} />
       </Switch>
     </>

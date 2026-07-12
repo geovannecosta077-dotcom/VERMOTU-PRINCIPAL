@@ -147,29 +147,10 @@ router.post("/users/signin", async (req, res): Promise<void> => {
   res.json(publicUser(row));
 });
 
-router.post("/users/set-password", async (req, res): Promise<void> => {
-  const { email, password } = req.body ?? {};
-  if (!email || typeof email !== "string" || !password || typeof password !== "string") {
-    res.status(400).json({ error: "Informe e-mail e nova senha." });
-    return;
-  }
-  if (password.length < 6) {
-    res.status(400).json({ error: "A senha deve ter ao menos 6 caracteres." });
-    return;
-  }
-  const [row] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase().trim()));
-  if (!row) {
-    res.status(404).json({ error: "E-mail não encontrado." });
-    return;
-  }
-  const passwordHash = await bcrypt.hash(password, 10);
-  const [updated] = await db
-    .update(usersTable)
-    .set({ passwordHash, loginAttempts: 0, lockedUntil: sql`NULL` })
-    .where(eq(usersTable.id, row.id))
-    .returning();
-  res.json(publicUser(updated!));
-});
+// NOTE: /users/set-password is intentionally removed — it allowed anyone to
+// reset any account's password just by knowing the email (no token required).
+// Password resets now go through the secure token-based flow:
+//   POST /auth/forgot-password  →  POST /auth/reset-password
 
 router.get("/users/:id", async (req, res): Promise<void> => {
   const p = GetUserParams.safeParse(req.params);
