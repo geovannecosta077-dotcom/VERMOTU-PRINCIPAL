@@ -1,4 +1,4 @@
 {
-  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/motohub run build && node scripts/build-vercel.mjs",
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/motohub run build && pnpm --filter @workspace/api-server run build-vercel",
   "framework": null
 }
