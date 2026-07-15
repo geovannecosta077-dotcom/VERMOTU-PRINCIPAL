@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRoute, Link } from "wouter";
 import { Layout } from "@/components/layout";
-import { useSession, formatRelative } from "@/lib/session";
+import { useSession, formatRelative, imageUrl } from "@/lib/session";
 import {
   useListConversations,
   useListMessages,
@@ -63,7 +63,7 @@ export function Chat() {
 
   const userName = (id: number) => users?.find((u) => u.id === id)?.name ?? `Usuário #${id}`;
   const itemTitle = (id: number) => items?.find((i) => i.id === id)?.title ?? `Anúncio #${id}`;
-  const itemImage = (id: number) => items?.find((i) => i.id === id)?.image ?? "";
+  const itemImage = (id: number) => imageUrl(items?.find((i) => i.id === id)?.image);
 
   if (!currentUserId) {
     return (
