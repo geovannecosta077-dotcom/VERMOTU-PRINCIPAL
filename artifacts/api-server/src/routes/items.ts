@@ -12,6 +12,21 @@ import {
 
 const router: IRouter = Router();
 
+// ─── Auth helper ──────────────────────────────────────────────────────────
+// This codebase authenticates writes via the `x-user-id` header (set by the
+// frontend after login) rather than sessions/JWT. Reused here so PATCH/DELETE
+// can verify the caller owns the item (or is an admin) before mutating it.
+async function getRequestUser(req: { headers: Record<string, unknown> }) {
+  const raw = req.headers["x-user-id"];
+  const userId = raw ? parseInt(String(raw), 10) : NaN;
+  if (isNaN(userId)) return null;
+  const [user] = await db
+    .select({ id: usersTable.id, isAdmin: usersTable.isAdmin, banned: usersTable.banned })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+  return user ?? null;
+}
+
 router.get("/items", async (req, res): Promise<void> => {
   const q = ListItemsQueryParams.safeParse(req.query);
   if (!q.success) {
@@ -94,6 +109,7 @@ router.post("/items", async (req, res): Promise<void> => {
       image: data.image,
       description: data.description,
       location: data.location,
+      state: data.state ?? "",
       sellerId: data.sellerId,
       premium: data.premium ?? false,
       stock: data.stock ?? 1,
@@ -128,6 +144,22 @@ router.patch("/items/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: b.error.message });
     return;
   }
+
+  const user = await getRequestUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Faça login para editar este anúncio." });
+    return;
+  }
+  const [existing] = await db.select({ sellerId: itemsTable.sellerId }).from(itemsTable).where(eq(itemsTable.id, p.data.id));
+  if (!existing) {
+    res.status(404).json({ error: "Item não encontrado" });
+    return;
+  }
+  if (existing.sellerId !== user.id && !user.isAdmin) {
+    res.status(403).json({ error: "Você não tem permissão para editar este anúncio." });
+    return;
+  }
+
   const [row] = await db
     .update(itemsTable)
     .set(b.data)
@@ -146,6 +178,22 @@ router.delete("/items/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: p.error.message });
     return;
   }
+
+  const user = await getRequestUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Faça login para remover este anúncio." });
+    return;
+  }
+  const [existing] = await db.select({ sellerId: itemsTable.sellerId }).from(itemsTable).where(eq(itemsTable.id, p.data.id));
+  if (!existing) {
+    res.status(404).json({ error: "Item não encontrado" });
+    return;
+  }
+  if (existing.sellerId !== user.id && !user.isAdmin) {
+    res.status(403).json({ error: "Você não tem permissão para remover este anúncio." });
+    return;
+  }
+
   await db.delete(itemsTable).where(eq(itemsTable.id, p.data.id));
   res.sendStatus(204);
 });

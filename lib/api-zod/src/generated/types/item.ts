@@ -29,6 +29,7 @@ export interface Item {
   image: string;
   description: string;
   location: string;
+  state?: string;
   sellerId: number;
   status: ItemStatus;
   createdAt: string;

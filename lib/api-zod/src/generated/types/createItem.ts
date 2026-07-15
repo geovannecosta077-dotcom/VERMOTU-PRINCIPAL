@@ -33,6 +33,8 @@ export interface CreateItem {
   description: string;
   /** @minLength 2 */
   location: string;
+  /** @nullable */
+  state?: string | null;
   sellerId: number;
   /** @nullable */
   premium?: boolean | null;

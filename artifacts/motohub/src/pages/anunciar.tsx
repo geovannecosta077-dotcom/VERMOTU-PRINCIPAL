@@ -250,6 +250,7 @@ export function Anunciar() {
           image: images.length === 1 ? images[0]! : JSON.stringify(images),
           description: description.trim(),
           location: location.trim(),
+          state: estado || undefined,
           sellerId: currentUserId,
           premium: false,
         } as Parameters<typeof createItem.mutate>[0]["data"],
