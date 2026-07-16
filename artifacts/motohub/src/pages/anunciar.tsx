@@ -162,7 +162,8 @@ export function Anunciar() {
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>, replaceIdx?: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Envie um arquivo de imagem"); return; }
+    // Google Fotos no Android entrega file.type === "" — o atributo accept="image/*" já filtra no nível do SO.
+    if (file.type && !file.type.startsWith("image/")) { toast.error("Envie um arquivo de imagem"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Imagem deve ter no máximo 10 MB"); return; }
     setUploadingIdx(replaceIdx ?? null);
     uploadFile(file);
