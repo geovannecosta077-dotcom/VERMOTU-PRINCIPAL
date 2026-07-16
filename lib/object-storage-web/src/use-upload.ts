@@ -21,6 +21,27 @@ interface UseUploadOptions {
 }
 
 /**
+ * Infer a MIME type from the file's type property or, when it is empty (e.g.
+ * when a file is picked from Google Photos on Android), fall back to the
+ * extension embedded in the filename.
+ */
+function resolveContentType(filename: string, mimeType: string): string {
+  if (mimeType) return mimeType;
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const map: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+    heic: "image/heic",
+    heif: "image/heif",
+    avif: "image/avif",
+  };
+  return map[ext] ?? "application/octet-stream";
+}
+
+/**
  * React hook for handling file uploads with presigned URLs.
  *
  * This hook implements the two-step presigned URL upload flow:
@@ -61,6 +82,7 @@ export function useUpload(options: UseUploadOptions = {}) {
 
   const requestUploadUrl = useCallback(
     async (file: File): Promise<UploadResponse> => {
+      const contentType = resolveContentType(file.name, file.type);
       const response = await fetch(`${basePath}/uploads/request-url`, {
         method: "POST",
         headers: {
@@ -69,7 +91,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         body: JSON.stringify({
           name: file.name,
           size: file.size,
-          contentType: file.type || "application/octet-stream",
+          contentType,
         }),
       });
 
@@ -80,16 +102,17 @@ export function useUpload(options: UseUploadOptions = {}) {
 
       return response.json();
     },
-    []
+    [basePath]
   );
 
   const uploadToPresignedUrl = useCallback(
     async (file: File, uploadURL: string): Promise<void> => {
+      const contentType = resolveContentType(file.name, file.type);
       const response = await fetch(uploadURL, {
         method: "PUT",
         body: file,
         headers: {
-          "Content-Type": file.type || "application/octet-stream",
+          "Content-Type": contentType,
         },
       });
 
@@ -136,6 +159,7 @@ export function useUpload(options: UseUploadOptions = {}) {
       url: string;
       headers?: Record<string, string>;
     }> => {
+      const contentType = resolveContentType(file.name, file.type ?? "");
       const response = await fetch(`${basePath}/uploads/request-url`, {
         method: "POST",
         headers: {
@@ -144,7 +168,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         body: JSON.stringify({
           name: file.name,
           size: file.size,
-          contentType: file.type || "application/octet-stream",
+          contentType,
         }),
       });
 
@@ -156,10 +180,10 @@ export function useUpload(options: UseUploadOptions = {}) {
       return {
         method: "PUT",
         url: data.uploadURL,
-        headers: { "Content-Type": file.type || "application/octet-stream" },
+        headers: { "Content-Type": contentType },
       };
     },
-    []
+    [basePath]
   );
 
   return {
