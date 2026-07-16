@@ -162,10 +162,25 @@ export function Anunciar() {
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>, replaceIdx?: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Envie um arquivo de imagem"); return; }
+
+    // Google Photos on Android often returns File objects with an empty MIME type.
+    // Infer the type from the file extension so valid images are not rejected.
+    const IMAGE_EXT_MAP: Record<string, string> = {
+      jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+      webp: "image/webp", gif: "image/gif", bmp: "image/bmp",
+      heic: "image/heic", heif: "image/heif", avif: "image/avif",
+    };
+    let fileToUpload: File = file;
+    if (!file.type.startsWith("image/")) {
+      const extMatch = file.name.match(/\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i);
+      if (!extMatch) { toast.error("Envie um arquivo de imagem"); return; }
+      const inferred = IMAGE_EXT_MAP[extMatch[1]!.toLowerCase()] ?? "image/jpeg";
+      fileToUpload = new File([file], file.name, { type: inferred });
+    }
+
     if (file.size > 10 * 1024 * 1024) { toast.error("Imagem deve ter no máximo 10 MB"); return; }
     setUploadingIdx(replaceIdx ?? null);
-    uploadFile(file);
+    uploadFile(fileToUpload);
     e.target.value = "";
   };
 
