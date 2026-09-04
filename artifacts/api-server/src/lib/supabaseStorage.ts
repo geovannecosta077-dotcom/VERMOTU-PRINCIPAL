@@ -1,88 +1,71 @@
 import { randomUUID } from "crypto";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const BUCKET = "motohub-uploads";
+export const SUPABASE_STORAGE_BUCKET = "vermotu-uploads";
 
-function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set");
+export function getSupabaseStorageConfig() {
+  const endpoint = process.env.SUPABASE_S3_ENDPOINT?.replace(/\/+$/, "");
+  const region = process.env.SUPABASE_S3_REGION;
+  const accessKeyId = process.env.SUPABASE_S3_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.SUPABASE_S3_SECRET_ACCESS_KEY;
+  const publicUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+
+  const missing = [
+    ["SUPABASE_S3_ENDPOINT", endpoint],
+    ["SUPABASE_S3_REGION", region],
+    ["SUPABASE_S3_ACCESS_KEY_ID", accessKeyId],
+    ["SUPABASE_S3_SECRET_ACCESS_KEY", secretAccessKey],
+    ["SUPABASE_URL", publicUrl],
+  ]
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Supabase Storage não configurado. Variáveis ausentes: ${missing.join(", ")}`,
+    );
   }
-  return { url, key };
-}
 
-/**
- * Ensures the upload bucket exists in Supabase Storage.
- * Safe to call repeatedly — ignores "already exists" errors.
- */
-async function ensureUploadBucket(url: string, key: string): Promise<void> {
-  const response = await fetch(`${url}/storage/v1/bucket`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: BUCKET,
-      name: BUCKET,
-      public: true,
-      fileSizeLimit: 10485760, // 10 MB
+  return {
+    client: new S3Client({
+      endpoint: endpoint!,
+      region: region!,
+      forcePathStyle: true,
+      credentials: { accessKeyId: accessKeyId!, secretAccessKey: secretAccessKey! },
     }),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as { error?: string; statusCode?: string };
-    // Ignore duplicate / already-exists
-    if (body?.error !== "Duplicate" && body?.statusCode !== "409" && response.status !== 409) {
-      throw new Error(`Failed to create storage bucket: ${JSON.stringify(body)}`);
-    }
-  }
+    publicUrl: publicUrl!,
+  };
 }
 
-let bucketReady = false;
-
 /**
- * Returns a presigned upload URL (browser PUTs the file directly to Supabase)
- * and the public URL where the object will be accessible after upload.
+ * Returns a Supabase S3 presigned upload URL and the public URL where the
+ * object will be accessible after upload.
  */
-export async function getSupabaseUploadURL(filename: string): Promise<{
+export async function getSupabaseUploadURL(
+  filename: string,
+  contentType?: string,
+): Promise<{
   uploadURL: string;
   objectPath: string;
 }> {
-  const { url, key } = getSupabaseConfig();
-
-  if (!bucketReady) {
-    await ensureUploadBucket(url, key);
-    bucketReady = true;
-  }
+  const { client, publicUrl } = getSupabaseStorageConfig();
 
   // Use uuid to avoid collisions; keep original filename extension for MIME inference
   const ext = filename.includes(".") ? `.${filename.split(".").pop()!.toLowerCase()}` : "";
   const objectName = `${randomUUID()}${ext}`;
 
-  const response = await fetch(
-    `${url}/storage/v1/object/sign/upload/${BUCKET}/${objectName}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ upsert: false }),
-    },
+  const uploadURL = await getSignedUrl(
+    client,
+    new PutObjectCommand({
+      Bucket: SUPABASE_STORAGE_BUCKET,
+      Key: objectName,
+      ContentType: contentType || undefined,
+    }),
+    { expiresIn: 900 },
   );
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(`Failed to create signed upload URL: ${JSON.stringify(body)}`);
-  }
-
-  const data = (await response.json()) as { signedUrl: string };
-
-  // signedUrl is a relative path (/storage/v1/object/upload/sign/...)
-  const uploadURL = `${url}${data.signedUrl}`;
   // Public URL — accessible immediately after a successful PUT
-  const objectPath = `${url}/storage/v1/object/public/${BUCKET}/${objectName}`;
+  const objectPath = `${publicUrl}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${objectName}`;
 
   return { uploadURL, objectPath };
 }

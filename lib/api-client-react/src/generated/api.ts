@@ -431,6 +431,83 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+export const getDatabaseHealthCheckUrl = () => {
+
+
+
+
+  return `/api/health`
+}
+
+/**
+ * @summary Database health check
+ */
+export const databaseHealthCheck = async ( options?: RequestInit): Promise<HealthStatus> => {
+
+  return customFetch<HealthStatus>(getDatabaseHealthCheckUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDatabaseHealthCheckQueryKey = () => {
+    return [
+    `/api/health`
+    ] as const;
+    }
+
+
+export const getDatabaseHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof databaseHealthCheck>>, TError = ErrorType<HealthStatus>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof databaseHealthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDatabaseHealthCheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof databaseHealthCheck>>> = ({ signal }) => databaseHealthCheck({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof databaseHealthCheck>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DatabaseHealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof databaseHealthCheck>>>
+export type DatabaseHealthCheckQueryError = ErrorType<HealthStatus>
+
+
+/**
+ * @summary Database health check
+ */
+
+export function useDatabaseHealthCheck<TData = Awaited<ReturnType<typeof databaseHealthCheck>>, TError = ErrorType<HealthStatus>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof databaseHealthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDatabaseHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListItemsUrl = (params?: ListItemsParams,) => {
   const normalizedParams = new URLSearchParams();
 

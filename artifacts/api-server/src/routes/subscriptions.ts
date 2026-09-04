@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, desc } from "drizzle-orm";
 import { db, subscriptionsTable, usersTable } from "@workspace/db";
+import { isDatabaseConnectionError } from "@workspace/db";
 import { getStripe, isStripeConfigured, STRIPE_WEBHOOK_SECRET, PLAN_PRICING, priceIdForPlan } from "../lib/stripe";
 import { requireAdmin } from "../middlewares/requireAdmin";
 import type Stripe from "stripe";
@@ -190,6 +191,10 @@ router.post("/subscriptions/checkout", async (req, res): Promise<void> => {
     res.json({ url: session.url });
   } catch (err) {
     req.log.error({ err }, "Falha ao criar sessão de checkout do Stripe");
+    if (isDatabaseConnectionError(err)) {
+      res.status(503).json({ error: "Serviço temporariamente indisponível" });
+      return;
+    }
     res.status(502).json({ error: "Não foi possível iniciar o pagamento com o Stripe." });
   }
 });
@@ -342,6 +347,10 @@ router.post("/subscriptions/webhook", async (req, res): Promise<void> => {
     res.json({ received: true });
   } catch (err) {
     req.log.error({ err, eventType: event.type }, "Falha ao processar evento do webhook do Stripe");
+    if (isDatabaseConnectionError(err)) {
+      res.status(503).json({ error: "Serviço temporariamente indisponível" });
+      return;
+    }
     res.status(500).json({ error: "Erro ao processar evento." });
   }
 });

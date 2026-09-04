@@ -129,57 +129,28 @@ Veja `.env.example` para a lista completa com descrições.
 | `SESSION_SECRET` | ✅ | Segredo para assinar sessões |
 | `STRIPE_SECRET_KEY` | ✅ | Chave secreta do Stripe |
 | `STRIPE_WEBHOOK_SECRET` | ✅ | Segredo do webhook do Stripe |
-| `S3_BUCKET` | ✅ | Nome do bucket S3 |
-| `S3_ACCESS_KEY_ID` | ✅ | Access key do storage |
-| `S3_SECRET_ACCESS_KEY` | ✅ | Secret key do storage |
-| `S3_ENDPOINT` | ❌ | Endpoint customizado (R2, MinIO…) |
-| `S3_REGION` | ❌ | Região (padrão: `us-east-1`) |
+| `SUPABASE_URL` | ✅ | URL do projeto Supabase |
+| `SUPABASE_ANON_KEY` ou `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Chave Supabase para validar a configuração |
+| `SUPABASE_S3_ENDPOINT` | ✅ | Endpoint S3 do Supabase Storage |
+| `SUPABASE_S3_REGION` | ✅ | Região do projeto Supabase |
+| `SUPABASE_S3_ACCESS_KEY_ID` | ✅ | Access key S3 do Supabase Storage |
+| `SUPABASE_S3_SECRET_ACCESS_KEY` | ✅ | Secret key S3 do Supabase Storage |
 | `PORT` | ❌ | Porta da API (padrão: `8080`) |
 
 ---
 
-## Object Storage
+## Supabase Storage
 
-O projeto usa qualquer storage S3-compatível. Opções recomendadas:
-
-| Serviço | Gratuito | Melhor para |
-|---------|----------|-------------|
-| **Cloudflare R2** | 10 GB/mês | Produção — sem custo de egress |
-| **AWS S3** | 5 GB (12 meses) | Produção |
-| **MinIO** | Self-hosted | Desenvolvimento local |
-| **Backblaze B2** | 10 GB/mês | Alternativa econômica |
-
-### Configurar Cloudflare R2 (recomendado)
-
-1. Crie uma conta em [cloudflare.com](https://cloudflare.com)
-2. Vá em **R2 → Create bucket** → nomeie `vermotu-uploads`
-3. Em **R2 → Manage R2 API tokens** → crie um token com permissão `Object Read & Write`
-4. Copie as credenciais para `.env`:
+As fotos são enviadas diretamente ao bucket `vermotu-uploads` do Supabase
+Storage por meio de URLs pré-assinadas S3. Gere as credenciais em
+**Storage → S3 → S3 access keys** no projeto Supabase correto e configure:
 
 ```env
-S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-S3_REGION=auto
-S3_BUCKET=vermotu-uploads
-S3_ACCESS_KEY_ID=<token-id>
-S3_SECRET_ACCESS_KEY=<token-secret>
-```
-
-### Configurar MinIO local (desenvolvimento)
-
-```bash
-# Com Docker
-docker run -p 9000:9000 -p 9001:9001 \
-  -e MINIO_ROOT_USER=minioadmin \
-  -e MINIO_ROOT_PASSWORD=minioadmin \
-  minio/minio server /data --console-address ":9001"
-```
-
-```env
-S3_ENDPOINT=http://localhost:9000
-S3_REGION=us-east-1
-S3_BUCKET=vermotu-uploads
-S3_ACCESS_KEY_ID=minioadmin
-S3_SECRET_ACCESS_KEY=minioadmin
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_S3_ENDPOINT=https://<project-ref>.storage.supabase.co/storage/v1/s3
+SUPABASE_S3_REGION=<project-region>
+SUPABASE_S3_ACCESS_KEY_ID=<access-key-id>
+SUPABASE_S3_SECRET_ACCESS_KEY=<secret-access-key>
 ```
 
 ---

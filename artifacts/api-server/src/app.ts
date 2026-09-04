@@ -4,6 +4,7 @@ import helmet from "helmet";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { getDatabaseHost, isDatabaseConnectionError } from "@workspace/db";
 
 const app: Express = express();
 
@@ -105,5 +106,25 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 app.use("/api", router);
+
+app.use((error: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (res.headersSent) {
+    next(error);
+    return;
+  }
+
+  if (isDatabaseConnectionError(error)) {
+    const timestamp = new Date().toISOString();
+    logger.error(
+      { err: error, databaseHost: getDatabaseHost(), timestamp, path: req.originalUrl },
+      "Database connection failed",
+    );
+    res.status(503).json({ error: "Serviço temporariamente indisponível" });
+    return;
+  }
+
+  logger.error({ err: error, path: req.originalUrl }, "Unhandled API error");
+  res.status(500).json({ error: "Erro interno do servidor" });
+});
 
 export default app;

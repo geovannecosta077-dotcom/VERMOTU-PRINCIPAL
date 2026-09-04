@@ -112,6 +112,23 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/HealthStatus" }
 
+  /health:
+    get:
+      operationId: databaseHealthCheck
+      tags: [health]
+      summary: Database health check
+      responses:
+        "200":
+          description: Database is available
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+        "503":
+          description: Database is temporarily unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
   /items:
     get:
       operationId: listItems
@@ -1405,6 +1422,7 @@ components:
       type: object
       properties:
         status: { type: string }
+        detail: { type: string }
       required: [status]
 
     Item:

@@ -28,7 +28,7 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
 
   try {
     const { name, size, contentType } = parsed.data;
-    const { uploadURL, objectPath } = await getSupabaseUploadURL(name);
+    const { uploadURL, objectPath } = await getSupabaseUploadURL(name, contentType);
 
     res.json(
       RequestUploadUrlResponse.parse({

@@ -26,6 +26,7 @@ export interface ErrorEnvelope {
 
 export interface HealthStatus {
   status: string;
+  detail?: string;
 }
 
 export type ItemType = typeof ItemType[keyof typeof ItemType];

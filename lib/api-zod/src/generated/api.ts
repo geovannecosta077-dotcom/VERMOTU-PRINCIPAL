@@ -62,7 +62,17 @@ export const GetStorageObjectResponse = zod.unknown()
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
-  "status": zod.string()
+  "status": zod.string(),
+  "detail": zod.string().optional()
+})
+
+
+/**
+ * @summary Database health check
+ */
+export const DatabaseHealthCheckResponse = zod.object({
+  "status": zod.string(),
+  "detail": zod.string().optional()
 })
 
 

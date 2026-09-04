@@ -1,20 +1,19 @@
 ---
 name: S3 object storage migration
-description: Replit Object Storage (GCS sidecar 127.0.0.1:1106) replaced with standard S3-compatible client; objectAcl.ts deleted.
+description: Supabase Storage S3 is the only runtime object-storage backend; legacy Replit/GCS storage must not be restored.
 ---
 
 ## Rule
-The project now uses `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner` for all file storage. The Replit-specific GCS external_account credential flow and sidecar endpoint are gone.
+The project uses `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner` against the Supabase Storage S3 endpoint for uploads and object reads. The bucket is `vermotu-uploads`.
 
 ## Key files
-- `artifacts/api-server/src/lib/objectStorage.ts` — S3Client, ObjectStorageService, S3ObjectRef type
-- `artifacts/api-server/src/routes/storage.ts` — uses S3ObjectRef (not GCS File)
-- `objectAcl.ts` was deleted (ACL logic merged into objectStorage.ts using S3 object tags)
+- `artifacts/api-server/src/lib/objectStorage.ts` — Supabase S3 client-backed object proxy
+- `artifacts/api-server/src/lib/supabaseStorage.ts` — presigned upload URLs
+- `artifacts/api-server/src/routes/storage.ts` — upload and object proxy routes
 
 ## Configuration env vars
-S3_ENDPOINT, S3_REGION, S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
-Leave S3_ENDPOINT empty for standard AWS S3; set to R2/MinIO endpoint for alternatives.
+SUPABASE_URL, SUPABASE_S3_ENDPOINT, SUPABASE_S3_REGION, SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY
 
-**Why:** Replit Object Storage relies on a local sidecar (127.0.0.1:1106) that only exists inside Replit; any deploy outside Replit needs a real S3-compatible provider.
+**Why:** Production runs outside Replit and must use the active Supabase project rather than a local sidecar or an unrelated Vercel-managed integration.
 
-**How to apply:** When modifying upload/download code, use S3ObjectRef { key, bucket } — never import from @google-cloud/storage.
+**How to apply:** When modifying upload/download code, use the Supabase S3 variables and the `vermotu-uploads` bucket; never add Replit/GCS storage fallbacks.
