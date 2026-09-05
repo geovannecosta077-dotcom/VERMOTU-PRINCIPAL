@@ -17,3 +17,10 @@ SUPABASE_URL, SUPABASE_S3_ENDPOINT, SUPABASE_S3_REGION, SUPABASE_S3_ACCESS_KEY_I
 **Why:** Production runs outside Replit and must use the active Supabase project rather than a local sidecar or an unrelated Vercel-managed integration.
 
 **How to apply:** When modifying upload/download code, use the Supabase S3 variables and the `vermotu-uploads` bucket; never add Replit/GCS storage fallbacks.
+
+## Web client routing
+The browser upload client must prepend `VITE_API_URL` when the frontend and API are deployed on separate Vercel domains; generated API hooks and the upload hook do not share URL configuration automatically.
+
+**Why:** A relative `/api/storage` request reaches the frontend deployment instead of the API deployment, producing a misleading upload failure before Supabase is contacted.
+
+**How to apply:** Keep the local fallback as `/api/storage`, but resolve upload and legacy `/objects/` URLs through `${VITE_API_URL}/api/storage` when that variable is set.
