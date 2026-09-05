@@ -4,6 +4,14 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const SUPABASE_STORAGE_BUCKET = "vermotu-uploads";
 
+export class SupabaseStorageConfigurationError extends Error {
+  constructor(missing: string[]) {
+    super(`Supabase Storage não configurado. Variáveis ausentes: ${missing.join(", ")}`);
+    this.name = "SupabaseStorageConfigurationError";
+    Object.setPrototypeOf(this, SupabaseStorageConfigurationError.prototype);
+  }
+}
+
 export function getSupabaseStorageConfig() {
   const endpoint = process.env.SUPABASE_S3_ENDPOINT?.replace(/\/+$/, "");
   const region = process.env.SUPABASE_S3_REGION;
@@ -11,20 +19,19 @@ export function getSupabaseStorageConfig() {
   const secretAccessKey = process.env.SUPABASE_S3_SECRET_ACCESS_KEY;
   const publicUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
 
-  const missing = [
+  const required: Array<[string, string | undefined]> = [
     ["SUPABASE_S3_ENDPOINT", endpoint],
     ["SUPABASE_S3_REGION", region],
     ["SUPABASE_S3_ACCESS_KEY_ID", accessKeyId],
     ["SUPABASE_S3_SECRET_ACCESS_KEY", secretAccessKey],
     ["SUPABASE_URL", publicUrl],
-  ]
+  ];
+  const missing = required
     .filter(([, value]) => !value)
     .map(([name]) => name);
 
   if (missing.length > 0) {
-    throw new Error(
-      `Supabase Storage não configurado. Variáveis ausentes: ${missing.join(", ")}`,
-    );
+    throw new SupabaseStorageConfigurationError(missing);
   }
 
   return {

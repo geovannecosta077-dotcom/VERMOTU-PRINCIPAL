@@ -153,7 +153,7 @@ export function Anunciar() {
       });
       toast.success("Foto enviada!");
     },
-    onError: () => { setUploadingIdx(null); toast.error("Falha no upload da foto"); },
+    onError: (error) => { setUploadingIdx(null); toast.error(error.message || "Falha no upload da foto"); },
   });
 
   useEffect(() => { document.title = "Anunciar — Vermotu"; }, []);

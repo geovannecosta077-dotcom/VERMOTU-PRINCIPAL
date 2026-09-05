@@ -20,6 +20,16 @@ interface UseUploadOptions {
   onError?: (error: Error) => void;
 }
 
+function getDefaultBasePath(): string {
+  const apiUrl = (
+    (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? ""
+  )
+    .trim()
+    .replace(/\/+$/, "");
+
+  return `${apiUrl}/api/storage`;
+}
+
 /**
  * Infer a MIME type from the file's type property or, when it is empty (e.g.
  * when a file is picked from Google Photos on Android), fall back to the
@@ -75,7 +85,7 @@ function resolveContentType(filename: string, mimeType: string): string {
  * ```
  */
 export function useUpload(options: UseUploadOptions = {}) {
-  const basePath = options.basePath ?? "/api/storage";
+  const basePath = options.basePath ?? getDefaultBasePath();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [progress, setProgress] = useState(0);
@@ -117,7 +127,7 @@ export function useUpload(options: UseUploadOptions = {}) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to upload file to storage");
+        throw new Error(`Falha ao enviar a foto para o storage (${response.status})`);
       }
     },
     []
@@ -173,7 +183,8 @@ export function useUpload(options: UseUploadOptions = {}) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to get upload URL");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Falha ao preparar upload (${response.status})`);
       }
 
       const data = await response.json();

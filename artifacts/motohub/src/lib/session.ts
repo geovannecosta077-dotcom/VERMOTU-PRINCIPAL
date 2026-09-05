@@ -124,10 +124,11 @@ export function formatRelative(iso: string): string {
 }
 
 const BASE_URL = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined ?? "").replace(/\/+$/, "");
 
 function resolveUrl(path: string): string {
   if (!path) return "";
-  if (path.startsWith("/objects/")) return `${BASE_URL}/api/storage${path}`;
+  if (path.startsWith("/objects/")) return `${API_URL || BASE_URL}/api/storage${path}`;
   return path;
 }
 

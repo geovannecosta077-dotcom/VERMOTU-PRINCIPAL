@@ -5,7 +5,10 @@ import {
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
-import { getSupabaseUploadURL } from "../lib/supabaseStorage";
+import {
+  getSupabaseUploadURL,
+  SupabaseStorageConfigurationError,
+} from "../lib/supabaseStorage";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -39,6 +42,12 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
     );
   } catch (error) {
     req.log.error({ err: error }, "Error generating upload URL");
+    if (error instanceof SupabaseStorageConfigurationError) {
+      res.status(503).json({
+        error: "Upload temporariamente indisponível: o Supabase Storage não está configurado no servidor.",
+      });
+      return;
+    }
     res.status(500).json({ error: "Failed to generate upload URL" });
   }
 });

@@ -141,7 +141,7 @@ export function Admin() {
   const coverFileRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isUploading: isCoverUploading } = useUpload({
     onSuccess: (r) => { setBlogForm((f) => ({ ...f, coverImageUrl: r.objectPath })); toast.success("Imagem enviada!"); },
-    onError: () => toast.error("Falha no upload da imagem."),
+    onError: (error) => toast.error(error.message || "Falha no upload da imagem."),
   });
   const [emailForm, setEmailForm] = useState({ subject: "", body: "", targetFilter: "all" });
   const BANNER_BLANK = { title: "", subtitle: "", ctaText: "", ctaUrl: "/", imageUrl: "", bgColor: "#dc2626", order: 0, active: true, durationSecs: 6, startsAt: "", endsAt: "" };
